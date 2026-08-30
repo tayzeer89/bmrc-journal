@@ -10,8 +10,11 @@ use App\Models\ManuscriptAuthor;
 use App\Models\ManuscriptFile;
 use App\Models\Revision;
 use App\Models\Payment;
-
-
+use App\Models\ArticleType;
+use App\Models\Journal;
+use App\Models\EthicalInformation;
+use App\Models\FundingInformation;
+use App\Models\ConflictOfInterest;
 
 class Manuscript extends Model
 {
@@ -65,34 +68,102 @@ class Manuscript extends Model
 
     public function authors()
     {
-        return $this->belongsToMany(
-            User::class,
-            'manuscript_authors'
-        )->withPivot([
-            'author_sequence',
-            'author_type',
-            'is_corresponding',
-            'contribution',
-            'coi_declaration',
-            'confirmation_status'
-        ])->withTimestamps();
+        return $this->hasMany(
+            ManuscriptAuthor::class,
+            'manuscript_id'
+        )
+        ->orderBy('author_order');
     }
-
-
 
 
     public function files()
-    {
-        return $this->hasMany(ManuscriptFile::class);
-    }
+        {
+            return $this->hasMany(
+                ManuscriptFile::class,
+                'manuscript_id'
+            );
+        }
 
-    public function revisions()
-    {
-        return $this->hasMany(Revision::class);
-    }
+        public function ethicalInformation()
+            {
+                return $this->hasOne(
+                    EthicalInformation::class,
+                    'manuscript_id'
+                );
+            }
 
-    public function payments()
-    {
-        return $this->hasMany(Payment::class);
-    }
+
+        public function fundingInformation()
+        {
+            return $this->hasOne(
+                FundingInformation::class,
+                'manuscript_id'
+            );
+        }
+
+        public function conflictOfInterest()
+        {
+            return $this->hasOne(
+                ConflictOfInterest::class,
+                'manuscript_id'
+            );
+        }
+
+        public function dataAvailability()
+        {
+            return $this->hasOne(
+                DataAvailability::class,
+                'manuscript_id'
+            );
+        }
+
+        public function acknowledgement()
+            {
+                return $this->hasOne(
+                    Acknowledgement::class,
+                    'manuscript_id'
+                );
+            }
+
+        
+        public function checklist()
+            {
+                return $this->hasOne(
+                    SubmissionChecklist::class
+                );
+            }
+            
+        public function revisions()
+        {
+            return $this->hasMany(Revision::class);
+        }
+
+        public function payments()
+        {
+            return $this->hasMany(Payment::class);
+        }
+
+        public function journal()
+        {
+            return $this->belongsTo(
+                Journal::class
+            );
+        }
+
+        public function details()
+        {
+            return $this->hasOne(
+                ManuscriptDetail::class,
+                'manuscript_id'
+            );
+        }
+
+
+        public function articleType()
+        {
+            return $this->belongsTo(
+                ArticleType::class,
+                'article_type_id'
+            );
+        }
 }

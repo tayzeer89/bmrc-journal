@@ -38,6 +38,8 @@ use App\Http\Controllers\Admin\RoleController;
 */
 
 use App\Http\Controllers\Author\Auth\AuthorAuthController;
+use App\Http\Controllers\Author\SubmissionController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -200,6 +202,277 @@ Route::prefix('author')
         });
     });
 
+
+
+    Route::middleware(['auth'])
+    ->prefix('author')
+    ->group(function(){
+
+
+        Route::get(
+            '/submission/create',
+            [SubmissionController::class,'create']
+        )
+        ->name('author.submission.create');
+
+
+
+        Route::post(
+            '/submission/step1',
+            [SubmissionController::class,'storeStep1']
+        )
+        ->name('author.submission.step1.store');
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 2 Show Form
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/submission/step2/{manuscript}',
+            [SubmissionController::class,'step2']
+        )
+        ->name('author.submission.step2');
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 2 Save Data
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/submission/step2/{manuscript}',
+            [SubmissionController::class,'storeStep2']
+        )
+        ->name('author.submission.step2.store');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 3 - Authors
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+        '/submission/step3/{manuscript}',
+        [SubmissionController::class,'step3']
+        )
+        ->name('author.submission.step3');
+
+
+        Route::post(
+        '/submission/step3/{manuscript}',
+        [SubmissionController::class,'storeStep3']
+        )
+        ->name('author.submission.step3.store');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 4 Affiliation
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/submission/step4/{manuscript}',
+            [SubmissionController::class,'step4']
+        )
+        ->name('author.submission.step4');
+
+
+        Route::post(
+            '/submission/step4/{manuscript}',
+            [SubmissionController::class,'storeStep4']
+        )
+        ->name('author.submission.step4.store');
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 5 Corresponding Author Declaration
+        |--------------------------------------------------------------------------
+        */
+
+            Route::get(
+                '/author/submission/step5/{manuscript}',
+                [SubmissionController::class,'step5']
+            )
+            ->name('author.submission.step5');
+
+
+
+            Route::post(
+                '/author/submission/step5/{manuscript}',
+                [SubmissionController::class,'storeStep5']
+            )
+            ->name('author.submission.step5.store');
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 6 - Manuscript File Upload
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/author/submission/step6/{manuscript}',
+            [SubmissionController::class, 'step6']
+        )
+        ->name('author.submission.step6');
+
+
+        Route::post(
+            '/author/submission/step6/{manuscript}',
+            [
+                SubmissionController::class,
+                'storeStep6'
+            ]
+        )
+        ->name('author.submission.step6.store');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 7 - Ethical Information 
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/author/submission/step7/{manuscript}',
+            [
+                SubmissionController::class,
+                'step7'
+            ]
+        )
+        ->name('author.submission.step7');
+
+
+        Route::post(
+        '/author/submission/step7/{manuscript}',
+        [SubmissionController::class,'storeStep7']
+        )
+        ->name('author.submission.step7.store');
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 8 - Ethical Information Upload
+        |--------------------------------------------------------------------------
+        */
+    
+            Route::get(
+                '/author/submission/step8/{manuscript}',
+                [SubmissionController::class, 'step8']
+            )->name('author.submission.step8');
+
+
+            Route::post(
+                '/author/submission/step8/{manuscript}',
+                [SubmissionController::class, 'storeStep8']
+            )->name('author.submission.step8.store');
+
+
+         /*
+        |--------------------------------------------------------------------------
+        | Step 9 - Conflict of Interest
+        |--------------------------------------------------------------------------
+        */
+
+            Route::get(
+                '/author/submission/step9/{manuscript}',
+                [SubmissionController::class, 'step9']
+            )
+            ->name('author.submission.step9');
+
+
+            Route::post(
+                '/author/submission/step9/{manuscript}',
+                [SubmissionController::class, 'storeStep9']
+            )
+            ->name('author.submission.step9.store');
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 10 - Data Availability
+        |--------------------------------------------------------------------------
+        */
+
+            Route::get(
+            '/author/submission/step10/{id}',
+            [SubmissionController::class,'step10']
+            )
+            ->name('author.submission.step10');
+
+
+
+            Route::post(
+            '/author/submission/step10/{id}',
+            [SubmissionController::class,'storeStep10']
+            )
+            ->name('author.submission.step10.store');
+
+         /*
+        |--------------------------------------------------------------------------
+        | Step 11 - Acknowledgement
+        |--------------------------------------------------------------------------
+        */
+        
+         Route::get(
+        '/author/submission/step11/{id}',
+        [SubmissionController::class,'step11']
+        )
+        ->name('author.submission.step11');
+
+
+
+        Route::post(
+        '/author/submission/step11/{id}',
+        [SubmissionController::class,'storeStep11']
+        )
+        ->name('author.submission.step11.store');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 12 - Declaration Checklist
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/author/submission/{manuscript}/step12',
+            [SubmissionController::class,'step12']
+        )
+        ->name('author.submission.step12');
+
+
+
+        Route::post(
+            '/author/submission/{manuscript}/step12',
+            [SubmissionController::class,'storeStep12']
+        )
+        ->name('author.submission.step12.store');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 13 - Submission Confirmation
+        |--------------------------------------------------------------------------
+        */
+            Route::get(
+            '/author/submission/step13/{manuscript}',
+            [SubmissionController::class,'step13']
+            )->name('author.submission.step13');
+
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -529,13 +802,22 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get(
-        '/editorial/dashboard',
-        function () {
-            return view('editorial.dashboard');
-        }
-    )->name('editorial.dashboard');
+    // Route::get(
+    //     '/editorial/dashboard',
+    //     function () {
+    //         return view('editorial.dashboard');
+    //     }
+    // )->name('editorial.dashboard');
 
+    Route::middleware(['auth','permission:dashboard.view'])
+    ->prefix('editorial')
+    ->group(function () {
+
+        Route::get('/dashboard',
+            [DashboardController::class,'index']
+        )->name('editorial.dashboard');
+
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -565,18 +847,6 @@ Route::middleware('auth')->group(function () {
     )->name('assistant.dashboard');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Finance Dashboard
-    |--------------------------------------------------------------------------
-    */
-
-    // Route::get(
-    //     '/finance/dashboard',
-    //     function () {
-    //         return view('finance.dashboard');
-    //     }
-    // )->name('finance.dashboard');
 
 /*
 |--------------------------------------------------------------------------
