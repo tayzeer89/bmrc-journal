@@ -269,14 +269,27 @@ class SubmissionController extends Controller
                     => $validated['number_of_references'] ?? 0,
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Draft Tracking
+                |--------------------------------------------------------------------------
+                */
 
                 'status'
                     => 'draft',
 
+                'completion_percentage'
+                    => 8,
+
+                'last_step'
+                    => 1,
+
+                'draft_saved_at'
+                    => now(),
 
 
                 'submission_version'
-                    => 1,
+                     => '1.0',
 
 
             ]);
@@ -285,7 +298,6 @@ class SubmissionController extends Controller
 
 
             DB::commit();
-
 
 
 
@@ -329,7 +341,7 @@ class SubmissionController extends Controller
     }
 
 
-         /**
+    /**
      * Step 2 Form
      * Article Information
      */
@@ -447,13 +459,22 @@ public function storeStep2(Request $request, Manuscript $manuscript)
 
     );
 
-
-
     /*
-    |--------------------------------------------------------------------------
-    | Go Step 3
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| Update Draft Progress
+|--------------------------------------------------------------------------
+*/
+
+    $manuscript->update([
+
+        'completion_percentage' => 15,
+
+        'last_step' => 2,
+
+        'draft_saved_at' => now(),
+
+    ]);
+
 
     return redirect()
 
@@ -471,26 +492,32 @@ public function storeStep2(Request $request, Manuscript $manuscript)
 
 }
 
-/**
- *  Step 3 Authors
- */
-
- public function step3(Manuscript $manuscript)
-    {
-        return view(
-            'author.submission.step3',
-            compact('manuscript')
-        );
-    }
 
 
-/**
- * Store Step 3 Authors
- */
 
 
-public function storeStep3( Request $request, Manuscript $manuscript)
-    {
+    /*
+    |--------------------------------------------------------------------------
+    | Step 3 Authors
+    |--------------------------------------------------------------------------
+    */
+
+    public function step3(Manuscript $manuscript)
+        {
+            return view(
+                'author.submission.step3',
+                compact('manuscript')
+            );
+        }
+
+
+    /**
+     * Store Step 3 Authors
+     */
+
+
+    public function storeStep3( Request $request, Manuscript $manuscript)
+        {
 
 
             $request->validate([
@@ -561,6 +588,23 @@ public function storeStep3( Request $request, Manuscript $manuscript)
 
 
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Submission Progress
+            |--------------------------------------------------------------------------
+            */
+
+            $manuscript->update([
+
+                'completion_percentage' => 23,
+
+                'last_step' => 3,
+
+                'draft_saved_at' => now(),
+
+            ]);
 
 
 
@@ -809,6 +853,22 @@ public function storeStep3( Request $request, Manuscript $manuscript)
 
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Update Submission Progress
+            |--------------------------------------------------------------------------
+            */
+
+
+            $manuscript->update([
+
+                'completion_percentage'=>31,
+
+                'last_step'=>4,
+
+                'draft_saved_at'=>now(),
+
+            ]);
 
 
 
@@ -932,6 +992,28 @@ public function storeStep3( Request $request, Manuscript $manuscript)
             );
 
 
+
+
+             /*
+            |--------------------------------------------------------------------------
+            | Update Draft Progress
+            |--------------------------------------------------------------------------
+            */
+
+
+            $manuscript->update([
+
+                'completion_percentage'=>38,
+
+                'last_step'=>5,
+
+                'draft_saved_at'=>now(),
+
+            ]);
+
+
+
+
             return redirect()
 
                 ->route(
@@ -952,18 +1034,18 @@ public function storeStep3( Request $request, Manuscript $manuscript)
 
 
         /**
- * Step 6
- * Manuscript File Upload Form
- */
-public function step6(Manuscript $manuscript)
-{
+         * Step 6
+         * Manuscript File Upload Form
+         */
+        public function step6(Manuscript $manuscript)
+        {
 
-    return view(
-        'author.submission.step6',
-        compact('manuscript')
-    );
+            return view(
+                'author.submission.step6',
+                compact('manuscript')
+            );
 
-}
+        }
 
 
 
@@ -1084,6 +1166,22 @@ public function step6(Manuscript $manuscript)
                 }
 
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Update Draft Progress
+                    |--------------------------------------------------------------------------
+                    */
+
+
+                    $manuscript->update([
+
+                        'completion_percentage'=>46,
+
+                        'last_step'=>6,
+
+                        'draft_saved_at'=>now(),
+
+                    ]);
 
 
                 return redirect()
@@ -1164,6 +1262,24 @@ public function step6(Manuscript $manuscript)
             );
 
 
+             /*
+            |--------------------------------------------------------------------------
+            | Update Draft Progress
+            |--------------------------------------------------------------------------
+            */
+
+
+            $manuscript->update([
+
+                'completion_percentage'=>54,
+
+                'last_step'=>7,
+
+                'draft_saved_at'=>now(),
+
+            ]);
+
+
 
             return redirect()
             ->route(
@@ -1178,17 +1294,17 @@ public function step6(Manuscript $manuscript)
 
 
             /**
- * Step 8 Funding Information
- */
-public function step8(Manuscript $manuscript)
-{
+             * Step 8 Funding Information
+             */
+            public function step8(Manuscript $manuscript)
+            {
 
-    return view(
-        'author.submission.step8',
-        compact('manuscript')
-    );
+                return view(
+                    'author.submission.step8',
+                    compact('manuscript')
+                );
 
-}
+            }
 
 
 
@@ -1268,6 +1384,22 @@ public function step8(Manuscript $manuscript)
 
             );
 
+            /*
+            |--------------------------------------------------------------------------
+            | Update Draft Progress
+            |--------------------------------------------------------------------------
+            */
+
+
+            $manuscript->update([
+
+                'completion_percentage'=>62,
+
+                'last_step'=>8,
+
+                'draft_saved_at'=>now(),
+
+            ]);
 
 
             return redirect()
@@ -1344,6 +1476,24 @@ public function step8(Manuscript $manuscript)
                         $validated
 
                     );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Update Draft Progress
+                    |--------------------------------------------------------------------------
+                    */
+
+
+                    $manuscript->update([
+
+                        'completion_percentage'=>69,
+
+                        'last_step'=>9,
+
+                        'draft_saved_at'=>now(),
+
+                    ]);
 
 
 
@@ -1458,6 +1608,22 @@ public function step8(Manuscript $manuscript)
 
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Update Draft Progress
+            |--------------------------------------------------------------------------
+            */
+
+
+            $manuscript->update([
+
+                'completion_percentage'=>77,
+
+                'last_step'=>10,
+
+                'draft_saved_at'=>now(),
+
+            ]);
 
 
             return redirect()
@@ -1555,6 +1721,24 @@ public function step8(Manuscript $manuscript)
                     );
 
 
+                     /*
+                    |--------------------------------------------------------------------------
+                    | Update Draft Progress
+                    |--------------------------------------------------------------------------
+                    */
+
+
+                    $manuscript->update([
+
+                        'completion_percentage'=>85,
+
+                        'last_step'=>11,
+
+                        'draft_saved_at'=>now(),
+
+                    ]);
+
+
 
 
                     return redirect()
@@ -1578,135 +1762,263 @@ public function step8(Manuscript $manuscript)
 
                 }
 
+                /**
+                 * Step 12
+                 * Declaration & Submission Checklist
+                 */
+                public function step12(Manuscript $manuscript)
+                {
+
+                    abort_if(
+                        $manuscript->submitted_by != auth()->id(),
+                        403
+                    );
+
+
+                    $checklist = SubmissionChecklist::where(
+                        'manuscript_id',
+                        $manuscript->id
+                    )->first();
+
+
+
+                    return view(
+                        'author.submission.step12',
+                        compact(
+                            'manuscript',
+                            'checklist'
+                        )
+                    );
+
+                }
        
-            /**
-             * Step 12
-             * Declaration & Submission Checklist
-             */
-            public function step12(Manuscript $manuscript)
-            {
+          /**
+         * Store Step 12
+         * Declaration & Submission Checklist
+         */
+        public function storeStep12(
+            Request $request,
+            Manuscript $manuscript
+        )
+        {
 
-                $checklist = SubmissionChecklist::where(
-                    'manuscript_id',
-                    $manuscript->id
-                )->first();
+            $validated = $request->validate([
 
 
-                return view(
-                    'author.submission.step12',
-                    compact(
-                        'manuscript',
-                        'checklist'
-                    )
-                );
+                'original_manuscript'=>'required',
 
-            }
-            /**
-             * Store Step 12 store
-             */
-            public function storeStep12(
-                Request $request,
-                Manuscript $manuscript
-            )
-            {
+                'not_published_elsewhere'=>'required',
 
-                $validated = $request->validate([
+                'not_under_consideration_elsewhere'=>'required',
 
-                    'original_manuscript'=>'required',
-                    'not_published_elsewhere'=>'required',
-                    'not_under_consideration_elsewhere'=>'required',
-                    'authors_approved'=>'required',
-                    'author_order_approved'=>'required',
-                    'ethics_information_provided'=>'required',
-                    'consent_information_provided'=>'required',
-                    'funding_declared'=>'required',
-                    'coi_declared'=>'required',
-                    'journal_guidelines_followed'=>'required',
-                    'references_checked'=>'required',
-                    'tables_figures_checked'=>'required',
-                    'required_files_uploaded'=>'required',
-                    'corresponding_author_authorized'=>'required',
-                    'publication_policy_agreed'=>'required',
+                'authors_approved'=>'required',
 
-                ]);
+                'author_order_approved'=>'required',
+
+                'ethics_information_provided'=>'required',
+
+                'consent_information_provided'=>'required',
+
+                'funding_declared'=>'required',
+
+                'coi_declared'=>'required',
+
+                'journal_guidelines_followed'=>'required',
+
+                'references_checked'=>'required',
+
+                'tables_figures_checked'=>'required',
+
+                'required_files_uploaded'=>'required',
+
+                'corresponding_author_authorized'=>'required',
+
+                'publication_policy_agreed'=>'required',
+
+
+            ]);
 
 
 
-                $validated['manuscript_id'] = $manuscript->id;
+            $validated['manuscript_id'] = $manuscript->id;
 
 
-                $validated['confirmed_by'] = auth()->id();
+            $validated['confirmed_by'] = auth()->id();
 
 
-                $validated['confirmed_at'] = now();
-
-
-
-                SubmissionChecklist::updateOrCreate(
-
-                    [
-                        'manuscript_id'=>$manuscript->id
-                    ],
-
-                    $validated
-
-                );
+            $validated['confirmed_at'] = now();
 
 
 
-                // Update manuscript status
+            /*
+            |--------------------------------------------------------------------------
+            | Save Checklist
+            |--------------------------------------------------------------------------
+            */
 
-                $manuscript->update([
+            SubmissionChecklist::updateOrCreate(
 
-                    'status'=>'submitted',
+                [
+                    'manuscript_id'=>$manuscript->id
+                ],
 
-                    'submitted_at'=>now(),
+                $validated
 
-                ]);
+            );
 
 
 
-                return redirect()->route(
+            /*
+            |--------------------------------------------------------------------------
+            | Update Draft Progress
+            |--------------------------------------------------------------------------
+            */
+
+            $manuscript->update([
+
+
+                'completion_percentage'=>92,
+
+
+                'last_step'=>12,
+
+
+                'draft_saved_at'=>now(),
+
+
+                'status'=>'draft',
+
+
+            ]);
+
+
+
+            return redirect()
+
+                ->route(
 
                     'author.submission.step13',
 
                     $manuscript->id
 
-                )->with(
+                )
+
+                ->with(
 
                     'success',
 
-                    'Submission checklist completed'
+                    'Submission checklist completed successfully.'
 
                 );
 
-            }
+        }
+        /**
+         * Step 13
+         * Submission Confirmation
+         */
+        public function step13(Manuscript $manuscript)
+        {
 
-             /**
-             * Step 13 Submission Confirmation
-             */
-
-            public function step13(Manuscript $manuscript)
-            {
-
-                $manuscript->load([
-                    'journal',
-                    'articleType',
-                    'submitter'
-                ]);
+            abort_if(
+                $manuscript->submitted_by != auth()->id(),
+                403
+            );
 
 
-                return view(
-                    'author.submission.step13',
-                    compact(
-                        'manuscript'
-                    )
+            $manuscript->load([
+
+                'journal',
+
+                'articleType',
+
+                'submitter',
+
+                'authors',
+
+                'details',
+
+                'ethicalInformation',
+
+                'fundingInformation',
+
+                'conflictOfInterest',
+
+                'dataAvailability',
+
+                'acknowledgement',
+
+                'checklist',
+
+                'files',
+
+            ]);
+
+
+
+             return view(
+                'author.submission.step13',
+                [
+                    'manuscript' => $manuscript,
+
+                    'message' =>
+                    'Your manuscript is ready for final submission. Please review all information carefully before submitting to BMRC editorial office.'
+                ]
+            );
+
+
+        }
+
+
+    
+
+
+        /**
+         * Final Manuscript Submit
+         */
+        public function finalSubmit(Manuscript $manuscript)
+        {
+
+            abort_if(
+                $manuscript->submitted_by != auth()->id(),
+                403
+            );
+
+
+
+            $manuscript->update([
+
+
+                'status'=>'submitted',
+
+
+                'completion_percentage'=>100,
+
+
+                'last_step'=>13,
+
+
+                'submitted_at'=>now(),
+
+
+            ]);
+
+
+
+            return redirect()
+
+                ->route(
+                    'author.dashboard'
+                )
+
+                ->with(
+
+                    'success',
+
+                    'Manuscript submitted successfully.'
+
                 );
 
-            }
-
-
-
+        }
 
     /**
      * Convert keywords text to JSON array

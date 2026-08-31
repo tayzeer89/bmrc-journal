@@ -51,6 +51,10 @@ class Manuscript extends Model
         'status',
         'submission_version',
         'submitted_at',
+        // Draft Management
+        'completion_percentage',
+        'last_step',
+        'draft_saved_at',
     ];
 
     protected $casts = [
@@ -58,6 +62,8 @@ class Manuscript extends Model
         'submitted_at' => 'datetime',
         'study_start_date' => 'date',
         'study_end_date' => 'date',
+        'completion_percentage' => 'integer',
+        'draft_saved_at'=>'datetime',
     ];
 
     public function submitter()
@@ -140,7 +146,9 @@ class Manuscript extends Model
 
         public function payments()
         {
-            return $this->hasMany(Payment::class);
+            return $this->hasMany(
+                Payment::class
+            );
         }
 
         public function journal()
@@ -166,4 +174,25 @@ class Manuscript extends Model
                 'article_type_id'
             );
         }
+
+        public function isDraft()
+        {
+            return $this->status === 'draft';
+        }
+
+
+        public function isSubmitted()
+        {
+            return $this->status === 'submitted';
+        }
+
+
+        public function progress()
+        {
+            return $this->completion_percentage ?? 0;
+        }
+                
+
+
+
 }

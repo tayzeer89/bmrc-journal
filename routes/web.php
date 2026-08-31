@@ -37,8 +37,14 @@ use App\Http\Controllers\Admin\RoleController;
 |--------------------------------------------------------------------------
 */
 
+
 use App\Http\Controllers\Author\Auth\AuthorAuthController;
+use App\Http\Controllers\Author\DashboardController as AuthorDashboardController;
 use App\Http\Controllers\Author\SubmissionController;
+use App\Http\Controllers\Author\DraftSubmissionController;
+use App\Http\Controllers\Author\MyManuscriptController;
+use App\Http\Controllers\Author\SubmittedManuscriptController;
+use App\Http\Controllers\Author\PaymentController;
 
 
 /*
@@ -134,9 +140,10 @@ Route::prefix('author')
 
             Route::get(
                 '/dashboard',
-                function () {
-                    return view('author.dashboard');
-                }
+                [
+                    AuthorDashboardController::class,
+                    'index'
+                ]
             )->name('dashboard');
 
 
@@ -300,19 +307,19 @@ Route::prefix('author')
         |--------------------------------------------------------------------------
         */
 
-            Route::get(
-                '/author/submission/step5/{manuscript}',
-                [SubmissionController::class,'step5']
-            )
-            ->name('author.submission.step5');
+        Route::get(
+            '/author/submission/step5/{manuscript}',
+            [SubmissionController::class,'step5']
+        )
+        ->name('author.submission.step5');
 
 
 
-            Route::post(
-                '/author/submission/step5/{manuscript}',
-                [SubmissionController::class,'storeStep5']
-            )
-            ->name('author.submission.step5.store');
+        Route::post(
+            '/author/submission/step5/{manuscript}',
+            [SubmissionController::class,'storeStep5']
+        )
+        ->name('author.submission.step5.store');
 
 
 
@@ -369,16 +376,16 @@ Route::prefix('author')
         |--------------------------------------------------------------------------
         */
     
-            Route::get(
-                '/author/submission/step8/{manuscript}',
-                [SubmissionController::class, 'step8']
-            )->name('author.submission.step8');
+        Route::get(
+            '/author/submission/step8/{manuscript}',
+            [SubmissionController::class, 'step8']
+        )->name('author.submission.step8');
 
 
-            Route::post(
-                '/author/submission/step8/{manuscript}',
-                [SubmissionController::class, 'storeStep8']
-            )->name('author.submission.step8.store');
+        Route::post(
+            '/author/submission/step8/{manuscript}',
+            [SubmissionController::class, 'storeStep8']
+        )->name('author.submission.step8.store');
 
 
          /*
@@ -387,18 +394,18 @@ Route::prefix('author')
         |--------------------------------------------------------------------------
         */
 
-            Route::get(
-                '/author/submission/step9/{manuscript}',
-                [SubmissionController::class, 'step9']
-            )
-            ->name('author.submission.step9');
+        Route::get(
+            '/author/submission/step9/{manuscript}',
+            [SubmissionController::class, 'step9']
+        )
+        ->name('author.submission.step9');
 
 
-            Route::post(
-                '/author/submission/step9/{manuscript}',
-                [SubmissionController::class, 'storeStep9']
-            )
-            ->name('author.submission.step9.store');
+        Route::post(
+            '/author/submission/step9/{manuscript}',
+            [SubmissionController::class, 'storeStep9']
+        )
+        ->name('author.submission.step9.store');
 
 
 
@@ -408,19 +415,19 @@ Route::prefix('author')
         |--------------------------------------------------------------------------
         */
 
-            Route::get(
-            '/author/submission/step10/{id}',
-            [SubmissionController::class,'step10']
-            )
-            ->name('author.submission.step10');
+        Route::get(
+        '/author/submission/step10/{id}',
+        [SubmissionController::class,'step10']
+        )
+        ->name('author.submission.step10');
 
 
 
-            Route::post(
-            '/author/submission/step10/{id}',
-            [SubmissionController::class,'storeStep10']
-            )
-            ->name('author.submission.step10.store');
+        Route::post(
+        '/author/submission/step10/{id}',
+        [SubmissionController::class,'storeStep10']
+        )
+        ->name('author.submission.step10.store');
 
          /*
         |--------------------------------------------------------------------------
@@ -472,17 +479,204 @@ Route::prefix('author')
             [SubmissionController::class,'step13']
             )->name('author.submission.step13');
 
+
+
+            Route::post(
+            '/submission/{manuscript}/final-submit',
+            [
+                SubmissionController::class,
+                'finalSubmit'
+            ]
+            )
+            ->name('author.submission.finalSubmit');
+
     });
 
-/*
-|--------------------------------------------------------------------------
-| REVIEWER PORTAL
-|--------------------------------------------------------------------------
-*/
 
-Route::prefix('reviewer')
-    ->name('reviewer.')
-    ->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | My Manuscript
+    |--------------------------------------------------------------------------
+    */
+
+        Route::middleware(['auth'])
+        ->prefix('author')
+        ->name('author.')
+        ->group(function(){
+
+
+            Route::get(
+                '/manuscripts',
+                [
+                    MyManuscriptController::class,
+                    'index'
+                ]
+            )
+            ->name('manuscripts.index');
+
+
+
+            Route::get(
+                '/manuscripts/{manuscript}',
+                [
+                    MyManuscriptController::class,
+                    'show'
+                ]
+            )
+            ->name('manuscripts.show');
+
+
+        });
+
+
+     /*
+    |--------------------------------------------------------------------------
+    | Draft Manuscript
+    |--------------------------------------------------------------------------
+    */
+
+        Route::middleware(['auth'])
+        ->prefix('author')
+        ->name('author.')
+        ->group(function(){
+
+
+            Route::get(
+                '/drafts',
+                [
+                    DraftSubmissionController::class,
+                    'index'
+                ]
+            )
+            ->name('drafts.index');
+
+
+
+            Route::get(
+                '/drafts/{id}/edit',
+                [
+                    DraftSubmissionController::class,
+                    'edit'
+                ]
+            )
+            ->name('drafts.edit');
+
+
+
+            Route::delete(
+                '/drafts/{id}',
+                [
+                    DraftSubmissionController::class,
+                    'destroy'
+                ]
+            )
+            ->name('drafts.destroy');
+
+
+
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUBMITTED MANUSCRIPTS
+        |--------------------------------------------------------------------------
+        */
+
+        Route::middleware(['auth'])
+            ->prefix('author')
+            ->name('author.')
+            ->group(function(){
+
+
+                Route::get(
+                    '/submitted-manuscripts',
+                    [
+                        SubmittedManuscriptController::class,
+                        'index'
+                    ]
+                )
+                ->name('submitted.index');
+
+
+
+                Route::get(
+                    '/submitted-manuscripts/{manuscript}',
+                    [
+                        SubmittedManuscriptController::class,
+                        'show'
+                    ]
+                )
+                ->name('submitted.show');
+
+
+            });
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUBMITTED MANUSCRIPTS
+        |--------------------------------------------------------------------------
+        */
+
+
+        Route::middleware(['auth'])
+        ->prefix('author')
+        ->name('author.')
+        ->group(function(){
+
+
+            Route::get(
+                '/payments',
+                [
+                    PaymentController::class,
+                    'index'
+                ]
+            )
+            ->name('payments.index');
+
+
+
+            Route::get(
+                '/payments/{payment}',
+                [
+                    PaymentController::class,
+                    'show'
+                ]
+            )
+            ->name('payments.show');
+
+
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | REVIEWER PORTAL
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('reviewer')
+        ->name('reviewer.')
+        ->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -669,13 +863,13 @@ Route::middleware('auth')->group(function () {
 |
 */
 
-Route::middleware([
-    'auth',
-    'role:system_administrator',
-])
-->prefix('admin')
-->name('admin.')
-->group(function () {
+    Route::middleware([
+        'auth',
+        'role:system_administrator',
+    ])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
     /*
     |--------------------------------------------------------------------------
@@ -802,22 +996,13 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    // Route::get(
-    //     '/editorial/dashboard',
-    //     function () {
-    //         return view('editorial.dashboard');
-    //     }
-    // )->name('editorial.dashboard');
+    Route::get(
+        '/editorial/dashboard',
+        function () {
+            return view('editorial.dashboard');
+        }
+    )->name('editorial.dashboard');
 
-    Route::middleware(['auth','permission:dashboard.view'])
-    ->prefix('editorial')
-    ->group(function () {
-
-        Route::get('/dashboard',
-            [DashboardController::class,'index']
-        )->name('editorial.dashboard');
-
-    });
 
     /*
     |--------------------------------------------------------------------------

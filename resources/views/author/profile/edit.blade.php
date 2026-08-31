@@ -138,49 +138,6 @@
 </div>
 
 
-{{-- =========================================================
-     VALIDATION ERRORS
-========================================================== --}}
-@if ($errors->any())
-
-    <div class="alert alert-danger">
-
-        <strong>
-            Please correct the following errors:
-        </strong>
-
-        <ul class="mb-0 mt-2">
-
-            @foreach ($errors->all() as $error)
-
-                <li>
-                    {{ $error }}
-                </li>
-
-            @endforeach
-
-        </ul>
-
-    </div>
-
-@endif
-
-
-{{-- =========================================================
-     SUCCESS MESSAGE
-========================================================== --}}
-@if(session('success'))
-
-    <div class="alert alert-success">
-
-        <i class="bi bi-check-circle me-1"></i>
-
-        {{ session('success') }}
-
-    </div>
-
-@endif
-
 
 {{-- =========================================================
      MAIN FORM

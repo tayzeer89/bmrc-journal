@@ -22,19 +22,6 @@ Submission Confirmation
 
 
 
-<div class="card-body">
-
-
-<div class="alert alert-success">
-
-<i class="bi bi-check-circle"></i>
-
-Your manuscript submission process is completed.
-
-</div>
-
-
-
 <table class="table table-bordered">
 
 
@@ -130,21 +117,57 @@ $manuscript->created_at->format('d M Y')
 
 
 <tr>
+    <th>
+        Current Status
+    </th>
 
-<th>
-Current Status
-</th>
+    <td>
+
+        @if($manuscript->status == 'draft')
+
+            <span class="badge bg-warning">
+                Draft
+            </span>
 
 
-<td>
+        @elseif($manuscript->status == 'submitted')
 
-<span class="badge bg-primary">
+            <span class="badge bg-success">
+                Submitted
+            </span>
 
-Submitted
 
-</span>
+        @elseif($manuscript->status == 'technical_check')
 
-</td>
+            <span class="badge bg-info">
+                Technical Review
+            </span>
+
+
+        @elseif($manuscript->status == 'under_review')
+
+            <span class="badge bg-primary">
+                Under Review
+            </span>
+
+
+        @elseif($manuscript->status == 'accepted')
+
+            <span class="badge bg-success">
+                Accepted
+            </span>
+
+
+        @elseif($manuscript->status == 'rejected')
+
+            <span class="badge bg-danger">
+                Rejected
+            </span>
+
+
+        @endif
+
+    </td>
 
 </tr>
 
@@ -206,12 +229,41 @@ Pending
 
 <div class="alert alert-info">
 
-
 <strong>Next Action:</strong>
 
 <br>
 
-BMRC editorial office will perform technical checking of your manuscript.
+
+@if($manuscript->status == 'submitted')
+
+    BMRC editorial office will perform technical checking of your manuscript.
+
+
+@elseif($manuscript->status == 'technical_check')
+
+    Your manuscript is currently under technical checking.
+
+
+@elseif($manuscript->status == 'under_review')
+
+    Your manuscript has been assigned for peer review.
+
+
+@elseif($manuscript->status == 'accepted')
+
+    Your manuscript has been accepted for publication.
+
+
+@elseif($manuscript->status == 'rejected')
+
+    Your manuscript has been rejected.
+
+
+@else
+
+    Please complete your submission.
+
+@endif
 
 
 </div>
@@ -219,14 +271,23 @@ BMRC editorial office will perform technical checking of your manuscript.
 
 
 
-<a href="{{route('author.dashboard')}}"
+<form method="POST"
+      action="{{ route('author.submission.finalSubmit',$manuscript->id) }}">
 
-class="btn btn-primary">
+    @csrf
 
-Go to Dashboard
 
-</a>
+    <button type="submit"
+            class="btn btn-success">
 
+        <i class="bi bi-send"></i>
+
+        Final Submit Manuscript
+
+    </button>
+
+
+</form>
 
 
 </div>

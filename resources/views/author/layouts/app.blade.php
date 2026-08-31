@@ -897,7 +897,7 @@ New Submission
 
 
 
-<a href="#"
+<a href="{{ route('author.manuscripts.index') }}"
 class="nav-link">
 
 <i class="bi bi-files"></i>
@@ -908,7 +908,7 @@ My Manuscripts
 
 
 
-<a href="#"
+<a href="{{ route('author.drafts.index') }}"
 class="nav-link">
 
 <i class="bi bi-file-earmark"></i>
@@ -919,7 +919,7 @@ Drafts
 
 
 
-<a href="#"
+<a href="{{ route('author.submitted.index') }}"
 class="nav-link">
 
 <i class="bi bi-send"></i>
@@ -984,7 +984,7 @@ Published Articles
 </div>
 
 
-<a href="#"
+<a href="{{route('author.payments.index')}}"
 class="nav-link">
 
 <i class="bi bi-credit-card"></i>
