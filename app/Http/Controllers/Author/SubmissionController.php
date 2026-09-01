@@ -340,160 +340,290 @@ class SubmissionController extends Controller
 
     }
 
-
     /**
-     * Step 2 Form
-     * Article Information
-     */
 
-    public function step2(Manuscript $manuscript)
-        {
+* Step 2 Form
+* Scientific & Study Information
+  */
+  public function step2(Manuscript $manuscript)
+  {
+  // Security: only the submitting author can access this manuscript
+  abort_if(
+  $manuscript->submitted_by != auth()->id(),
+  403
+  );
 
-            return view(
-                'author.submission.step2',
-                compact('manuscript')
-            );
+  // Load Step 2 details
+  $manuscript->load('details');
 
-        }
-
+  return view(
+  'author.submission.step2',
+  compact('manuscript')
+  );
+  }
 
 /**
- * Store Step 2
- * Manuscript Information
- */
-public function storeStep2(Request $request, Manuscript $manuscript)
-{
+* Store Step 2
+* Scientific & Study Information
+  */
+  public function storeStep2(
+  Request $request,
+  Manuscript $manuscript
+  ) {
+        // Security
+        abort_if(
+        $manuscript->submitted_by != auth()->id(),
+        403
+        );
 
-    $validated = $request->validate([
+        $validated = $request->validate([
 
-        'background' => 'nullable|string',
+            /*
+            |--------------------------------------------------------------------------
+            | Scientific Information
+            |--------------------------------------------------------------------------
+            */
 
-        'objective' => 'nullable|string',
+            'background' => [
+                'nullable',
+                'string'
+            ],
 
-        'methods' => 'nullable|string',
+            'objective' => [
+                'nullable',
+                'string'
+            ],
 
-        'results' => 'nullable|string',
+            'methods' => [
+                'nullable',
+                'string'
+            ],
 
-        'conclusion' => 'nullable|string',
+            'results' => [
+                'nullable',
+                'string'
+            ],
 
-
-        'trial_registration_number' => 'nullable|string',
-
-        'trial_registration_organization' => 'nullable|string',
-
-
-        'study_design' => 'nullable|string',
-
-        'other_study_design' => 'nullable|string',
-
-
-        'study_start_date' => 'nullable|date',
-
-        'study_end_date' => 'nullable|date',
-
-
-        'study_location' => 'nullable|string',
-
-
-        'sample_size' => 'nullable|integer',
-
-
-        'funding_source' => 'nullable|string',
-
-        'other_funding_source' => 'nullable|string',
+            'conclusion' => [
+                'nullable',
+                'string'
+            ],
 
 
-        'ethical_approval_available' => 'nullable|string',
+   /*
+   |--------------------------------------------------------------------------
+   | Trial Registration
+   |--------------------------------------------------------------------------
+   */
 
-        'ethical_approval_number' => 'nullable|string',
+        'trial_registration_number' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
 
-        'ethical_approval_date' => 'nullable|date',
+        'trial_registration_organization' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+
+   /*
+   |--------------------------------------------------------------------------
+   | Study Design
+   |--------------------------------------------------------------------------
+   */
+
+        'study_design' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+        'other_study_design' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+
+   /*
+   |--------------------------------------------------------------------------
+   | Study Period
+   |--------------------------------------------------------------------------
+   */
+
+        'study_start_date' => [
+            'nullable',
+            'date'
+        ],
+
+        'study_end_date' => [
+            'nullable',
+            'date',
+            'after_or_equal:study_start_date'
+        ],
+
+
+   /*
+   |--------------------------------------------------------------------------
+   | Study Information
+   |--------------------------------------------------------------------------
+   */
+
+        'study_location' => [
+            'nullable',
+            'string',
+            'max:500'
+        ],
+
+        'sample_size' => [
+            'nullable',
+            'integer',
+            'min:0'
+        ],
+
+
+   /*
+   |--------------------------------------------------------------------------
+   | Funding
+   |--------------------------------------------------------------------------
+   */
+
+        'funding_source' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+        'other_funding_source' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+
+   /*
+   |--------------------------------------------------------------------------
+   | Ethical Approval
+   |--------------------------------------------------------------------------
+   */
+
+        'ethical_approval_available' => [
+            'nullable',
+            'boolean'
+        ],
+
+        'ethical_approval_number' => [
+            'nullable',
+            'string',
+            'max:255'
+        ],
+
+        'ethical_approval_date' => [
+            'nullable',
+            'date'
+        ],
 
     ]);
 
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Other Study Design
-    |--------------------------------------------------------------------------
-    */
-
-    if ($request->study_design == 'Other') {
-
-        $validated['study_design'] =
-            $request->other_study_design;
-
-    }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Other Funding Source
-    |--------------------------------------------------------------------------
-    */
-
-    if ($request->funding_source == 'Other') {
-
-        $validated['funding_source'] =
-            $request->other_funding_source;
-
-    }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Save Data
-    |--------------------------------------------------------------------------
-    */
-
-    $manuscript->details()->updateOrCreate(
-
-        [
-            'manuscript_id' => $manuscript->id
-        ],
-
-        $validated
-
-    );
-
-    /*
+/*
 |--------------------------------------------------------------------------
-| Update Draft Progress
+| Ethical Approval Checkbox
 |--------------------------------------------------------------------------
 */
 
-    $manuscript->update([
+  $validated['ethical_approval_available'] =
+  $request->boolean('ethical_approval_available');
 
-        'completion_percentage' => 15,
+     /*                                                                         
+  | -------------------------------------------------------------------------- 
+  | Clear Other Study Design if not selected                                   
+  | -------------------------------------------------------------------------- 
+  */                                                                         
 
-        'last_step' => 2,
+  if ($validated['study_design'] !== 'Other') {
 
-        'draft_saved_at' => now(),
+   $validated['other_study_design'] = null;
 
-    ]);
+  }
+
+  /*                                                                         
+  | -------------------------------------------------------------------------- 
+  | Clear Other Funding Source if not selected                                 
+  | -------------------------------------------------------------------------- 
+ */                                                                         
+
+  if ($validated['funding_source'] !== 'Other') {
 
 
-    return redirect()
+   $validated['other_funding_source'] = null;
 
-        ->route(
-            'author.submission.step3',
-            [
-                'manuscript'=>$manuscript->id
-            ]
-        )
 
-        ->with(
-            'success',
-            'Manuscript information saved successfully.'
-        );
+  }
+
+  /*                                                                         
+  | -------------------------------------------------------------------------- 
+  | Save Step 2 Details                                                        
+  | -------------------------------------------------------------------------- 
+  */                                                                         
+
+  DB::transaction(function () use (
+  $manuscript,
+  $validated
+  ) {
+
+   $manuscript->details()->updateOrCreate(
+
+       [
+           'manuscript_id' => $manuscript->id
+       ],
+
+       $validated
+
+   );
+
+
+   /*
+   |--------------------------------------------------------------------------
+   | Update Draft Progress
+   |--------------------------------------------------------------------------
+   */
+
+   $manuscript->update([
+
+       'completion_percentage' => 15,
+
+       'last_step' => 2,
+
+       'draft_saved_at' => now(),
+
+   ]);
+
+
+  });
+
+   /*                                                                         
+  | -------------------------------------------------------------------------- 
+  | Continue to Step 3                                                         
+  | -------------------------------------------------------------------------- 
+  */                                                                         
+
+  return redirect()
+
+   ->route(
+       'author.submission.step3',
+       $manuscript->id
+   )
+
+   ->with(
+       'success',
+       'Manuscript scientific information saved successfully.'
+   );
 
 }
-
-
-
 
 
     /*

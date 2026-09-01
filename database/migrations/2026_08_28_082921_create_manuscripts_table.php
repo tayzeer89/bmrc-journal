@@ -12,71 +12,171 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('manuscripts', function (Blueprint $table) {
-                $table->id();
 
-                $table->string('manuscript_id')->unique();
+            /*
+            |--------------------------------------------------------------------------
+            | 1. Primary Identification
+            |--------------------------------------------------------------------------
+            */
 
-                $table->foreignId('submitted_by')
-                    ->constrained('users')
-                    ->restrictOnDelete();
+            $table->id();
 
-               $table->foreignId('journal_id')
-                    ->nullable()
-                    ->constrained('journals')
-                    ->onDelete('set null');
+            $table->string('manuscript_id')
+                ->unique()
+                ->comment('BMRC Manuscript ID');
 
-               $table->foreignId('article_type_id')
-                    ->nullable()
-                    ->constrained('article_types')
-                    ->nullOnDelete();
 
-                $table->string('title');
+            /*
+            |--------------------------------------------------------------------------
+            | 2. Submission / Ownership
+            |--------------------------------------------------------------------------
+            */
 
-                $table->string('short_title')->nullable();
+            $table->foreignId('submitted_by')
+                ->constrained('users')
+                ->restrictOnDelete();
 
-                $table->longText('abstract')->nullable();
 
-                $table->json('keywords')->nullable();
+            /*
+            |--------------------------------------------------------------------------
+            | 3. Journal & Article Type
+            |--------------------------------------------------------------------------
+            */
 
-                $table->string('subject_category')->nullable();
-                $table->string('subcategory')->nullable();
+            $table->foreignId('journal_id')
+                ->nullable()
+                ->constrained('journals')
+                ->nullOnDelete();
 
-                $table->string('language')->default('English');
+            $table->foreignId('article_type_id')
+                ->nullable()
+                ->constrained('article_types')
+                ->nullOnDelete();
 
-                $table->unsignedInteger('word_count')->nullable();
 
-                $table->unsignedInteger('number_of_tables')->default(0);
-                $table->unsignedInteger('number_of_figures')->default(0);
-                $table->unsignedInteger('number_of_references')->default(0);
+            /*
+            |--------------------------------------------------------------------------
+            | 4. Article Information - Step 1
+            |--------------------------------------------------------------------------
+            */
 
-                // Manuscript information
-                $table->longText('background')->nullable();
-                $table->longText('objective')->nullable();
-                $table->longText('methods')->nullable();
-                $table->longText('results')->nullable();
-                $table->longText('conclusion')->nullable();
+            $table->string('title');
 
-                $table->string('trial_registration_number')->nullable();
-                $table->string('trial_registration_organization')->nullable();
+            $table->string('short_title')
+                ->nullable();
 
-                $table->string('study_design')->nullable();
-                $table->date('study_start_date')->nullable();
-                $table->date('study_end_date')->nullable();
-                $table->text('study_location')->nullable();
+            $table->longText('abstract')
+                ->nullable();
 
-                $table->unsignedInteger('sample_size')->nullable();
+            $table->json('keywords')
+                ->nullable();
 
-                // Status
-                $table->string('status')->default('draft')->index();
+            $table->string('subject_category')
+                ->nullable();
 
-                $table->string('submission_version')->default('1.0');
+            $table->string('subcategory')
+                ->nullable();
 
-                $table->timestamp('submitted_at')->nullable();
+            $table->string('language')
+                ->default('English');
 
-                $table->timestamps();
-                $table->softDeletes();
-            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | 5. Manuscript Statistics - Step 1
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unsignedInteger('word_count')
+                ->nullable();
+
+            $table->unsignedInteger('number_of_tables')
+                ->default(0);
+
+            $table->unsignedInteger('number_of_figures')
+                ->default(0);
+
+            $table->unsignedInteger('number_of_references')
+                ->default(0);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 6. Submission Status
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('status')
+                ->default('draft')
+                ->index();
+
+            /*
+             | Examples:
+             | draft
+             | submitted
+             | technical_check
+             | technical_revision
+             | editor_assigned
+             | under_review
+             | revision_required
+             | accepted
+             | rejected
+             | copy_editing
+             | proofreading
+             | production
+             | published
+             */
+
+            $table->string('submission_version')
+                ->default('1.0');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 7. Draft Management
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unsignedTinyInteger('completion_percentage')
+                ->default(0);
+
+            $table->unsignedTinyInteger('last_step')
+                ->default(1);
+
+            $table->timestamp('draft_saved_at')
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 8. Final Submission
+            |--------------------------------------------------------------------------
+            */
+
+            $table->timestamp('submitted_at')
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 9. Timestamps
+            |--------------------------------------------------------------------------
+            */
+
+            $table->timestamps();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 10. Soft Delete
+            |--------------------------------------------------------------------------
+            */
+
+            $table->softDeletes();
+
+        });
     }
+
 
     /**
      * Reverse the migrations.

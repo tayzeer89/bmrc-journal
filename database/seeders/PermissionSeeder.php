@@ -38,8 +38,10 @@ class PermissionSeeder extends Seeder
             // Technical Screening
             'technical_check.view',
             'technical_check.perform',
-            'technical_check.approve',
+            'technical_check.assign',
+            'technical_check.complete',
             'technical_check.return',
+            'technical_check.history',
 
             // Similarity
             'similarity.view',

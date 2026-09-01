@@ -426,17 +426,18 @@
 
                 @can('manuscript.view')
 
-                    <a href="#">
+                <a href="{{ route('admin.manuscripts.index') }}"
+                class="{{ request()->routeIs('admin.manuscripts.*') ? 'active' : '' }}">
 
-                        <i class="bi bi-file-earmark-text"></i>
+                    <i class="bi bi-file-earmark-text"></i>
 
-                        <span>
-                            Manuscripts
-                        </span>
+                    <span>
+                        Manuscripts
+                    </span>
 
-                    </a>
+                </a>
 
-                @endcan
+            @endcan
 
 
                 @can('reviewer.view')

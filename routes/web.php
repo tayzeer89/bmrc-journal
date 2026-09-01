@@ -30,6 +30,8 @@ use App\Http\Controllers\Admin\JournalController;
 use App\Http\Controllers\ArticleTypeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\TechnicalCheckController;
+use App\Http\Controllers\Admin\ManuscriptController;
 
 /*
 |--------------------------------------------------------------------------
@@ -653,21 +655,6 @@ Route::prefix('author')
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /*
     |--------------------------------------------------------------------------
     | REVIEWER PORTAL
@@ -1110,3 +1097,65 @@ Route::middleware('auth')->group(function () {
     )->name('journal.dashboard');
 
 });
+
+
+
+Route::middleware(['auth'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Manuscripts
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/manuscripts',
+            [ManuscriptController::class, 'index']
+        )->name('manuscripts.index');
+
+
+        Route::get(
+            '/manuscripts/{manuscript}',
+            [ManuscriptController::class, 'show']
+        )->name('manuscripts.show');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Technical Check
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/manuscripts/{manuscript}/technical-check',
+            [TechnicalCheckController::class, 'show']
+        )->name('manuscripts.technical-check');
+
+
+        Route::post(
+            '/manuscripts/{manuscript}/technical-check/start',
+            [TechnicalCheckController::class, 'start']
+        )->name('manuscripts.technical-check.start');
+
+
+        Route::put(
+            '/manuscripts/{manuscript}/technical-check/{technicalCheck}',
+            [TechnicalCheckController::class, 'update']
+        )->name('manuscripts.technical-check.update');
+
+
+        Route::post(
+            '/manuscripts/{manuscript}/technical-check/{technicalCheck}/pass',
+            [TechnicalCheckController::class, 'pass']
+        )->name('manuscripts.technical-check.pass');
+
+
+        Route::post(
+            '/manuscripts/{manuscript}/technical-check/{technicalCheck}/return',
+            [TechnicalCheckController::class, 'returnToAuthor']
+        )->name('manuscripts.technical-check.return');
+
+    });

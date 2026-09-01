@@ -2,29 +2,54 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\User;
-use App\Models\ManuscriptAuthor;
-use App\Models\ManuscriptFile;
-use App\Models\Revision;
-use App\Models\Payment;
-use App\Models\ArticleType;
-use App\Models\Journal;
-use App\Models\EthicalInformation;
-use App\Models\FundingInformation;
-use App\Models\ConflictOfInterest;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Manuscript extends Model
 {
     use HasFactory, SoftDeletes;
 
+
     protected $fillable = [
+
+        /*
+        |--------------------------------------------------------------------------
+        | Identification
+        |--------------------------------------------------------------------------
+        */
+
         'manuscript_id',
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ownership
+        |--------------------------------------------------------------------------
+        */
+
         'submitted_by',
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Journal & Article Type
+        |--------------------------------------------------------------------------
+        */
+
         'journal_id',
         'article_type_id',
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Article Information
+        |--------------------------------------------------------------------------
+        */
+
         'title',
         'short_title',
         'abstract',
@@ -32,167 +57,338 @@ class Manuscript extends Model
         'subject_category',
         'subcategory',
         'language',
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Manuscript Statistics
+        |--------------------------------------------------------------------------
+        */
+
         'word_count',
         'number_of_tables',
         'number_of_figures',
         'number_of_references',
-        'background',
-        'objective',
-        'methods',
-        'results',
-        'conclusion',
-        'trial_registration_number',
-        'trial_registration_organization',
-        'study_design',
-        'study_start_date',
-        'study_end_date',
-        'study_location',
-        'sample_size',
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submission Status
+        |--------------------------------------------------------------------------
+        */
+
         'status',
         'submission_version',
         'submitted_at',
-        // Draft Management
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Draft Management
+        |--------------------------------------------------------------------------
+        */
+
         'completion_percentage',
         'last_step',
         'draft_saved_at',
     ];
 
+
     protected $casts = [
+
         'keywords' => 'array',
+
         'submitted_at' => 'datetime',
-        'study_start_date' => 'date',
-        'study_end_date' => 'date',
+
+        'draft_saved_at' => 'datetime',
+
         'completion_percentage' => 'integer',
-        'draft_saved_at'=>'datetime',
+
+        'last_step' => 'integer',
+
+        'word_count' => 'integer',
+
+        'number_of_tables' => 'integer',
+
+        'number_of_figures' => 'integer',
+
+        'number_of_references' => 'integer',
+
     ];
 
-    public function submitter()
+
+    /*
+    |--------------------------------------------------------------------------
+    | Submitter
+    |--------------------------------------------------------------------------
+    */
+
+    public function submitter(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'submitted_by');
+        return $this->belongsTo(
+            User::class,
+            'submitted_by'
+        );
     }
 
 
-    public function authors()
+    /*
+    |--------------------------------------------------------------------------
+    | Journal
+    |--------------------------------------------------------------------------
+    */
+
+    public function journal(): BelongsTo
+    {
+        return $this->belongsTo(
+            Journal::class,
+            'journal_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Article Type
+    |--------------------------------------------------------------------------
+    */
+
+    public function articleType(): BelongsTo
+    {
+        return $this->belongsTo(
+            ArticleType::class,
+            'article_type_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Step 2 - Manuscript Details
+    |--------------------------------------------------------------------------
+    */
+
+    public function details(): HasOne
+    {
+        return $this->hasOne(
+            ManuscriptDetail::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authors
+    |--------------------------------------------------------------------------
+    */
+
+    public function authors(): HasMany
     {
         return $this->hasMany(
             ManuscriptAuthor::class,
             'manuscript_id'
-        )
-        ->orderBy('author_order');
+        )->orderBy('author_order');
     }
 
 
-    public function files()
-        {
-            return $this->hasMany(
-                ManuscriptFile::class,
-                'manuscript_id'
-            );
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | Files
+    |--------------------------------------------------------------------------
+    */
 
-        public function ethicalInformation()
-            {
-                return $this->hasOne(
-                    EthicalInformation::class,
-                    'manuscript_id'
-                );
-            }
+    public function files(): HasMany
+    {
+        return $this->hasMany(
+            ManuscriptFile::class,
+            'manuscript_id'
+        );
+    }
 
 
-        public function fundingInformation()
-        {
-            return $this->hasOne(
-                FundingInformation::class,
-                'manuscript_id'
-            );
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | Ethical Information
+    |--------------------------------------------------------------------------
+    */
 
-        public function conflictOfInterest()
-        {
-            return $this->hasOne(
-                ConflictOfInterest::class,
-                'manuscript_id'
-            );
-        }
-
-        public function dataAvailability()
-        {
-            return $this->hasOne(
-                DataAvailability::class,
-                'manuscript_id'
-            );
-        }
-
-        public function acknowledgement()
-            {
-                return $this->hasOne(
-                    Acknowledgement::class,
-                    'manuscript_id'
-                );
-            }
-
-        
-        public function checklist()
-            {
-                return $this->hasOne(
-                    SubmissionChecklist::class
-                );
-            }
-            
-        public function revisions()
-        {
-            return $this->hasMany(Revision::class);
-        }
-
-        public function payments()
-        {
-            return $this->hasMany(
-                Payment::class
-            );
-        }
-
-        public function journal()
-        {
-            return $this->belongsTo(
-                Journal::class
-            );
-        }
-
-        public function details()
-        {
-            return $this->hasOne(
-                ManuscriptDetail::class,
-                'manuscript_id'
-            );
-        }
+    public function ethicalInformation(): HasOne
+    {
+        return $this->hasOne(
+            EthicalInformation::class,
+            'manuscript_id'
+        );
+    }
 
 
-        public function articleType()
-        {
-            return $this->belongsTo(
-                ArticleType::class,
-                'article_type_id'
-            );
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | Funding Information
+    |--------------------------------------------------------------------------
+    */
 
-        public function isDraft()
-        {
-            return $this->status === 'draft';
-        }
-
-
-        public function isSubmitted()
-        {
-            return $this->status === 'submitted';
-        }
+    public function fundingInformation(): HasOne
+    {
+        return $this->hasOne(
+            FundingInformation::class,
+            'manuscript_id'
+        );
+    }
 
 
-        public function progress()
-        {
-            return $this->completion_percentage ?? 0;
-        }
-                
+    /*
+    |--------------------------------------------------------------------------
+    | Conflict of Interest
+    |--------------------------------------------------------------------------
+    */
+
+    public function conflictOfInterest(): HasOne
+    {
+        return $this->hasOne(
+            ConflictOfInterest::class,
+            'manuscript_id'
+        );
+    }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Data Availability
+    |--------------------------------------------------------------------------
+    */
 
+    public function dataAvailability(): HasOne
+    {
+        return $this->hasOne(
+            DataAvailability::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Acknowledgement
+    |--------------------------------------------------------------------------
+    */
+
+    public function acknowledgement(): HasOne
+    {
+        return $this->hasOne(
+            Acknowledgement::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Submission Checklist
+    |--------------------------------------------------------------------------
+    */
+
+    public function checklist(): HasOne
+    {
+        return $this->hasOne(
+            SubmissionChecklist::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Revisions
+    |--------------------------------------------------------------------------
+    */
+
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(
+            Revision::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payments
+    |--------------------------------------------------------------------------
+    */
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(
+            Payment::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Technical Checks
+    |--------------------------------------------------------------------------
+    */
+
+    public function technicalChecks(): HasMany
+    {
+        return $this->hasMany(
+            TechnicalCheck::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Latest Technical Check
+    |--------------------------------------------------------------------------
+    */
+
+    public function latestTechnicalCheck(): HasOne
+    {
+        return $this->hasOne(
+            TechnicalCheck::class,
+            'manuscript_id'
+        )->latestOfMany();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Draft Status
+    |--------------------------------------------------------------------------
+    */
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Submitted Status
+    |--------------------------------------------------------------------------
+    */
+
+    public function isSubmitted(): bool
+    {
+        return $this->status === 'submitted';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Progress
+    |--------------------------------------------------------------------------
+    */
+
+    public function progress(): int
+    {
+        return $this->completion_percentage ?? 0;
+    }
 }
