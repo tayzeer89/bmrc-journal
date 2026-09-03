@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Manuscript;
 use App\Models\TechnicalCheck;
-use App\Models\TechnicalCheckItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -127,30 +126,59 @@ class TechnicalCheckController extends Controller
 
     /*
     |--------------------------------------------------------------------------
+    | Technical Review Dashboard
+    |--------------------------------------------------------------------------
+    */
+
+    public function index()
+    {
+        abort_unless(
+            auth()->user()->can('technical_check.view'),
+            403
+        );
+
+        $technicalChecks = TechnicalCheck::with([
+            'manuscript.articleType',
+        ])
+        ->latest()
+        ->paginate(20);
+
+        return view(
+            'admin.manuscripts.technical-review.index',
+            compact('technicalChecks')
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Show Technical Check
     |--------------------------------------------------------------------------
     */
 
     public function show(Manuscript $manuscript)
-{
-    abort_unless(
-        auth()->user()->can('technical_check.view'),
-        403
-    );
+    {
+        abort_unless(
+            auth()->user()->can('technical_check.view'),
+            403
+        );
 
-    $technicalCheck = $manuscript
-        ->latestTechnicalCheck()
-        ->with('items')
-        ->first();
+        $technicalCheck = $manuscript
+            ->technicalChecks()
+            ->with('items')
+            ->latest('check_number')
+            ->first();
 
-    return view(
-        'admin.manuscripts.technical-check',
-        compact(
-            'manuscript',
-            'technicalCheck'
-        )
-    );
-}
+        return view(
+            'admin.manuscripts.technical-check',
+            compact(
+                'manuscript',
+                'technicalCheck'
+            )
+        );
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | Start Technical Check
@@ -230,42 +258,35 @@ class TechnicalCheckController extends Controller
 
     public function update(
         Request $request,
-        Manuscript $manuscript,
         TechnicalCheck $technicalCheck
     ) {
-
         abort_unless(
             auth()->user()->can('technical_check.perform'),
             403
-        );
-
-        abort_unless(
-            $technicalCheck->manuscript_id === $manuscript->id,
-            404
         );
 
         $validated = $request->validate([
 
             'items' => [
                 'required',
-                'array'
+                'array',
             ],
 
             'items.*.result' => [
                 'required',
-                'in:pass,fail,na'
+                'in:pass,fail,na',
             ],
 
             'items.*.comment' => [
                 'nullable',
                 'string',
-                'max:5000'
+                'max:5000',
             ],
 
             'comments' => [
                 'nullable',
                 'string',
-                'max:10000'
+                'max:10000',
             ],
 
         ]);
@@ -300,7 +321,6 @@ class TechnicalCheckController extends Controller
                         now(),
 
                 ]);
-
             }
 
 
@@ -314,36 +334,31 @@ class TechnicalCheckController extends Controller
         });
 
 
-        return back()
-            ->with(
-                'success',
-                'Technical check saved successfully.'
-            );
+        return back()->with(
+            'success',
+            'Technical check saved successfully.'
+        );
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Pass Technical Check
+    | Complete Technical Check
     |--------------------------------------------------------------------------
     */
 
-    public function pass(
+    public function complete(
         Request $request,
-        Manuscript $manuscript,
         TechnicalCheck $technicalCheck
     ) {
-
         abort_unless(
             auth()->user()->can('technical_check.complete'),
             403
         );
 
+        $manuscript = $technicalCheck->manuscript;
 
-        abort_unless(
-            $technicalCheck->manuscript_id === $manuscript->id,
-            404
-        );
+        abort_unless($manuscript, 404);
 
 
         $failedItems = $technicalCheck
@@ -360,21 +375,19 @@ class TechnicalCheckController extends Controller
 
         if ($failedItems > 0) {
 
-            return back()
-                ->with(
-                    'error',
-                    'Technical check cannot be passed because some items failed.'
-                );
+            return back()->with(
+                'error',
+                'Technical check cannot be completed because some items failed.'
+            );
         }
 
 
         if ($pendingItems > 0) {
 
-            return back()
-                ->with(
-                    'error',
-                    'Please complete all technical check items first.'
-                );
+            return back()->with(
+                'error',
+                'Please complete all technical check items first.'
+            );
         }
 
 
@@ -397,12 +410,6 @@ class TechnicalCheckController extends Controller
             ]);
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Update Manuscript Workflow
-            |--------------------------------------------------------------------------
-            */
-
             $manuscript->update([
 
                 'status' =>
@@ -418,32 +425,33 @@ class TechnicalCheckController extends Controller
 
         return redirect()
             ->route(
-                'admin.manuscripts.show',
-                $manuscript
+                'admin.manuscripts.technical-review.index'
             )
             ->with(
                 'success',
-                'Technical check passed successfully.'
+                'Technical check completed successfully.'
             );
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Return to Author
+    | Return Manuscript to Author
     |--------------------------------------------------------------------------
     */
 
     public function returnToAuthor(
         Request $request,
-        Manuscript $manuscript,
         TechnicalCheck $technicalCheck
     ) {
-
         abort_unless(
             auth()->user()->can('technical_check.return'),
             403
         );
+
+        $manuscript = $technicalCheck->manuscript;
+
+        abort_unless($manuscript, 404);
 
 
         $validated = $request->validate([
@@ -451,7 +459,126 @@ class TechnicalCheckController extends Controller
             'comments' => [
                 'required',
                 'string',
-                'max:10000'
+                'max:10000',
+            ],
+
+        ]);
+
+
+        DB::transaction(function () use (
+            $manuscript,
+            $technicalCheck,
+            $validated
+        ) {
+
+            $technicalCheck->update([
+
+                'status' =>
+                    'correction_required',
+
+                'comments' =>
+                    $validated['comments'],
+
+            ]);
+
+
+            $manuscript->update([
+
+                'status' =>
+                    'technical_correction',
+
+                'current_stage' =>
+                    'author_correction',
+
+            ]);
+
+        });
+
+
+        return redirect()
+            ->route(
+                'admin.manuscripts.technical-review.index'
+            )
+            ->with(
+                'success',
+                'Manuscript returned to author for technical correction.'
+            );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Add Technical Issue
+    |--------------------------------------------------------------------------
+    */
+
+    public function addIssue(
+        Request $request,
+        TechnicalCheck $technicalCheck
+    ) {
+        abort_unless(
+            auth()->user()->can('technical_check.perform'),
+            403
+        );
+
+
+        $validated = $request->validate([
+
+            'description' => [
+                'required',
+                'string',
+                'max:10000',
+            ],
+
+        ]);
+
+
+        /*
+        |----------------------------------------------------------------------
+        | This method should be connected to your technical_issues table.
+        |----------------------------------------------------------------------
+        */
+
+        $technicalCheck->issues()->create([
+
+            'description' =>
+                $validated['description'],
+
+            'reported_by' =>
+                auth()->id(),
+
+        ]);
+
+
+        return back()->with(
+            'success',
+            'Technical issue added successfully.'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Assign Technical Check
+    |--------------------------------------------------------------------------
+    */
+
+    public function assign(
+        Request $request,
+        TechnicalCheck $technicalCheck
+    ) {
+        abort_unless(
+            auth()->user()->can('technical_check.assign'),
+            403
+        );
+
+
+        $validated = $request->validate([
+
+            'assigned_to' => [
+                'required',
+                'integer',
+                'exists:users,id',
             ],
 
         ]);
@@ -459,34 +586,15 @@ class TechnicalCheckController extends Controller
 
         $technicalCheck->update([
 
-            'status' =>
-                'correction_required',
-
-            'comments' =>
-                $validated['comments'],
+            'assigned_to' =>
+                $validated['assigned_to'],
 
         ]);
 
 
-        $manuscript->update([
-
-            'status' =>
-                'technical_correction',
-
-            'current_stage' =>
-                'author_correction',
-
-        ]);
-
-
-        return redirect()
-            ->route(
-                'admin.manuscripts.show',
-                $manuscript
-            )
-            ->with(
-                'success',
-                'Manuscript returned to author for technical correction.'
-            );
+        return back()->with(
+            'success',
+            'Technical check assigned successfully.'
+        );
     }
 }

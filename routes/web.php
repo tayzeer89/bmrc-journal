@@ -1099,63 +1099,106 @@ Route::middleware('auth')->group(function () {
 });
 
 
-
-Route::middleware(['auth'])
-    ->prefix('admin')
+    Route::prefix('admin')
     ->name('admin.')
+    ->middleware(['auth'])
     ->group(function () {
 
-        /*
-        |--------------------------------------------------------------------------
-        | Manuscripts
-        |--------------------------------------------------------------------------
-        */
+    /*
+    |--------------------------------------------------------------------------
+    | Manuscripts
+    |--------------------------------------------------------------------------
+    */
 
-        Route::get(
-            '/manuscripts',
-            [ManuscriptController::class, 'index']
-        )->name('manuscripts.index');
-
-
-        Route::get(
-            '/manuscripts/{manuscript}',
-            [ManuscriptController::class, 'show']
-        )->name('manuscripts.show');
+    Route::get(
+        '/manuscripts',
+        [ManuscriptController::class, 'index']
+    )
+        ->name('manuscripts.index')
+        ->middleware('permission:manuscript.view');
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Technical Check
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/manuscripts/{manuscript}/technical-check',
-            [TechnicalCheckController::class, 'show']
-        )->name('manuscripts.technical-check');
+    Route::get(
+        '/manuscripts/{manuscript}',
+        [ManuscriptController::class, 'show']
+    )
+        ->name('manuscripts.show')
+        ->middleware('permission:manuscript.view');
 
 
-        Route::post(
-            '/manuscripts/{manuscript}/technical-check/start',
-            [TechnicalCheckController::class, 'start']
-        )->name('manuscripts.technical-check.start');
+    /*
+    |--------------------------------------------------------------------------
+    | Technical Review
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/manuscripts/technical-review',
+        [TechnicalCheckController::class, 'index']
+    )
+        ->name('manuscripts.technical-review.index')
+        ->middleware('permission:technical_check.view');
 
 
-        Route::put(
-            '/manuscripts/{manuscript}/technical-check/{technicalCheck}',
-            [TechnicalCheckController::class, 'update']
-        )->name('manuscripts.technical-check.update');
+    Route::get(
+        '/manuscripts/{manuscript}/technical-check',
+        [TechnicalCheckController::class, 'show']
+    )
+        ->name('manuscripts.technical-check')
+        ->middleware('permission:technical_check.view');
 
 
-        Route::post(
-            '/manuscripts/{manuscript}/technical-check/{technicalCheck}/pass',
-            [TechnicalCheckController::class, 'pass']
-        )->name('manuscripts.technical-check.pass');
+    Route::post(
+        '/manuscripts/{manuscript}/technical-check/start',
+        [TechnicalCheckController::class, 'start']
+    )
+        ->name('manuscripts.technical-check.start')
+        ->middleware('permission:technical_check.perform');
 
 
-        Route::post(
-            '/manuscripts/{manuscript}/technical-check/{technicalCheck}/return',
-            [TechnicalCheckController::class, 'returnToAuthor']
-        )->name('manuscripts.technical-check.return');
+    /*
+    |--------------------------------------------------------------------------
+    | Technical Check Actions
+    |--------------------------------------------------------------------------
+    */
 
-    });
+    Route::put(
+        '/technical-checks/{technicalCheck}',
+        [TechnicalCheckController::class, 'update']
+    )
+        ->name('manuscripts.technical-check.update')
+        ->middleware('permission:technical_check.perform');
+
+
+    Route::post(
+        '/technical-checks/{technicalCheck}/complete',
+        [TechnicalCheckController::class, 'complete']
+    )
+        ->name('manuscripts.technical-check.complete')
+        ->middleware('permission:technical_check.complete');
+
+
+    Route::post(
+        '/technical-checks/{technicalCheck}/return',
+        [TechnicalCheckController::class, 'returnToAuthor']
+    )
+        ->name('manuscripts.technical-check.return')
+        ->middleware('permission:technical_check.return');
+
+
+    Route::post(
+        '/technical-checks/{technicalCheck}/issues',
+        [TechnicalCheckController::class, 'addIssue']
+    )
+        ->name('manuscripts.technical-check.issue')
+        ->middleware('permission:technical_check.perform');
+
+
+    Route::post(
+        '/technical-checks/{technicalCheck}/assign',
+        [TechnicalCheckController::class, 'assign']
+    )
+        ->name('manuscripts.technical-check.assign')
+        ->middleware('permission:technical_check.assign');
+
+});

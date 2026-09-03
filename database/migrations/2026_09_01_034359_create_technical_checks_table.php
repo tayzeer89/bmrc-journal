@@ -38,7 +38,17 @@ return new class extends Migration
                 'correction_required',
                 'passed',
                 'failed',
-            ])->default('pending');
+            ])
+                ->default('pending')
+                ->index();
+
+            $table->enum('overall_result', [
+                'passed',
+                'passed_with_minor_corrections',
+                'correction_required',
+                'failed',
+            ])
+                ->nullable();
 
 
             /*
@@ -78,7 +88,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | Result
+            | Comments
             |--------------------------------------------------------------------------
             */
 
@@ -86,8 +96,33 @@ return new class extends Migration
                 ->nullable();
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Timestamps
+            |--------------------------------------------------------------------------
+            */
+
             $table->timestamps();
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Prevent Duplicate Check Number
+            |--------------------------------------------------------------------------
+            |
+            | Example:
+            |
+            | Manuscript #101
+            |   Check #1
+            |   Check #2
+            |   Check #3
+            |
+            */
+
+            $table->unique([
+                'manuscript_id',
+                'check_number',
+            ]);
         });
     }
 

@@ -13,6 +13,7 @@ use App\Models\ManuscriptAuthor;
 use App\Models\DataAvailability;
 use App\Models\Acknowledgement;
 use App\Models\SubmissionChecklist;
+use App\Services\TechnicalCheckService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -2105,50 +2106,109 @@ class SubmissionController extends Controller
         /**
          * Final Manuscript Submit
          */
-        public function finalSubmit(Manuscript $manuscript)
-        {
+      /**
+ * Final Manuscript Submit
+ *
+ * Draft
+ *   ↓
+ * Submitted
+ *   ↓
+ * Technical Check #1
+ */
+public function finalSubmit(
+    Manuscript $manuscript,
+    TechnicalCheckService $technicalCheckService
+) {
+    /*
+    |--------------------------------------------------------------------------
+    | Security
+    |--------------------------------------------------------------------------
+    */
 
-            abort_if(
-                $manuscript->submitted_by != auth()->id(),
-                403
+    abort_if(
+        $manuscript->submitted_by != auth()->id(),
+        403
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Prevent Duplicate Submission
+    |--------------------------------------------------------------------------
+    */
+
+    if ($manuscript->status !== 'draft') {
+
+        return redirect()
+            ->route('author.dashboard')
+            ->with(
+                'error',
+                'This manuscript has already been submitted.'
             );
+    }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Final Submission
+    |--------------------------------------------------------------------------
+    */
+
+        DB::transaction(function () use (
+            $manuscript,
+            $technicalCheckService
+        ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Manuscript Status
+            |--------------------------------------------------------------------------
+            */
 
             $manuscript->update([
 
+                'status' => 'submitted',
 
-                'status'=>'submitted',
+                'completion_percentage' => 100,
 
+                'last_step' => 13,
 
-                'completion_percentage'=>100,
+                'submitted_at' => now(),
 
-
-                'last_step'=>13,
-
-
-                'submitted_at'=>now(),
-
+                'draft_saved_at' => null,
 
             ]);
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Create Technical Check #1
+            |--------------------------------------------------------------------------
+            */
 
-            return redirect()
+            $technicalCheckService->createForManuscript(
+                $manuscript
+            );
+        });
 
-                ->route(
-                    'author.dashboard'
-                )
 
-                ->with(
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
 
-                    'success',
+        return redirect()
 
-                    'Manuscript submitted successfully.'
+            ->route(
+                'author.dashboard'
+            )
 
-                );
-
-        }
+            ->with(
+                'success',
+                'Manuscript submitted successfully and sent for technical review.'
+            );
+    }
 
     /**
      * Convert keywords text to JSON array

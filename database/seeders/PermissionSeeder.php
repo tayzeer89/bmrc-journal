@@ -41,7 +41,10 @@ class PermissionSeeder extends Seeder
             'technical_check.assign',
             'technical_check.complete',
             'technical_check.return',
+            'technical_check.override',
             'technical_check.history',
+
+
 
             // Similarity
             'similarity.view',

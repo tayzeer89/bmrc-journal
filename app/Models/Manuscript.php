@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+
+
 class Manuscript extends Model
 {
     use HasFactory, SoftDeletes;
@@ -333,6 +335,12 @@ class Manuscript extends Model
     |--------------------------------------------------------------------------
     */
 
+    /*
+|--------------------------------------------------------------------------
+| Technical Checks
+|--------------------------------------------------------------------------
+*/
+
     public function technicalChecks(): HasMany
     {
         return $this->hasMany(
@@ -341,22 +349,14 @@ class Manuscript extends Model
         );
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Latest Technical Check
-    |--------------------------------------------------------------------------
-    */
-
     public function latestTechnicalCheck(): HasOne
     {
         return $this->hasOne(
             TechnicalCheck::class,
             'manuscript_id'
-        )->latestOfMany();
+        )->latestOfMany('check_number');
     }
-
-
+        
     /*
     |--------------------------------------------------------------------------
     | Draft Status

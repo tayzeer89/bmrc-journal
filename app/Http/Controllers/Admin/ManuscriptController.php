@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Manuscript;
-use Illuminate\Http\Request;
 
 class ManuscriptController extends Controller
 {
@@ -18,8 +17,13 @@ class ManuscriptController extends Controller
             403
         );
 
-        $manuscripts = Manuscript::latest()
-            ->paginate(20);
+        $manuscripts = Manuscript::with([
+            'articleType',
+            'journal',
+            'submitter',
+        ])
+        ->latest()
+        ->paginate(20);
 
         return view(
             'admin.manuscripts.index',
@@ -29,7 +33,7 @@ class ManuscriptController extends Controller
 
 
     /**
-     * Show Single Manuscript
+     * Show Manuscript
      */
     public function show(Manuscript $manuscript)
     {
@@ -37,6 +41,22 @@ class ManuscriptController extends Controller
             auth()->user()->can('manuscript.view'),
             403
         );
+
+        $manuscript->load([
+            'articleType',
+            'journal',
+            'submitter',
+            'details',
+            'authors',
+            'files',
+            'ethicalInformation',
+            'fundingInformation',
+            'conflictOfInterest',
+            'dataAvailability',
+            'acknowledgement',
+            'checklist',
+            'technicalChecks',
+        ]);
 
         return view(
             'admin.manuscripts.show',

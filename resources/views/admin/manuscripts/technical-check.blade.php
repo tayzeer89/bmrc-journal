@@ -89,7 +89,7 @@
 
                     <div class="fw-semibold mt-1">
 
-                        {{ $manuscript->article_type ?? '—' }}
+                       {{ $manuscript->articleType->name ?? 'N/A' }}
 
                     </div>
 
@@ -440,22 +440,13 @@
 
                         @if($technicalCheck->status !== 'passed')
 
-                            <button
+
+                           <button
                                 type="submit"
-                                formaction="{{ route(
-                                    'admin.manuscripts.technical-check.pass',
-                                    [
-                                        $manuscript,
-                                        $technicalCheck
-                                    ]
-                                ) }}"
+                                formaction="{{ route('admin.manuscripts.technical-check.complete', $technicalCheck) }}"
                                 formmethod="POST"
                                 class="btn btn-success">
-
-                                <i class="bi bi-check-circle me-1"></i>
-
-                                Pass Technical Check
-
+                                Complete Technical Check
                             </button>
 
                         @endif
@@ -488,13 +479,7 @@
 
             <form
                 method="POST"
-                action="{{ route(
-                    'admin.manuscripts.technical-check.return',
-                    [
-                        'manuscript' => $manuscript->id,
-                        'technicalCheck' => $technicalCheck->id,
-                    ]
-                ) }}">
+                action="{{ route('admin.manuscripts.technical-check.return', $technicalCheck) }}">
 
                 @csrf
 

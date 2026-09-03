@@ -48,7 +48,8 @@ return new class extends Migration
                 'pass',
                 'fail',
                 'na',
-            ])->default('pending');
+            ])
+                ->default('pending');
 
 
             /*
@@ -76,19 +77,25 @@ return new class extends Migration
                 ->nullable();
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Timestamps
+            |--------------------------------------------------------------------------
+            */
+
             $table->timestamps();
+
 
             /*
             |--------------------------------------------------------------------------
-            | Prevent duplicate checklist key
+            | Prevent Duplicate Checklist Key
             |--------------------------------------------------------------------------
             */
 
             $table->unique([
                 'technical_check_id',
-                'check_key'
+                'check_key',
             ]);
-
         });
     }
 

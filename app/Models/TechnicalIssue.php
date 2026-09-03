@@ -5,21 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TechnicalCheckItem extends Model
+class TechnicalIssue extends Model
 {
     protected $fillable = [
         'technical_check_id',
-        'check_key',
-        'check_name',
-        'sort_order',
-        'result',
-        'comment',
-        'checked_by',
-        'checked_at',
+        'technical_check_item_id',
+        'category',
+        'severity',
+        'description',
+        'required_action',
+        'status',
+        'created_by',
+        'resolved_by',
+        'resolved_at',
     ];
 
     protected $casts = [
-        'checked_at' => 'datetime',
+        'resolved_at' => 'datetime',
     ];
 
     /*
@@ -36,11 +38,27 @@ class TechnicalCheckItem extends Model
         );
     }
 
-    public function checkedBy(): BelongsTo
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(
+            TechnicalCheckItem::class,
+            'technical_check_item_id'
+        );
+    }
+
+    public function createdBy(): BelongsTo
     {
         return $this->belongsTo(
             User::class,
-            'checked_by'
+            'created_by'
+        );
+    }
+
+    public function resolvedBy(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'resolved_by'
         );
     }
 }

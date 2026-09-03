@@ -2,108 +2,64 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TechnicalCheck extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-
         'manuscript_id',
         'check_number',
         'status',
-
+        'overall_result',
         'assigned_to',
         'started_by',
         'completed_by',
-
         'started_at',
         'completed_at',
-
         'comments',
-
     ];
 
     protected $casts = [
-
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
-
     ];
 
-
     /*
     |--------------------------------------------------------------------------
-    | Manuscript
+    | Relationships
     |--------------------------------------------------------------------------
     */
 
-    public function manuscript()
+    public function manuscript(): BelongsTo
     {
-        return $this->belongsTo(
-            Manuscript::class
-        );
+        return $this->belongsTo(Manuscript::class);
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Assigned Officer
-    |--------------------------------------------------------------------------
-    */
-
-    public function assignedOfficer()
+    public function items(): HasMany
     {
-        return $this->belongsTo(
-            User::class,
-            'assigned_to'
-        );
+        return $this->hasMany(TechnicalCheckItem::class)
+            ->orderBy('sort_order');
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Started By
-    |--------------------------------------------------------------------------
-    */
-
-    public function startedBy()
+    public function issues(): HasMany
     {
-        return $this->belongsTo(
-            User::class,
-            'started_by'
-        );
+        return $this->hasMany(TechnicalIssue::class);
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Completed By
-    |--------------------------------------------------------------------------
-    */
-
-    public function completedBy()
+    public function assignedTo(): BelongsTo
     {
-        return $this->belongsTo(
-            User::class,
-            'completed_by'
-        );
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Checklist Items
-    |--------------------------------------------------------------------------
-    */
-
-    public function items()
+    public function startedBy(): BelongsTo
     {
-        return $this->hasMany(
-            TechnicalCheckItem::class
-        )->orderBy('sort_order');
+        return $this->belongsTo(User::class, 'started_by');
     }
 
+    public function completedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
 }
