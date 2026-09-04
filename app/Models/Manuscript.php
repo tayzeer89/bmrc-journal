@@ -80,6 +80,7 @@ class Manuscript extends Model
         */
 
         'status',
+        'current_stage',
         'submission_version',
         'submitted_at',
 
@@ -327,6 +328,22 @@ class Manuscript extends Model
             'manuscript_id'
         );
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Latest Payment
+    |--------------------------------------------------------------------------
+    */
+
+    public function latestPayment(): HasOne
+    {
+        return $this->hasOne(
+            Payment::class,
+            'manuscript_id'
+        )->latestOfMany();
+    }
+
 
 
     /*

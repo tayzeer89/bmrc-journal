@@ -127,13 +127,45 @@ return new class extends Migration
              | published
              */
 
+       $table->string('current_stage')
+                ->nullable()
+                ->index();
+
+            /*
+            | Current Stage examples:
+            |
+            | submission
+            | technical_review
+            | author_correction
+            | payment
+            | payment_correction
+            | editorial_assessment
+            | similarity_check
+            | peer_review
+            | revision
+            | decision
+            | copy_editing
+            | proofreading
+            | production
+            | publication
+            */
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 7. Submission Version
+            |--------------------------------------------------------------------------
+            */
+
+
             $table->string('submission_version')
                 ->default('1.0');
 
 
             /*
             |--------------------------------------------------------------------------
-            | 7. Draft Management
+            | 8. Draft Management
             |--------------------------------------------------------------------------
             */
 
@@ -149,7 +181,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 8. Final Submission
+            | 9. Final Submission
             |--------------------------------------------------------------------------
             */
 
@@ -159,7 +191,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 9. Timestamps
+            | 10. Timestamps
             |--------------------------------------------------------------------------
             */
 
@@ -168,7 +200,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 10. Soft Delete
+            | 11. Soft Delete
             |--------------------------------------------------------------------------
             */
 

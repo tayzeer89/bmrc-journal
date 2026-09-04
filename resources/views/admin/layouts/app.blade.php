@@ -472,26 +472,48 @@
             @endif
 
 
-            <!-- Finance -->
+          
+            {{-- =====================================================
+            PAYMENT
+            ====================================================== --}}
 
-            @can('payment.view')
-
-                <div class="sidebar-menu-title">
-                    Finance
-                </div>
+            <div class="sidebar-section">
+                Finance
+            </div>
 
 
-                <a href="#">
+            {{-- PAYMENT VERIFICATION --}}
 
-                    <i class="bi bi-credit-card"></i>
+            @can('payment.verify')
 
-                    <span>
-                        Payments
+                <a
+                    href="{{ route('admin.payments.verification.index') }}"
+                    class="nav-link
+                        {{ request()->routeIs('admin.payments.verification.*') ? 'active' : '' }}"
+                >
+
+                    <i class="bi bi-credit-card-2-front"></i>
+
+                    <span class="flex-grow-1">
+                        Payment Verification
                     </span>
+
+
+                    @if(($pendingPaymentVerificationCount ?? 0) > 0)
+
+                        <span
+                            class="badge bg-danger rounded-pill"
+                            title="Pending payment verification"
+                        >
+                            {{ $pendingPaymentVerificationCount }}
+                        </span>
+
+                    @endif
 
                 </a>
 
             @endcan
+
 
 
             <!-- Publication -->

@@ -12,112 +12,117 @@ class TechnicalCheckController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | Technical Check Checklist
+    | Technical Checklist
     |--------------------------------------------------------------------------
     */
 
-    private function checklist()
+    private function checklist(): array
     {
         return [
 
             [
-                'key'  => 'article_type',
+                'key' => 'article_type',
                 'name' => 'Article Type',
             ],
 
             [
-                'key'  => 'title',
-                'name' => 'Manuscript Title',
+                'key' => 'title',
+                'name' => 'Title',
             ],
 
             [
-                'key'  => 'abstract',
-                'name' => 'Abstract',
-            ],
-
-            [
-                'key'  => 'keywords',
-                'name' => 'Keywords',
-            ],
-
-            [
-                'key'  => 'authors',
+                'key' => 'author_information',
                 'name' => 'Author Information',
             ],
 
             [
-                'key'  => 'affiliations',
-                'name' => 'Author Affiliations',
+                'key' => 'abstract',
+                'name' => 'Abstract',
             ],
 
             [
-                'key'  => 'corresponding_author',
-                'name' => 'Corresponding Author',
+                'key' => 'keywords',
+                'name' => 'Keywords',
             ],
 
             [
-                'key'  => 'main_manuscript',
-                'name' => 'Main Manuscript File',
+                'key' => 'manuscript_file',
+                'name' => 'Manuscript File',
             ],
 
             [
-                'key'  => 'title_page',
-                'name' => 'Title Page',
+                'key' => 'blinding',
+                'name' => 'Blinding',
             ],
 
             [
-                'key'  => 'figures',
-                'name' => 'Figures',
+                'key' => 'manuscript_structure',
+                'name' => 'Manuscript Structure',
             ],
 
             [
-                'key'  => 'tables',
+                'key' => 'tables',
                 'name' => 'Tables',
             ],
 
             [
-                'key'  => 'references',
+                'key' => 'figures',
+                'name' => 'Figures',
+            ],
+
+            [
+                'key' => 'references',
                 'name' => 'References',
             ],
 
             [
-                'key'  => 'word_count',
-                'name' => 'Word Count',
+                'key' => 'ethics',
+                'name' => 'Ethical Approval / Research Ethics',
             ],
 
             [
-                'key'  => 'ethics',
-                'name' => 'Ethical Approval',
-            ],
-
-            [
-                'key'  => 'consent',
+                'key' => 'consent',
                 'name' => 'Informed Consent',
             ],
 
             [
-                'key'  => 'conflict_of_interest',
+                'key' => 'conflict_of_interest',
                 'name' => 'Conflict of Interest',
             ],
 
             [
-                'key'  => 'funding',
-                'name' => 'Funding Statement',
+                'key' => 'funding',
+                'name' => 'Funding Information',
             ],
 
             [
-                'key'  => 'author_contribution',
+                'key' => 'author_contribution',
                 'name' => 'Author Contribution',
             ],
 
             [
-                'key'  => 'data_availability',
+                'key' => 'data_availability',
                 'name' => 'Data Availability',
             ],
 
             [
-                'key'  => 'blinding',
-                'name' => 'Blinding / Author Identification',
+                'key' => 'trial_registration',
+                'name' => 'Trial Registration',
+            ],
+
+            [
+                'key' => 'submission_completeness',
+                'name' => 'Submission Completeness',
+            ],
+
+            [
+                'key' => 'declarations',
+                'name' => 'Declarations',
+            ],
+
+            [
+                'key' => 'acknowledgement',
+                'name' => 'Acknowledgement',
             ],
 
         ];
@@ -126,7 +131,7 @@ class TechnicalCheckController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Technical Review Dashboard
+    | Technical Review Queue
     |--------------------------------------------------------------------------
     */
 
@@ -139,9 +144,12 @@ class TechnicalCheckController extends Controller
 
         $technicalChecks = TechnicalCheck::with([
             'manuscript.articleType',
+            'assignedUser',
+            'startedBy',
+            'completedBy',
         ])
-        ->latest()
-        ->paginate(20);
+            ->latest()
+            ->paginate(20);
 
         return view(
             'admin.manuscripts.technical-review.index',
@@ -165,7 +173,12 @@ class TechnicalCheckController extends Controller
 
         $technicalCheck = $manuscript
             ->technicalChecks()
-            ->with('items')
+            ->with([
+                'items',
+                'assignedUser',
+                'startedBy',
+                'completedBy',
+            ])
             ->latest('check_number')
             ->first();
 
@@ -192,16 +205,58 @@ class TechnicalCheckController extends Controller
             403
         );
 
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent starting another check if one is already active
+        |--------------------------------------------------------------------------
+        */
+
+        $activeCheck = $manuscript
+            ->technicalChecks()
+            ->whereIn('status', [
+                'pending',
+                'in_progress',
+            ])
+            ->latest('check_number')
+            ->first();
+
+        if ($activeCheck) {
+
+            return redirect()
+                ->route(
+                    'admin.manuscripts.technical-check',
+                    $manuscript
+                )
+                ->with(
+                    'warning',
+                    'A technical check is already in progress.'
+                );
+        }
+
+
         DB::transaction(function () use ($manuscript) {
 
-            $previous = $manuscript
+            /*
+            |--------------------------------------------------------------------------
+            | Determine next check number
+            |--------------------------------------------------------------------------
+            */
+
+            $previousCheck = $manuscript
                 ->technicalChecks()
                 ->latest('check_number')
                 ->first();
 
-            $checkNumber = $previous
-                ? $previous->check_number + 1
+            $checkNumber = $previousCheck
+                ? $previousCheck->check_number + 1
                 : 1;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Technical Check
+            |--------------------------------------------------------------------------
+            */
 
             $technicalCheck = $manuscript
                 ->technicalChecks()
@@ -220,23 +275,45 @@ class TechnicalCheckController extends Controller
                 ]);
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Create Checklist Items
+            |--------------------------------------------------------------------------
+            */
+
             foreach ($this->checklist() as $index => $item) {
 
-                $technicalCheck->items()->create([
+                $technicalCheck
+                    ->items()
+                    ->create([
 
-                    'check_key' => $item['key'],
+                        'check_key' => $item['key'],
 
-                    'check_name' => $item['name'],
+                        'check_name' => $item['name'],
 
-                    'sort_order' => $index + 1,
+                        'sort_order' => $index + 1,
 
-                    'result' => 'pending',
+                        'result' => 'pending',
 
-                ]);
-
+                    ]);
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Manuscript Workflow
+            |--------------------------------------------------------------------------
+            */
+
+            $manuscript->update([
+
+                'status' => 'technical_check',
+
+                'current_stage' => 'technical_review',
+
+            ]);
         });
+
 
         return redirect()
             ->route(
@@ -252,7 +329,7 @@ class TechnicalCheckController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Update Checklist
+    | Update Technical Check
     |--------------------------------------------------------------------------
     */
 
@@ -260,12 +337,13 @@ class TechnicalCheckController extends Controller
         Request $request,
         TechnicalCheck $technicalCheck
     ) {
+
         abort_unless(
             auth()->user()->can('technical_check.perform'),
             403
         );
 
-        $validated = $request->validate([
+        $request->validate([
 
             'items' => [
                 'required',
@@ -274,70 +352,90 @@ class TechnicalCheckController extends Controller
 
             'items.*.result' => [
                 'required',
-                'in:pass,fail,na',
+                'in:pass,fail,pending',
             ],
 
-            'items.*.comment' => [
+            'items.*.comments' => [
                 'nullable',
                 'string',
-                'max:5000',
-            ],
-
-            'comments' => [
-                'nullable',
-                'string',
-                'max:10000',
             ],
 
         ]);
 
 
         DB::transaction(function () use (
-            $validated,
+            $request,
             $technicalCheck
         ) {
 
             foreach (
-                $validated['items']
-                as $itemId => $itemData
+                $request->input('items', [])
+                as $itemId => $data
             ) {
 
                 $item = $technicalCheck
                     ->items()
-                    ->findOrFail($itemId);
+                    ->find($itemId);
+
+                if (!$item) {
+                    continue;
+                }
 
                 $item->update([
 
-                    'result' =>
-                        $itemData['result'],
+                    'result' => $data['result'],
 
-                    'comment' =>
-                        $itemData['comment'] ?? null,
-
-                    'checked_by' =>
-                        auth()->id(),
-
-                    'checked_at' =>
-                        now(),
+                    'comments' =>
+                        $data['comments'] ?? null,
 
                 ]);
             }
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Determine Overall Result
+            |--------------------------------------------------------------------------
+            */
+
+            $failed = $technicalCheck
+                ->items()
+                ->where('result', 'fail')
+                ->exists();
+
+            $pending = $technicalCheck
+                ->items()
+                ->where('result', 'pending')
+                ->exists();
+
+
+           if ($failed) {
+
+                $overallResult = 'failed';
+
+            } elseif ($pending) {
+
+                $overallResult = null;
+
+            } else {
+
+                $overallResult = 'passed';
+            }
+
+
             $technicalCheck->update([
 
-                'comments' =>
-                    $validated['comments'] ?? null,
+                'overall_result' => $overallResult,
 
             ]);
-
         });
 
 
-        return back()->with(
-            'success',
-            'Technical check saved successfully.'
-        );
+        return back()
+            ->with(
+                'success',
+                'Technical checklist saved successfully.'
+            );
     }
 
 
@@ -351,6 +449,7 @@ class TechnicalCheckController extends Controller
         Request $request,
         TechnicalCheck $technicalCheck
     ) {
+
         abort_unless(
             auth()->user()->can('technical_check.complete'),
             403
@@ -358,8 +457,33 @@ class TechnicalCheckController extends Controller
 
         $manuscript = $technicalCheck->manuscript;
 
-        abort_unless($manuscript, 404);
+        abort_unless(
+            $manuscript,
+            404
+        );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cannot complete an already completed check
+        |--------------------------------------------------------------------------
+        */
+
+        if ($technicalCheck->status === 'passed') {
+
+            return back()
+                ->with(
+                    'warning',
+                    'This technical check has already been completed.'
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Failed Items
+        |--------------------------------------------------------------------------
+        */
 
         $failedItems = $technicalCheck
             ->items()
@@ -367,76 +491,75 @@ class TechnicalCheckController extends Controller
             ->count();
 
 
+        if ($failedItems > 0) {
+
+            return back()
+                ->with(
+                    'error',
+                    'Technical check cannot be completed because some items failed.'
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Pending Items
+        |--------------------------------------------------------------------------
+        */
+
         $pendingItems = $technicalCheck
             ->items()
             ->where('result', 'pending')
             ->count();
 
 
-        if ($failedItems > 0) {
-
-            return back()->with(
-                'error',
-                'Technical check cannot be completed because some items failed.'
-            );
-        }
-
-
         if ($pendingItems > 0) {
 
-            return back()->with(
-                'error',
-                'Please complete all technical check items first.'
-            );
+            return back()
+                ->with(
+                    'error',
+                    'Please complete all technical check items first.'
+                );
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Complete
+        |--------------------------------------------------------------------------
+        */
 
         DB::transaction(function () use (
             $manuscript,
             $technicalCheck
         ) {
-
             $technicalCheck->update([
-
-                'status' =>
-                    'passed',
-
-                'completed_by' =>
-                    auth()->id(),
-
-                'completed_at' =>
-                    now(),
-
+                'status' => 'passed',
+                'overall_result' => 'passed',
+                'completed_by' => auth()->id(),
+                'completed_at' => now(),
             ]);
-
 
             $manuscript->update([
-
-                'status' =>
-                    'technical_check_passed',
-
-                'current_stage' =>
-                    'similarity_check',
-
+                'status' => 'payment_setup',
+                'current_stage' => 'payment',
             ]);
-
         });
 
 
-        return redirect()
-            ->route(
-                'admin.manuscripts.technical-review.index'
-            )
-            ->with(
-                'success',
-                'Technical check completed successfully.'
-            );
+       return redirect()
+        ->route('admin.manuscripts.payment.index')
+        ->with(
+            'success',
+            'Technical check completed successfully. Manuscript moved to Payment Setup.'
+        );
+
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Return Manuscript to Author
+    | Return to Author
     |--------------------------------------------------------------------------
     */
 
@@ -444,54 +567,55 @@ class TechnicalCheckController extends Controller
         Request $request,
         TechnicalCheck $technicalCheck
     ) {
+
         abort_unless(
             auth()->user()->can('technical_check.return'),
             403
         );
 
-        $manuscript = $technicalCheck->manuscript;
-
-        abort_unless($manuscript, 404);
-
-
-        $validated = $request->validate([
+        $request->validate([
 
             'comments' => [
                 'required',
                 'string',
-                'max:10000',
+                'max:5000',
             ],
 
         ]);
 
 
-        DB::transaction(function () use (
+        $manuscript = $technicalCheck->manuscript;
+
+        abort_unless(
             $manuscript,
-            $technicalCheck,
-            $validated
+            404
+        );
+
+
+        DB::transaction(function () use (
+            $request,
+            $manuscript,
+            $technicalCheck
         ) {
 
             $technicalCheck->update([
 
-                'status' =>
-                    'correction_required',
+                'status' => 'correction_required',
 
-                'comments' =>
-                    $validated['comments'],
+                'overall_result' => 'fail',
+
+                'comments' => $request->comments,
 
             ]);
 
 
             $manuscript->update([
 
-                'status' =>
-                    'technical_correction',
+                'status' => 'technical_correction',
 
-                'current_stage' =>
-                    'author_correction',
+                'current_stage' => 'author_correction',
 
             ]);
-
         });
 
 
@@ -516,44 +640,71 @@ class TechnicalCheckController extends Controller
         Request $request,
         TechnicalCheck $technicalCheck
     ) {
+
         abort_unless(
             auth()->user()->can('technical_check.perform'),
             403
         );
 
+        $request->validate([
 
-        $validated = $request->validate([
+            'technical_check_item_id' => [
+                'nullable',
+                'exists:technical_check_items,id',
+            ],
+
+            'category' => [
+                'required',
+                'string',
+            ],
+
+            'severity' => [
+                'required',
+                'in:minor,major,critical',
+            ],
 
             'description' => [
                 'required',
                 'string',
-                'max:10000',
+            ],
+
+            'required_action' => [
+                'nullable',
+                'string',
             ],
 
         ]);
 
 
-        /*
-        |----------------------------------------------------------------------
-        | This method should be connected to your technical_issues table.
-        |----------------------------------------------------------------------
-        */
-
         $technicalCheck->issues()->create([
 
-            'description' =>
-                $validated['description'],
+            'technical_check_item_id' =>
+                $request->technical_check_item_id,
 
-            'reported_by' =>
-                auth()->id(),
+            'category' =>
+                $request->category,
+
+            'severity' =>
+                $request->severity,
+
+            'description' =>
+                $request->description,
+
+            'required_action' =>
+                $request->required_action,
+
+            'status' => 'open',
+
+            'created_by' => auth()->id(),
 
         ]);
 
 
-        return back()->with(
-            'success',
-            'Technical issue added successfully.'
-        );
+        return back()
+            ->with(
+                'success',
+                'Technical issue added successfully.'
+            );
     }
 
 
@@ -567,17 +718,16 @@ class TechnicalCheckController extends Controller
         Request $request,
         TechnicalCheck $technicalCheck
     ) {
+
         abort_unless(
             auth()->user()->can('technical_check.assign'),
             403
         );
 
-
-        $validated = $request->validate([
+        $request->validate([
 
             'assigned_to' => [
                 'required',
-                'integer',
                 'exists:users,id',
             ],
 
@@ -587,14 +737,15 @@ class TechnicalCheckController extends Controller
         $technicalCheck->update([
 
             'assigned_to' =>
-                $validated['assigned_to'],
+                $request->assigned_to,
 
         ]);
 
 
-        return back()->with(
-            'success',
-            'Technical check assigned successfully.'
-        );
+        return back()
+            ->with(
+                'success',
+                'Technical check assigned successfully.'
+            );
     }
 }

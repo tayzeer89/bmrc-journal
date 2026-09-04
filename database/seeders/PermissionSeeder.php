@@ -82,8 +82,10 @@ class PermissionSeeder extends Seeder
             // Payments
             'payment.view',
             'payment.create',
+            'payment.edit',
+            'payment.send',
             'payment.verify',
-            'payment.refund',
+            'payment.reject',
 
             // Finance Dashboard
             'finance.view',

@@ -58,9 +58,17 @@ class ManuscriptController extends Controller
             'technicalChecks',
         ]);
 
+        $technicalCheck = $manuscript
+            ->technicalChecks
+            ->sortByDesc('check_number')
+            ->first();
+
         return view(
             'admin.manuscripts.show',
-            compact('manuscript')
+            compact(
+                'manuscript',
+                'technicalCheck'
+            )
         );
     }
 }

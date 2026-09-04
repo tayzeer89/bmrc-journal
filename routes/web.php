@@ -32,6 +32,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TechnicalCheckController;
 use App\Http\Controllers\Admin\ManuscriptController;
+use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\PaymentVerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +48,7 @@ use App\Http\Controllers\Author\SubmissionController;
 use App\Http\Controllers\Author\DraftSubmissionController;
 use App\Http\Controllers\Author\MyManuscriptController;
 use App\Http\Controllers\Author\SubmittedManuscriptController;
-use App\Http\Controllers\Author\PaymentController;
+use App\Http\Controllers\Author\PaymentController as AuthorPaymentController;
 
 
 /*
@@ -495,41 +497,65 @@ Route::prefix('author')
     });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | My Manuscript
-    |--------------------------------------------------------------------------
-    */
+Route::middleware(['auth'])
+    ->prefix('author')
+    ->name('author.')
+    ->group(function () {
 
-        Route::middleware(['auth'])
-        ->prefix('author')
-        ->name('author.')
-        ->group(function(){
+        /*
+        |--------------------------------------------------------------------------
+        | My Manuscript
+        |--------------------------------------------------------------------------
+        */
 
+        Route::get(
+            '/manuscripts',
+            [
+                MyManuscriptController::class,
+                'index'
+            ]
+        )->name('manuscripts.index');
 
-            Route::get(
-                '/manuscripts',
-                [
-                    MyManuscriptController::class,
-                    'index'
-                ]
-            )
-            ->name('manuscripts.index');
-
-
-
-            Route::get(
-                '/manuscripts/{manuscript}',
-                [
-                    MyManuscriptController::class,
-                    'show'
-                ]
-            )
-            ->name('manuscripts.show');
+        Route::get(
+            '/manuscripts/{manuscript}',
+            [
+                MyManuscriptController::class,
+                'show'
+            ]
+        )->name('manuscripts.show');
 
 
-        });
+        /*
+        |--------------------------------------------------------------------------
+        | Author Payment
+        |--------------------------------------------------------------------------
+        */
 
+        Route::get(
+            '/payments',
+            [
+                AuthorPaymentController::class,
+                'index'
+            ]
+        )->name('payments.index');
+
+        Route::get(
+            '/payments/{payment}',
+            [
+                AuthorPaymentController::class,
+                'show'
+            ]
+        )->name('payments.show');
+
+        Route::post(
+            '/payments/{payment}/submit',
+            [
+                AuthorPaymentController::class,
+                'submit'
+            ]
+        )->name('payments.submit');
+
+    });
 
      /*
     |--------------------------------------------------------------------------
@@ -618,41 +644,34 @@ Route::prefix('author')
 
 
         /*
-        |--------------------------------------------------------------------------
-        | SUBMITTED MANUSCRIPTS
-        |--------------------------------------------------------------------------
-        */
+|--------------------------------------------------------------------------
+| SUBMITTED MANUSCRIPTS / AUTHOR PAYMENTS
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])
+    ->prefix('author')
+    ->name('author.')
+    ->group(function () {
+
+        Route::get(
+            '/payments',
+            [
+                AuthorPaymentController::class,
+                'index'
+            ]
+        )->name('payments.index');
 
 
-        Route::middleware(['auth'])
-        ->prefix('author')
-        ->name('author.')
-        ->group(function(){
+        Route::get(
+            '/payments/{payment}',
+            [
+                AuthorPaymentController::class,
+                'show'
+            ]
+        )->name('payments.show');
 
-
-            Route::get(
-                '/payments',
-                [
-                    PaymentController::class,
-                    'index'
-                ]
-            )
-            ->name('payments.index');
-
-
-
-            Route::get(
-                '/payments/{payment}',
-                [
-                    PaymentController::class,
-                    'show'
-                ]
-            )
-            ->name('payments.show');
-
-
-        });
-
+    });
 
 
     /*
@@ -1098,8 +1117,7 @@ Route::middleware('auth')->group(function () {
 
 });
 
-
-    Route::prefix('admin')
+Route::prefix('admin')
     ->name('admin.')
     ->middleware(['auth'])
     ->group(function () {
@@ -1118,14 +1136,6 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:manuscript.view');
 
 
-    Route::get(
-        '/manuscripts/{manuscript}',
-        [ManuscriptController::class, 'show']
-    )
-        ->name('manuscripts.show')
-        ->middleware('permission:manuscript.view');
-
-
     /*
     |--------------------------------------------------------------------------
     | Technical Review
@@ -1139,6 +1149,56 @@ Route::middleware('auth')->group(function () {
         ->name('manuscripts.technical-review.index')
         ->middleware('permission:technical_check.view');
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Management
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/manuscripts/payment',
+        [PaymentController::class, 'index']
+    )
+        ->name('manuscripts.payment.index')
+        ->middleware('permission:payment.view');
+
+
+    Route::get(
+        '/manuscripts/{manuscript}/payment/create',
+        [PaymentController::class, 'create']
+    )
+        ->name('manuscripts.payment.create')
+        ->middleware('permission:payment.create');
+
+
+    Route::post(
+        '/manuscripts/{manuscript}/payment',
+        [PaymentController::class, 'store']
+    )
+        ->name('manuscripts.payment.store')
+        ->middleware('permission:payment.create');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Manuscript Details
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/manuscripts/{manuscript}',
+        [ManuscriptController::class, 'show']
+    )
+        ->name('manuscripts.show')
+        ->middleware('permission:manuscript.view');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Technical Check
+    |--------------------------------------------------------------------------
+    */
 
     Route::get(
         '/manuscripts/{manuscript}/technical-check',
@@ -1201,4 +1261,100 @@ Route::middleware('auth')->group(function () {
         ->name('manuscripts.technical-check.assign')
         ->middleware('permission:technical_check.assign');
 
+
+   /*
+|--------------------------------------------------------------------------
+| Payment Details
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/payments/{payment}',
+    [PaymentController::class, 'show']
+)
+    ->whereNumber('payment')
+    ->name('payments.show')
+    ->middleware('permission:payment.view');
+
+Route::post(
+    '/payments/{payment}/send-to-author',
+    [PaymentController::class, 'sendToAuthor']
+)
+    ->whereNumber('payment')
+    ->name('payments.send-to-author')
+    ->middleware('permission:payment.send');
+
+
+/*
+|--------------------------------------------------------------------------
+| Payment Verification
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('payments')
+    ->name('payments.')
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verification Queue
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/verification',
+            [PaymentVerificationController::class, 'index']
+        )
+            ->name('verification.index')
+            ->middleware('permission:payment.verify');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verification Details
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/verification/{payment}',
+            [PaymentVerificationController::class, 'show']
+        )
+            ->whereNumber('payment')
+            ->name('verification.show')
+            ->middleware('permission:payment.verify');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verify Payment
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/verification/{payment}/verify',
+            [PaymentVerificationController::class, 'verify']
+        )
+            ->whereNumber('payment')
+            ->name('verification.verify')
+            ->middleware('permission:payment.verify');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reject Payment
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/verification/{payment}/reject',
+            [PaymentVerificationController::class, 'reject']
+        )
+            ->whereNumber('payment')
+            ->name('verification.reject')
+            ->middleware('permission:payment.verify');
+
+    });
+
 });
+
+  

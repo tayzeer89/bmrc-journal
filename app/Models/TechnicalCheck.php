@@ -15,51 +15,58 @@ class TechnicalCheck extends Model
         'overall_result',
         'assigned_to',
         'started_by',
-        'completed_by',
         'started_at',
+        'completed_by',
         'completed_at',
         'comments',
     ];
 
-    protected $casts = [
-        'started_at' => 'datetime',
-        'completed_at' => 'datetime',
-    ];
-
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
 
     public function manuscript(): BelongsTo
     {
         return $this->belongsTo(Manuscript::class);
     }
 
+
     public function items(): HasMany
     {
-        return $this->hasMany(TechnicalCheckItem::class)
-            ->orderBy('sort_order');
+        return $this->hasMany(
+            TechnicalCheckItem::class
+        );
     }
+
 
     public function issues(): HasMany
     {
-        return $this->hasMany(TechnicalIssue::class);
+        return $this->hasMany(
+            TechnicalIssue::class
+        );
     }
 
-    public function assignedTo(): BelongsTo
+
+    public function assignedUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'assigned_to');
+        return $this->belongsTo(
+            User::class,
+            'assigned_to'
+        );
     }
+
 
     public function startedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'started_by');
+        return $this->belongsTo(
+            User::class,
+            'started_by'
+        );
     }
+
 
     public function completedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'completed_by');
+        return $this->belongsTo(
+            User::class,
+            'completed_by'
+        );
     }
 }

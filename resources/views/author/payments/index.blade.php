@@ -1,161 +1,386 @@
 @extends('author.layouts.app')
 
-
-@section('title','My Payments')
-
+@section('title', 'My Payments')
 
 @section('content')
 
-
 <div class="container-fluid py-4">
 
+    {{-- Page Header --}}
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
 
-<h3 class="mb-4">
-My Payments & Invoices
-</h3>
+        <div>
+            <h3 class="mb-1 fw-bold">
+                My Payments & Invoices
+            </h3>
 
+            <p class="text-muted mb-0">
+                View your invoices and submit payment information.
+            </p>
+        </div>
 
-<div class="card shadow-sm">
+    </div>
 
 
-<div class="card-body">
+    {{-- Success Message --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            {{ session('success') }}
 
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+            </button>
+        </div>
+    @endif
 
-<table class="table table-bordered">
 
+    {{-- Error Message --}}
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ session('error') }}
 
-<thead>
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+            </button>
+        </div>
+    @endif
 
-<tr>
 
-<th>
-Invoice No
-</th>
+    <div class="card border-0 shadow-sm">
 
-<th>
-Manuscript
-</th>
+        <div class="card-body p-0">
 
-<th>
-Fee Type
-</th>
+            <div class="table-responsive">
 
-<th>
-Amount
-</th>
+                <table class="table table-hover align-middle mb-0">
 
-<th>
-Status
-</th>
+                    <thead class="table-light">
 
-<th>
-Action
-</th>
+                        <tr>
 
-</tr>
+                            <th class="px-3">
+                                Invoice No
+                            </th>
 
-</thead>
+                            <th>
+                                Manuscript
+                            </th>
 
+                            <th>
+                                Fee Type
+                            </th>
 
-<tbody>
+                            <th>
+                                Amount
+                            </th>
 
+                            <th>
+                                Payment Status
+                            </th>
 
-@forelse($payments as $payment)
+                            <th>
+                                Verification
+                            </th>
 
+                            <th class="text-center">
+                                Action
+                            </th>
 
-<tr>
+                        </tr>
 
+                    </thead>
 
-<td>
 
-{{ $payment->invoice_no }}
+                    <tbody>
 
-</td>
+                        @forelse($payments as $payment)
 
+                            <tr>
 
-<td>
+                                {{-- Invoice --}}
+                                <td class="px-3">
 
-{{ $payment->manuscript->title }}
+                                    <strong>
+                                        {{ $payment->invoice_no }}
+                                    </strong>
 
-</td>
+                                    @if($payment->payment_deadline)
 
+                                        <div class="small text-muted mt-1">
 
-<td>
+                                            Due:
+                                            {{ \Carbon\Carbon::parse($payment->payment_deadline)->format('d M Y') }}
 
-{{ $payment->fee_type }}
+                                        </div>
 
-</td>
+                                    @endif
 
+                                </td>
 
-<td>
 
-{{ number_format($payment->amount,2) }}
+                                {{-- Manuscript --}}
+                                <td>
 
-{{ $payment->currency }}
+                                    <div class="fw-semibold">
+                                        {{ Str::limit($payment->manuscript->title ?? 'N/A', 45) }}
+                                    </div>
 
-</td>
+                                    @if($payment->manuscript)
 
+                                        <small class="text-muted">
+                                            {{ $payment->manuscript->manuscript_id }}
+                                        </small>
 
-<td>
+                                    @endif
 
-<span class="badge bg-warning">
+                                </td>
 
-{{ ucfirst($payment->payment_status) }}
 
-</span>
+                                {{-- Fee Type --}}
+                                <td>
 
-</td>
+                                    {{ $payment->fee_type }}
 
+                                </td>
 
-<td>
 
+                                {{-- Amount --}}
+                                <td>
 
-<a href="{{route('author.payments.show',$payment->id)}}"
+                                    <strong>
+                                        {{ number_format($payment->amount, 2) }}
+                                    </strong>
 
-class="btn btn-sm btn-primary">
+                                    {{ $payment->currency }}
 
-View
+                                </td>
 
-</a>
 
+                                {{-- Payment Status --}}
+                                <td>
 
-</td>
+                                    @if($payment->payment_status === 'pending')
 
+                                        <span class="badge bg-warning text-dark">
+                                            Payment Required
+                                        </span>
 
-</tr>
+                                    @elseif($payment->payment_status === 'submitted')
 
+                                        <span class="badge bg-info">
+                                            Submitted
+                                        </span>
 
-@empty
+                                    @elseif($payment->payment_status === 'paid')
 
+                                        <span class="badge bg-success">
+                                            Paid
+                                        </span>
 
-<tr>
+                                    @elseif($payment->payment_status === 'rejected')
 
-<td colspan="6"
-class="text-center">
+                                        <span class="badge bg-danger">
+                                            Rejected
+                                        </span>
 
-No Payment Found
+                                    @elseif($payment->payment_status === 'cancelled')
 
-</td>
+                                        <span class="badge bg-secondary">
+                                            Cancelled
+                                        </span>
 
-</tr>
+                                    @else
 
+                                        <span class="badge bg-secondary">
+                                            {{ ucfirst($payment->payment_status) }}
+                                        </span>
 
-@endforelse
+                                    @endif
 
+                                </td>
 
-</tbody>
 
+                                {{-- Verification Status --}}
+                                <td>
 
-</table>
+                                    @if($payment->verification_status === 'verified')
 
+                                        <span class="badge bg-success">
+                                            Verified
+                                        </span>
+
+                                    @elseif($payment->verification_status === 'rejected')
+
+                                        <span class="badge bg-danger">
+                                            Rejected
+                                        </span>
+
+                                    @else
+
+                                        <span class="badge bg-secondary">
+                                            Pending
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- Actions --}}
+                                <td class="text-center">
+
+                                    <div class="d-flex justify-content-center gap-1 flex-wrap">
+
+
+                                        {{-- PAY NOW --}}
+                                        @if(
+                                            $payment->payment_status === 'pending' &&
+                                            $payment->manuscript &&
+                                            $payment->manuscript->status === 'payment_required'
+                                        )
+
+                                            <a
+                                                href="{{ route('author.payments.show', $payment->id) }}"
+                                                class="btn btn-sm btn-success"
+                                            >
+
+                                                <i class="bi bi-credit-card me-1"></i>
+
+                                                Pay Now
+
+                                            </a>
+
+
+                                        {{-- UPDATE PAYMENT --}}
+                                        @elseif(
+                                            $payment->payment_status === 'submitted' &&
+                                            $payment->verification_status === 'rejected'
+                                        )
+
+                                            <a
+                                                href="{{ route('author.payments.show', $payment->id) }}"
+                                                class="btn btn-sm btn-warning"
+                                            >
+
+                                                <i class="bi bi-pencil-square me-1"></i>
+
+                                                Update Payment
+
+                                            </a>
+
+
+                                        {{-- PAYMENT SUBMITTED --}}
+                                        @elseif($payment->payment_status === 'submitted')
+
+                                            <a
+                                                href="{{ route('author.payments.show', $payment->id) }}"
+                                                class="btn btn-sm btn-info text-white"
+                                            >
+
+                                                <i class="bi bi-eye me-1"></i>
+
+                                                View
+
+                                            </a>
+
+
+                                        {{-- VERIFIED --}}
+                                        @elseif(
+                                            $payment->payment_status === 'paid' &&
+                                            $payment->verification_status === 'verified'
+                                        )
+
+                                            <a
+                                                href="{{ route('author.payments.show', $payment->id) }}"
+                                                class="btn btn-sm btn-success"
+                                            >
+
+                                                <i class="bi bi-check-circle me-1"></i>
+
+                                                Paid
+
+                                            </a>
+
+
+                                        {{-- DEFAULT VIEW --}}
+                                        @else
+
+                                            <a
+                                                href="{{ route('author.payments.show', $payment->id) }}"
+                                                class="btn btn-sm btn-primary"
+                                            >
+
+                                                <i class="bi bi-eye me-1"></i>
+
+                                                View
+
+                                            </a>
+
+                                        @endif
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="text-center py-5"
+                                >
+
+                                    <div class="text-muted">
+
+                                        <i class="bi bi-receipt fs-1 d-block mb-3"></i>
+
+                                        <h5>
+                                            No Payments Found
+                                        </h5>
+
+                                        <p class="mb-0">
+                                            You don't have any payment invoices yet.
+                                        </p>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            {{-- Pagination --}}
+            @if(method_exists($payments, 'links'))
+
+                <div class="p-3">
+
+                    {{ $payments->links() }}
+
+                </div>
+
+            @endif
+
+        </div>
+
+    </div>
 
 </div>
-
-
-</div>
-
-
-</div>
-
 
 @endsection

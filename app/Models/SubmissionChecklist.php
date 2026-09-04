@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SubmissionChecklist extends Model
@@ -66,5 +68,21 @@ class SubmissionChecklist extends Model
             Manuscript::class
         );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Confirmed By
+    |--------------------------------------------------------------------------
+    */
+
+    public function confirmedBy(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'confirmed_by'
+        );
+    }
+
+
 
 }
