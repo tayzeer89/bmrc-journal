@@ -64,7 +64,7 @@ class AuthorProfile extends Model
 
         'available_for_editorial_communication' => 'boolean',
 
-        'profile_completed' => 'boolean',
+        'profile_completed' => 'integer',
 
         'approved_at' => 'datetime',
     ];

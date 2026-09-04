@@ -159,7 +159,18 @@ class AuthorAuthController extends Controller
 
                 'designation' => null,
 
-                'profile_completed' => false,
+                /*
+                |--------------------------------------------------------------------------
+                | Profile Completion
+                |--------------------------------------------------------------------------
+                | 0 = Not completed
+                | 33 = Step 1 completed
+                | 66 = Step 2 completed
+                | 100 = Step 3 completed
+                |--------------------------------------------------------------------------
+                */
+
+                'profile_completed' => 0,
 
             ]);
 
@@ -233,6 +244,12 @@ class AuthorAuthController extends Controller
 
         ]);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Only External Users Can Login Through Author Login
+        |--------------------------------------------------------------------------
+        */
 
         $credentials['user_type'] = 'external';
 
@@ -522,6 +539,20 @@ class AuthorAuthController extends Controller
             ]);
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Step 1 Completion
+            |--------------------------------------------------------------------------
+            */
+
+            $authorProfile->update([
+                'profile_completed' => max(
+                    (int) $authorProfile->profile_completed,
+                    33
+                ),
+            ]);
+
+
             DB::commit();
 
 
@@ -588,6 +619,12 @@ class AuthorAuthController extends Controller
         )->firstOrFail();
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Validation
+        |--------------------------------------------------------------------------
+        */
+
         $validated = $request->validate([
 
             'gender' => [
@@ -634,7 +671,50 @@ class AuthorAuthController extends Controller
         ]);
 
 
-        $authorProfile->update($validated);
+        /*
+        |--------------------------------------------------------------------------
+        | Update Profile
+        |--------------------------------------------------------------------------
+        */
+
+        $authorProfile->update([
+
+            'gender' =>
+                $validated['gender'] ?? null,
+
+            'date_of_birth' =>
+                $validated['date_of_birth'] ?? null,
+
+            'nationality' =>
+                $validated['nationality'] ?? null,
+
+            'division_state' =>
+                $validated['division_state'] ?? null,
+
+            'city_district' =>
+                $validated['city_district'] ?? null,
+
+            'postal_address' =>
+                $validated['postal_address'] ?? null,
+
+            'office_address' =>
+                $validated['office_address'] ?? null,
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 2 Completion
+        |--------------------------------------------------------------------------
+        */
+
+        $authorProfile->update([
+            'profile_completed' => max(
+                (int) $authorProfile->profile_completed,
+                66
+            ),
+        ]);
 
 
         return redirect()
@@ -681,7 +761,19 @@ class AuthorAuthController extends Controller
         )->firstOrFail();
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Validation
+        |--------------------------------------------------------------------------
+        */
+
         $validated = $request->validate([
+
+            /*
+            |--------------------------------------------------------------------------
+            | Professional Information
+            |--------------------------------------------------------------------------
+            */
 
             'institution' => [
                 'required',
@@ -725,6 +817,13 @@ class AuthorAuthController extends Controller
                 'max:2000',
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Research Identifiers
+            |--------------------------------------------------------------------------
+            */
+
             'orcid' => [
                 'nullable',
                 'string',
@@ -755,10 +854,50 @@ class AuthorAuthController extends Controller
                 'max:2000',
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Preferred Communication Method
+            |--------------------------------------------------------------------------
+            */
+
+            'preferred_communication_method' => [
+                'nullable',
+                'string',
+                'max:50',
+                'in:Email,Mobile,Both',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Editorial Communication
+            |--------------------------------------------------------------------------
+            */
+
+            'available_for_editorial_communication' => [
+                'nullable',
+                'boolean',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Profile Declaration
+            |--------------------------------------------------------------------------
+            */
+
             'profile_declaration' => [
                 'required',
                 'accepted',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Action
+            |--------------------------------------------------------------------------
+            */
 
             'action' => [
                 'required',
@@ -770,11 +909,17 @@ class AuthorAuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Update Professional Information
+        | Update Author Profile
         |--------------------------------------------------------------------------
         */
 
         $authorProfile->update([
+
+            /*
+            |--------------------------------------------------------------------------
+            | Professional Information
+            |--------------------------------------------------------------------------
+            */
 
             'institution' =>
                 $validated['institution'],
@@ -797,6 +942,13 @@ class AuthorAuthController extends Controller
             'research_interest' =>
                 $validated['research_interest'] ?? null,
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Research Identifiers
+            |--------------------------------------------------------------------------
+            */
+
             'orcid' =>
                 $validated['orcid'] ?? null,
 
@@ -811,6 +963,29 @@ class AuthorAuthController extends Controller
 
             'google_scholar_profile' =>
                 $validated['google_scholar_profile'] ?? null,
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | IMPORTANT:
+            | Preferred Communication Method
+            |--------------------------------------------------------------------------
+            */
+
+            'preferred_communication_method' =>
+                $validated['preferred_communication_method'] ?? null,
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Available for Editorial Communication
+            |--------------------------------------------------------------------------
+            */
+
+            'available_for_editorial_communication' =>
+                $request->boolean(
+                    'available_for_editorial_communication'
+                ),
 
         ]);
 
@@ -840,7 +1015,7 @@ class AuthorAuthController extends Controller
 
         $authorProfile->update([
 
-            'profile_completed' => true,
+            'profile_completed' => 100,
 
         ]);
 
@@ -888,6 +1063,12 @@ class AuthorAuthController extends Controller
             Auth::id()
         )->firstOrFail();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validation
+        |--------------------------------------------------------------------------
+        */
 
         $validated = $request->validate([
 
@@ -1059,6 +1240,30 @@ class AuthorAuthController extends Controller
                 'max:2000',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Preferred Communication Method
+            |--------------------------------------------------------------------------
+            */
+
+            'preferred_communication_method' => [
+                'nullable',
+                'string',
+                'max:50',
+                'in:Email,Mobile,Both',
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Editorial Communication
+            |--------------------------------------------------------------------------
+            */
+
+            'available_for_editorial_communication' => [
+                'nullable',
+                'boolean',
+            ],
+
         ]);
 
 
@@ -1154,6 +1359,26 @@ class AuthorAuthController extends Controller
 
                 'google_scholar_profile' =>
                     $validated['google_scholar_profile'] ?? null,
+
+                /*
+                |--------------------------------------------------------------------------
+                | Preferred Communication Method
+                |--------------------------------------------------------------------------
+                */
+
+                'preferred_communication_method' =>
+                    $validated['preferred_communication_method'] ?? null,
+
+                /*
+                |--------------------------------------------------------------------------
+                | Editorial Communication
+                |--------------------------------------------------------------------------
+                */
+
+                'available_for_editorial_communication' =>
+                    $request->boolean(
+                        'available_for_editorial_communication'
+                    ),
 
             ]);
 

@@ -1261,7 +1261,10 @@
          NO TECHNICAL CHECK
     ========================================================== --}}
 
-    @if(!$technicalCheck)
+    @if(
+    !$technicalCheck ||
+    in_array($technicalCheck->status, ['correction_required', 'failed'], true)
+    )
 
         <div class="tc-card">
 
@@ -1554,12 +1557,12 @@
 
                                             <input
                                                 type="text"
-                                                name="items[{{ $item->id }}][comments]"
+                                                name="items[{{ $item->id }}][comment]"
                                                 value="{{ old(
-                                                    'items.' . $item->id . '.comments',
-                                                    $item->comments
+                                                    'items.' . $item->id . '.comment',
+                                                    $item->comment
                                                 ) }}"
-                                                class="form-control form-control-sm comment-input"
+                                                class="form-control form-control-sm"
                                                 placeholder="Optional comment"
                                                 {{ !$canEditChecklist ? 'disabled' : '' }}>
 

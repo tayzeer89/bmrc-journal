@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\ManuscriptVersion;
 
 
 
@@ -313,6 +314,21 @@ class Manuscript extends Model
             'manuscript_id'
         );
     }
+
+     /*
+    |--------------------------------------------------------------------------
+    | Versions
+    |--------------------------------------------------------------------------
+    */
+
+        public function versions(): HasMany
+        {
+            return $this->hasMany(
+                ManuscriptVersion::class,
+                'manuscript_id'
+            );
+        }
+
 
 
     /*

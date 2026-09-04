@@ -1609,9 +1609,11 @@
 
                         <span class="summary-value">
 
-                            {{ $technicalCheck->completed_at
-                                ? $technicalCheck->completed_at->format('d M Y, h:i A')
-                                : '—' }}
+                          
+                        {{ $technicalCheck->completed_at
+                            ? \Carbon\Carbon::parse($technicalCheck->completed_at)->format('d M Y')
+                            : '—'
+                        }}
 
                         </span>
 

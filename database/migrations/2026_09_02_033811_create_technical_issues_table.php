@@ -12,6 +12,7 @@ return new class extends Migration
 
             $table->id();
 
+
             /*
             |--------------------------------------------------------------------------
             | Technical Check
@@ -20,7 +21,8 @@ return new class extends Migration
 
             $table->foreignId('technical_check_id')
                 ->constrained('technical_checks')
-                ->cascadeOnDelete();
+                ->cascadeOnDelete()
+                ->index();
 
 
             /*
@@ -33,6 +35,22 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('technical_check_items')
                 ->nullOnDelete();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | EXACT Uploaded Manuscript File
+            |--------------------------------------------------------------------------
+            |
+            | This identifies the exact uploaded file that needs correction.
+            |
+            */
+
+            $table->foreignId('manuscript_file_id')
+                ->nullable()
+                ->constrained('manuscript_files')
+                ->nullOnDelete()
+                ->index();
 
 
             /*
@@ -89,7 +107,7 @@ return new class extends Migration
 
                 'other',
 
-            ]);
+            ])->index();
 
 
             /*
@@ -103,7 +121,8 @@ return new class extends Migration
                 'major',
                 'critical',
             ])
-                ->default('minor');
+                ->default('minor')
+                ->index();
 
 
             /*
@@ -183,6 +202,7 @@ return new class extends Migration
             $table->timestamps();
         });
     }
+
 
     public function down(): void
     {

@@ -12,6 +12,7 @@ return new class extends Migration
 
             $table->id();
 
+
             /*
             |--------------------------------------------------------------------------
             | Manuscript
@@ -20,7 +21,8 @@ return new class extends Migration
 
             $table->foreignId('manuscript_id')
                 ->constrained('manuscripts')
-                ->cascadeOnDelete();
+                ->cascadeOnDelete()
+                ->index();
 
 
             /*
@@ -42,13 +44,21 @@ return new class extends Migration
                 ->default('pending')
                 ->index();
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Overall Result
+            |--------------------------------------------------------------------------
+            */
+
             $table->enum('overall_result', [
                 'passed',
                 'passed_with_minor_corrections',
                 'correction_required',
                 'failed',
             ])
-                ->nullable();
+                ->nullable()
+                ->index();
 
 
             /*
@@ -107,16 +117,8 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | Prevent Duplicate Check Number
+            | One Check Number Per Manuscript
             |--------------------------------------------------------------------------
-            |
-            | Example:
-            |
-            | Manuscript #101
-            |   Check #1
-            |   Check #2
-            |   Check #3
-            |
             */
 
             $table->unique([
@@ -125,6 +127,7 @@ return new class extends Migration
             ]);
         });
     }
+
 
     public function down(): void
     {

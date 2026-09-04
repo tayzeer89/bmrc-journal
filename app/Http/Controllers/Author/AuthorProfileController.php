@@ -353,6 +353,76 @@ class AuthorProfileController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | CALCULATE PROFILE COMPLETION
+        |--------------------------------------------------------------------------
+        |
+        | These fields determine the Profile Completion percentage.
+        |
+        */
+
+        $completionFields = [
+
+            'first_name',
+            'last_name',
+            'display_name',
+            'mobile',
+            'country',
+            'institution',
+            'department',
+            'designation',
+            'orcid',
+            'research_interest',
+
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COUNT COMPLETED FIELDS
+        |--------------------------------------------------------------------------
+        */
+
+        $completedFields = 0;
+
+        foreach ($completionFields as $field) {
+
+            if (
+                filled(
+                    $authorProfile->getAttribute($field)
+                )
+            ) {
+                $completedFields++;
+            }
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CALCULATE PERCENTAGE
+        |--------------------------------------------------------------------------
+        */
+
+        $profileCompletion = count($completionFields) > 0
+            ? round(
+                ($completedFields / count($completionFields)) * 100
+            )
+            : 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAVE PROFILE COMPLETION
+        |--------------------------------------------------------------------------
+        */
+
+        $authorProfile->update([
+            'profile_completed' => $profileCompletion,
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
         | UPDATE USERS TABLE
         |--------------------------------------------------------------------------
         */

@@ -60,5 +60,12 @@ class ManuscriptFile extends Model
         );
     }
 
+    public function technicalIssues()
+    {
+    return $this->hasMany(
+    TechnicalIssue::class,
+    'manuscript_file_id'
+    );
+    }
 
 }

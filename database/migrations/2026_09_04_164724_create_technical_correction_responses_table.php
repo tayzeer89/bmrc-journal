@@ -6,77 +6,85 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Create technical correction responses table.
+     *
+     * This table stores the author's response to a failed
+     * technical check.
+     */
     public function up(): void
     {
-        Schema::create('technical_check_items', function (Blueprint $table) {
+        Schema::create('technical_correction_responses', function (Blueprint $table) {
 
             $table->id();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Manuscript
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('manuscript_id')
+                ->constrained('manuscripts')
+                ->cascadeOnDelete();
 
 
             /*
             |--------------------------------------------------------------------------
             | Technical Check
             |--------------------------------------------------------------------------
+            |
+            | This identifies which technical check the author is responding to.
+            |
             */
 
             $table->foreignId('technical_check_id')
                 ->constrained('technical_checks')
-                ->cascadeOnDelete()
-                ->index();
+                ->cascadeOnDelete();
 
 
             /*
             |--------------------------------------------------------------------------
-            | Checklist Information
+            | Version
             |--------------------------------------------------------------------------
+            |
+            | The corrected submission/version created by the author.
+            |
             */
 
-            $table->string('check_key');
-
-            $table->string('check_name');
-
-            $table->unsignedInteger('sort_order')
-                ->default(0);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Result
-            |--------------------------------------------------------------------------
-            */
-
-            $table->enum('result', [
-                'pending',
-                'pass',
-                'fail',
-                'na',
-            ])
-                ->default('pending')
-                ->index();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Officer Comment
-            |--------------------------------------------------------------------------
-            */
-
-            $table->text('comment')
-                ->nullable();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Checked By
-            |--------------------------------------------------------------------------
-            */
-
-            $table->foreignId('checked_by')
+            $table->foreignId('manuscript_version_id')
                 ->nullable()
-                ->constrained('users')
+                ->constrained('manuscript_versions')
                 ->nullOnDelete();
 
-            $table->timestamp('checked_at')
+
+            /*
+            |--------------------------------------------------------------------------
+            | Author
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('submitted_by')
+                ->constrained('users')
+                ->restrictOnDelete();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Author Response
+            |--------------------------------------------------------------------------
+            */
+
+            $table->text('response')->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Submission Time
+            |--------------------------------------------------------------------------
+            */
+
+            $table->timestamp('submitted_at')
                 ->nullable();
 
 
@@ -91,20 +99,23 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | Prevent Duplicate Checklist Key
+            | Indexes
             |--------------------------------------------------------------------------
             */
 
-            $table->unique([
+            $table->index([
+                'manuscript_id',
                 'technical_check_id',
-                'check_key',
             ]);
         });
     }
 
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('technical_check_items');
+        Schema::dropIfExists('technical_correction_responses');
     }
 };

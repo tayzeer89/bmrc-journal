@@ -1,394 +1,307 @@
+{{--
+|--------------------------------------------------------------------------
+| Author Profile - Step 2: Personal Information
+|--------------------------------------------------------------------------
+| File:
+| resources/views/author/profile/step2.blade.php
+|
+| Purpose:
+| Collect the author's personal and contact information.
+|--------------------------------------------------------------------------
+--}}
+
 @extends('author.layouts.app')
 
-@section('title', 'Author Profile - Personal Information')
+@section('title', 'Personal Information')
 
 @section('content')
 
-<div class="container-fluid py-4">
-
-{{-- Page Header --}}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="fw-bold mb-1">Author Profile</h2>
-        <p class="text-muted mb-0">
-            Complete your personal information
-        </p>
-    </div>
-
-    <span class="badge bg-primary px-3 py-2">
-        Step 2 of 3
-    </span>
-</div>
-
-
-{{-- Progress --}}
 @php
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 1 COMPLETION
+    |--------------------------------------------------------------------------
+    */
+
     $step1Complete =
-        !empty($authorProfile->title) &&
-        !empty($authorProfile->first_name) &&
-        !empty($authorProfile->last_name) &&
-        !empty($authorProfile->display_name) &&
-        !empty($authorProfile->mobile) &&
-        !empty($authorProfile->country) &&
-        !empty($authorProfile->institution) &&
-        !empty($authorProfile->department) &&
-        !empty($authorProfile->designation);
+        filled($authorProfile?->title) &&
+        filled($authorProfile?->first_name) &&
+        filled($authorProfile?->last_name) &&
+        filled($authorProfile?->display_name) &&
+        filled($authorProfile?->mobile) &&
+        filled($authorProfile?->country) &&
+        filled($authorProfile?->institution) &&
+        filled($authorProfile?->department) &&
+        filled($authorProfile?->designation);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 2 COMPLETION
+    |--------------------------------------------------------------------------
+    */
 
     $step2Complete =
-        !empty($authorProfile->gender) &&
-        !empty($authorProfile->date_of_birth) &&
-        !empty($authorProfile->nationality) &&
-        !empty($authorProfile->division_state) &&
-        !empty($authorProfile->city_district) &&
-        !empty($authorProfile->postal_address);
+        filled($authorProfile?->gender) &&
+        filled($authorProfile?->date_of_birth) &&
+        filled($authorProfile?->nationality) &&
+        filled($authorProfile?->division_state) &&
+        filled($authorProfile?->city_district) &&
+        filled($authorProfile?->postal_address);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 3 COMPLETION
+    |--------------------------------------------------------------------------
+    */
 
     $step3Complete =
-        !empty($authorProfile->institution) &&
-        !empty($authorProfile->department) &&
-        !empty($authorProfile->designation) &&
-        $authorProfile->profile_completed;
+        ((int) ($authorProfile?->profile_completed ?? 0)) === 100;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE COMPLETION
+    |--------------------------------------------------------------------------
+    */
 
     if ($step3Complete) {
+
         $completion = 100;
+
     } elseif ($step2Complete) {
+
         $completion = 66;
+
     } elseif ($step1Complete) {
+
         $completion = 33;
+
     } else {
+
         $completion = 0;
+
     }
+
 @endphp
 
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
 
-        <div class="d-flex justify-content-between mb-2">
-            <span class="fw-semibold">
-                Profile Completion
-            </span>
+<div class="container-fluid py-4">
 
-            <span class="text-primary fw-semibold">
-                {{ $completion }}%
-            </span>
-        </div>
+    {{-- ================================================================
+         PAGE HEADER
+    ================================================================= --}}
 
-        <div class="progress" style="height: 8px;">
-            <div class="progress-bar
-                {{ $completion == 100 ? 'bg-success' : '' }}"
-                role="progressbar"
-                style="width: {{ $completion }}%;"
-                aria-valuenow="{{ $completion }}"
-                aria-valuemin="0"
-                aria-valuemax="100">
-            </div>
-        </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
-        <div class="d-flex flex-wrap justify-content-between mt-3 small gap-2">
+        <div>
 
-            {{-- Step 1 --}}
-            <span class="{{ $step1Complete ? 'text-success fw-semibold' : 'text-primary fw-semibold' }}">
+            <h4 class="fw-bold mb-1">
 
-                @if($step1Complete)
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                @else
-                    <i class="bi bi-circle-fill me-1"></i>
-                @endif
-
-                1. Minimum Information
-            </span>
-
-            {{-- Step 2 --}}
-            <span class="{{ $step2Complete ? 'text-success fw-semibold' : 'text-muted' }}">
-
-                @if($step2Complete)
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                @else
-                    <i class="bi bi-circle me-1"></i>
-                @endif
-
-                2. Personal Information
-            </span>
-
-            {{-- Step 3 --}}
-            <span class="{{ $step3Complete ? 'text-success fw-semibold' : 'text-muted' }}">
-
-                @if($step3Complete)
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                @else
-                    <i class="bi bi-circle me-1"></i>
-                @endif
-
-                3. Professional Information
-            </span>
-
-        </div>
-
-    </div>
-</div>
-
-
-{{-- Validation Errors --}}
-@if ($errors->any())
-
-    <div class="alert alert-danger">
-        <strong>Please correct the following errors:</strong>
-
-        <ul class="mb-0 mt-2">
-
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-
-        </ul>
-    </div>
-
-@endif
-
-
-{{-- Success Message --}}
-@if(session('success'))
-
-    <div class="alert alert-success">
-        <i class="bi bi-check-circle me-1"></i>
-        {{ session('success') }}
-    </div>
-
-@endif
-
-
-{{-- Personal Information Form --}}
-<form method="POST"
-      action="{{ route('author.profile.step2.update') }}">
-
-    @csrf
-    @method('PATCH')
-
-
-    {{-- =========================
-         PERSONAL INFORMATION
-    ========================== --}}
-
-    <div class="card border-0 shadow-sm mb-4">
-
-        <div class="card-header bg-white">
-
-            <h5 class="mb-0 fw-semibold">
-
-                <i class="bi bi-person text-primary me-2"></i>
+                <i class="bi bi-person-vcard me-2"></i>
 
                 Personal Information
 
-            </h5>
+            </h4>
 
-            <small class="text-muted">
-                Provide your personal information.
-            </small>
+            <p class="text-muted mb-0">
 
-        </div>
+                Step 2 of 3 — Complete your personal information.
 
-
-        <div class="card-body p-4">
-
-            <div class="row g-3">
-
-
-                {{-- Date of Birth --}}
-                <div class="col-md-6">
-
-                    <label class="form-label fw-semibold">
-                        Date of Birth
-                    </label>
-
-                    <input type="date"
-                           name="date_of_birth"
-                           class="form-control"
-                           value="{{ old('date_of_birth', $authorProfile->date_of_birth ?? '') }}">
-
-                </div>
-
-
-                {{-- Gender --}}
-                <div class="col-md-6">
-
-                    <label class="form-label fw-semibold">
-                        Gender
-                    </label>
-
-                    <select name="gender"
-                            class="form-select">
-
-                        <option value="">
-                            Select Gender
-                        </option>
-
-                        <option value="Male"
-                            {{ old('gender', $authorProfile->gender ?? '') == 'Male' ? 'selected' : '' }}>
-                            Male
-                        </option>
-
-                        <option value="Female"
-                            {{ old('gender', $authorProfile->gender ?? '') == 'Female' ? 'selected' : '' }}>
-                            Female
-                        </option>
-
-                        <option value="Other"
-                            {{ old('gender', $authorProfile->gender ?? '') == 'Other' ? 'selected' : '' }}>
-                            Other
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                {{-- Nationality --}}
-                <div class="col-md-6">
-
-                    <label class="form-label fw-semibold">
-                        Nationality
-                    </label>
-
-                    <input type="text"
-                           name="nationality"
-                           class="form-control"
-                           value="{{ old('nationality', $authorProfile->nationality ?? 'Bangladeshi') }}"
-                           placeholder="Nationality">
-
-                </div>
-
-
-                {{-- Country --}}
-                <div class="col-md-6">
-
-                    <label class="form-label fw-semibold">
-                        Country
-                    </label>
-
-                    <select name="country"
-                            class="form-select">
-
-                        <option value="">
-                            Select Country
-                        </option>
-
-                        <option value="Bangladesh"
-                            {{ old('country', $authorProfile->country ?? '') == 'Bangladesh' ? 'selected' : '' }}>
-                            Bangladesh
-                        </option>
-
-                        <option value="India"
-                            {{ old('country', $authorProfile->country ?? '') == 'India' ? 'selected' : '' }}>
-                            India
-                        </option>
-
-                        <option value="Pakistan"
-                            {{ old('country', $authorProfile->country ?? '') == 'Pakistan' ? 'selected' : '' }}>
-                            Pakistan
-                        </option>
-
-                        <option value="Nepal"
-                            {{ old('country', $authorProfile->country ?? '') == 'Nepal' ? 'selected' : '' }}>
-                            Nepal
-                        </option>
-
-                        <option value="Other"
-                            {{ old('country', $authorProfile->country ?? '') == 'Other' ? 'selected' : '' }}>
-                            Other
-                        </option>
-
-                    </select>
-
-                </div>
-
-            </div>
+            </p>
 
         </div>
+
+
+        <a
+            href="{{ route('author.dashboard') }}"
+            class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+
+            Dashboard
+
+        </a>
 
     </div>
 
 
-    {{-- =========================
-         LOCATION INFORMATION
-    ========================== --}}
+    {{-- ================================================================
+         PROFILE PROGRESS
+    ================================================================= --}}
 
     <div class="card border-0 shadow-sm mb-4">
 
-        <div class="card-header bg-white">
+        <div class="card-body">
 
-            <h5 class="mb-0 fw-semibold">
+            {{-- Progress Header --}}
 
-                <i class="bi bi-geo-alt text-primary me-2"></i>
+            <div class="d-flex justify-content-between align-items-center mb-2">
 
-                Location Information
+                <div>
 
-            </h5>
+                    <span class="fw-semibold">
 
-        </div>
+                        Profile Completion
 
+                    </span>
 
-        <div class="card-body p-4">
+                    <small class="text-muted ms-2">
 
-            <div class="row g-3">
+                        Step 2 of 3
 
-
-                {{-- Division --}}
-                <div class="col-md-6">
-
-                    <label class="form-label fw-semibold">
-                        Division / State
-                    </label>
-
-                    <input type="text"
-                           name="division_state"
-                           class="form-control"
-                           value="{{ old('division_state', $authorProfile->division_state ?? '') }}"
-                           placeholder="e.g. Dhaka">
+                    </small>
 
                 </div>
 
 
-                {{-- District --}}
-                <div class="col-md-6">
+                <span class="fw-bold text-primary">
 
-                    <label class="form-label fw-semibold">
-                        City / District
-                    </label>
+                    {{ $completion }}%
 
-                    <input type="text"
-                           name="city_district"
-                           class="form-control"
-                           value="{{ old('city_district', $authorProfile->city_district ?? '') }}"
-                           placeholder="e.g. Dhaka">
+                </span>
+
+            </div>
+
+
+            {{-- Progress Bar --}}
+
+            <div
+                class="progress"
+                style="height: 10px;">
+
+                <div
+                    class="progress-bar"
+                    role="progressbar"
+                    style="width: {{ $completion }}%;"
+                    aria-valuenow="{{ $completion }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100">
+
+                </div>
+
+            </div>
+
+
+            {{-- ========================================================
+                 STEP INDICATORS
+            ========================================================= --}}
+
+            <div class="row text-center mt-4">
+
+                {{-- ====================================================
+                     STEP 1
+                ===================================================== --}}
+
+                <div class="col-4">
+
+                    <div class="mb-2">
+
+                        @if($step1Complete)
+
+                            <span
+                                class="badge rounded-pill bg-success px-3 py-2">
+
+                                <i class="bi bi-check-lg me-1"></i>
+
+                                Step 1
+
+                            </span>
+
+                        @else
+
+                            <span
+                                class="badge rounded-pill bg-secondary px-3 py-2">
+
+                                Step 1
+
+                            </span>
+
+                        @endif
+
+                    </div>
+
+
+                    <small
+                        class="{{ $step1Complete ? 'fw-semibold text-success' : 'text-muted' }}">
+
+                        Minimum Information
+
+                    </small>
 
                 </div>
 
 
-                {{-- Postal Address --}}
-                <div class="col-md-12">
+                {{-- ====================================================
+                     STEP 2 - CURRENT
+                ===================================================== --}}
 
-                    <label class="form-label fw-semibold">
-                        Postal Address
-                    </label>
+                <div class="col-4">
 
-                    <textarea name="postal_address"
-                              rows="3"
-                              class="form-control"
-                              placeholder="Enter your postal address">{{ old('postal_address', $authorProfile->postal_address ?? '') }}</textarea>
+                    <div class="mb-2">
+
+                        <span
+                            class="badge rounded-pill bg-primary px-3 py-2">
+
+                            <i class="bi bi-pencil me-1"></i>
+
+                            Step 2
+
+                        </span>
+
+                    </div>
+
+
+                    <small class="fw-semibold text-primary">
+
+                        Personal Information
+
+                    </small>
 
                 </div>
 
 
-                {{-- Office Address --}}
-                <div class="col-md-12">
+                {{-- ====================================================
+                     STEP 3
+                ===================================================== --}}
 
-                    <label class="form-label fw-semibold">
-                        Office Address
-                    </label>
+                <div class="col-4">
 
-                    <textarea name="office_address"
-                              rows="3"
-                              class="form-control"
-                              placeholder="Enter your office address">{{ old('office_address', $authorProfile->office_address ?? '') }}</textarea>
+                    <div class="mb-2">
+
+                        @if($step3Complete)
+
+                            <span
+                                class="badge rounded-pill bg-success px-3 py-2">
+
+                                <i class="bi bi-check-lg me-1"></i>
+
+                                Step 3
+
+                            </span>
+
+                        @else
+
+                            <span
+                                class="badge rounded-pill bg-secondary px-3 py-2">
+
+                                Step 3
+
+                            </span>
+
+                        @endif
+
+                    </div>
+
+
+                    <small
+                        class="{{ $step3Complete ? 'fw-semibold text-success' : 'text-muted' }}">
+
+                        Professional Information
+
+                    </small>
 
                 </div>
 
@@ -399,62 +312,313 @@
     </div>
 
 
-    {{-- =========================
-         IDENTIFICATION
-    ========================== --}}
+    {{-- ================================================================
+         VALIDATION ERRORS
+    ================================================================= --}}
 
-    <div class="card border-0 shadow-sm mb-4">
+    @if($errors->any())
 
-        <div class="card-header bg-white">
+        <div
+            class="alert alert-danger alert-dismissible fade show shadow-sm">
 
-            <h5 class="mb-0 fw-semibold">
+            <div class="fw-bold mb-2">
 
-                <i class="bi bi-card-text text-primary me-2"></i>
+                <i class="bi bi-exclamation-triangle me-1"></i>
 
-                Identification Information
+                Please correct the following errors:
 
-            </h5>
+            </div>
 
-            <small class="text-muted">
-                Identification information is optional.
-            </small>
+
+            <ul class="mb-0 ps-4">
+
+                @foreach($errors->all() as $error)
+
+                    <li>
+
+                        {{ $error }}
+
+                    </li>
+
+                @endforeach
+
+            </ul>
+
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+
+            </button>
 
         </div>
 
-
-        <div class="card-body p-4">
-
-            <div class="row g-3">
+    @endif
 
 
-                {{-- NID --}}
-                <div class="col-md-6">
+    {{-- ================================================================
+         SUCCESS MESSAGE
+    ================================================================= --}}
 
-                    <label class="form-label fw-semibold">
-                        National ID (NID) Number
-                    </label>
+    @if(session('success'))
 
-                    <input type="text"
-                           name="nid_number"
-                           class="form-control"
-                           value="{{ old('nid_number', $authorProfile->nid_number ?? '') }}"
-                           placeholder="NID Number">
+        <div
+            class="alert alert-success alert-dismissible fade show shadow-sm">
 
-                </div>
+            <i class="bi bi-check-circle me-1"></i>
+
+            {{ session('success') }}
 
 
-                {{-- Passport --}}
-                <div class="col-md-6">
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
 
-                    <label class="form-label fw-semibold">
-                        Passport Number
-                    </label>
+            </button>
 
-                    <input type="text"
-                           name="passport_number"
-                           class="form-control"
-                           value="{{ old('passport_number', $authorProfile->passport_number ?? '') }}"
-                           placeholder="Passport Number">
+        </div>
+
+    @endif
+
+
+    {{-- ================================================================
+         PERSONAL INFORMATION FORM
+    ================================================================= --}}
+
+    <form
+        action="{{ route('author.profile.step2.update') }}"
+        method="POST">
+
+        @csrf
+
+        @method('PATCH')
+
+
+        {{-- ============================================================
+             PERSONAL DETAILS
+        ============================================================= --}}
+
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-header bg-white border-bottom">
+
+                <h5 class="fw-bold mb-0">
+
+                    <i class="bi bi-person me-2 text-primary"></i>
+
+                    Personal Details
+
+                </h5>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+
+                    {{-- =================================================
+                         DATE OF BIRTH
+                    ================================================== --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="date_of_birth"
+                            class="form-label fw-semibold">
+
+                            Date of Birth
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <input
+                            type="date"
+                            name="date_of_birth"
+                            id="date_of_birth"
+                            class="form-control @error('date_of_birth') is-invalid @enderror"
+                            value="{{ old('date_of_birth', optional($authorProfile?->date_of_birth)->format('Y-m-d')) }}"
+                            max="{{ now()->format('Y-m-d') }}"
+                            required>
+
+
+                        @error('date_of_birth')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
+
+                    </div>
+
+
+                    {{-- =================================================
+                         GENDER
+                    ================================================== --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="gender"
+                            class="form-label fw-semibold">
+
+                            Gender
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <select
+                            name="gender"
+                            id="gender"
+                            class="form-select @error('gender') is-invalid @enderror"
+                            required>
+
+                            <option value="">
+
+                                -- Select Gender --
+
+                            </option>
+
+
+                            <option
+                                value="male"
+                                {{ old('gender', $authorProfile?->gender) === 'male' ? 'selected' : '' }}>
+
+                                Male
+
+                            </option>
+
+
+                            <option
+                                value="female"
+                                {{ old('gender', $authorProfile?->gender) === 'female' ? 'selected' : '' }}>
+
+                                Female
+
+                            </option>
+
+
+                            <option
+                                value="other"
+                                {{ old('gender', $authorProfile?->gender) === 'other' ? 'selected' : '' }}>
+
+                                Other
+
+                            </option>
+
+
+                            <option
+                                value="prefer_not_to_say"
+                                {{ old('gender', $authorProfile?->gender) === 'prefer_not_to_say' ? 'selected' : '' }}>
+
+                                Prefer not to say
+
+                            </option>
+
+                        </select>
+
+
+                        @error('gender')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
+
+                    </div>
+
+
+                    {{-- =================================================
+                         NATIONALITY
+                    ================================================== --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="nationality"
+                            class="form-label fw-semibold">
+
+                            Nationality
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            name="nationality"
+                            id="nationality"
+                            class="form-control @error('nationality') is-invalid @enderror"
+                            value="{{ old('nationality', $authorProfile?->nationality) }}"
+                            placeholder="e.g. Bangladeshi"
+                            required>
+
+
+                        @error('nationality')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
+
+                    </div>
+
+
+                    {{-- =================================================
+                         COUNTRY
+                    ================================================== --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="country"
+                            class="form-label fw-semibold">
+
+                            Country
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            name="country"
+                            id="country"
+                            class="form-control @error('country') is-invalid @enderror"
+                            value="{{ old('country', $authorProfile?->country) }}"
+                            placeholder="e.g. Bangladesh"
+                            required>
+
+
+                        @error('country')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
+
+                    </div>
 
                 </div>
 
@@ -462,58 +626,261 @@
 
         </div>
 
-    </div>
+
+        {{-- ============================================================
+             LOCATION INFORMATION
+        ============================================================= --}}
+
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-header bg-white border-bottom">
+
+                <h5 class="fw-bold mb-0">
+
+                    <i class="bi bi-geo-alt me-2 text-primary"></i>
+
+                    Location Information
+
+                </h5>
+
+            </div>
 
 
-    {{-- =========================
-         ACTION BUTTONS
-    ========================== --}}
+            <div class="card-body">
 
-    <div class="card border-0 shadow-sm">
-
-        <div class="card-body p-4">
-
-            <div class="d-flex flex-wrap justify-content-between gap-2">
+                <div class="row g-3">
 
 
-                {{-- Previous --}}
-                <a href="{{ route('author.profile.step1') }}"
-                   class="btn btn-outline-secondary">
+                    {{-- =================================================
+                         DIVISION / STATE
+                    ================================================== --}}
 
-                    <i class="bi bi-arrow-left me-1"></i>
+                    <div class="col-md-6">
 
-                    Previous
+                        <label
+                            for="division_state"
+                            class="form-label fw-semibold">
 
-                </a>
+                            Division / State
+
+                            <span class="text-danger">*</span>
+
+                        </label>
 
 
-                <div class="d-flex gap-2">
+                        <input
+                            type="text"
+                            name="division_state"
+                            id="division_state"
+                            class="form-control @error('division_state') is-invalid @enderror"
+                            value="{{ old('division_state', $authorProfile?->division_state) }}"
+                            placeholder="e.g. Dhaka"
+                            required>
 
 
-                    {{-- Save --}}
-                    <button type="submit"
+                        @error('division_state')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
+
+                    </div>
+
+
+                    {{-- =================================================
+                         CITY / DISTRICT
+                    ================================================== --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="city_district"
+                            class="form-label fw-semibold">
+
+                            City / District
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            name="city_district"
+                            id="city_district"
+                            class="form-control @error('city_district') is-invalid @enderror"
+                            value="{{ old('city_district', $authorProfile?->city_district) }}"
+                            placeholder="e.g. Dhaka"
+                            required>
+
+
+                        @error('city_district')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
+
+                    </div>
+
+
+                    {{-- =================================================
+                         POSTAL ADDRESS
+                    ================================================== --}}
+
+                    <div class="col-12">
+
+                        <label
+                            for="postal_address"
+                            class="form-label fw-semibold">
+
+                            Postal Address
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <textarea
+                            name="postal_address"
+                            id="postal_address"
+                            rows="3"
+                            class="form-control @error('postal_address') is-invalid @enderror"
+                            placeholder="Enter your complete postal address"
+                            required>{{ old('postal_address', $authorProfile?->postal_address) }}</textarea>
+
+
+                        @error('postal_address')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
+
+                    </div>
+
+
+                    {{-- =================================================
+                         OFFICE ADDRESS
+                    ================================================== --}}
+
+                    <div class="col-12">
+
+                        <label
+                            for="office_address"
+                            class="form-label fw-semibold">
+
+                            Office Address
+
+                            <span class="text-muted fw-normal">
+
+                                (Optional)
+
+                            </span>
+
+                        </label>
+
+
+                        <textarea
+                            name="office_address"
+                            id="office_address"
+                            rows="3"
+                            class="form-control @error('office_address') is-invalid @enderror"
+                            placeholder="Enter your office / institutional address">{{ old('office_address', $authorProfile?->office_address) }}</textarea>
+
+
+                        @error('office_address')
+
+                            <div class="invalid-feedback">
+
+                                {{ $message }}
+
+                            </div>
+
+                        @enderror
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- ============================================================
+             FORM ACTIONS
+        ============================================================= --}}
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+
+
+                    {{-- =================================================
+                         BACK TO STEP 1
+                    ================================================== --}}
+
+                    <a
+                        href="{{ route('author.profile.step1') }}"
+                        class="btn btn-outline-secondary">
+
+                        <i class="bi bi-arrow-left me-1"></i>
+
+                        Previous
+
+                    </a>
+
+
+                    <div class="d-flex gap-2">
+
+
+                        {{-- =================================================
+                             SAVE
+                        ================================================== --}}
+
+                        <button
+                            type="submit"
                             name="action"
                             value="save"
                             class="btn btn-outline-primary">
 
-                        <i class="bi bi-save me-1"></i>
+                            <i class="bi bi-save me-1"></i>
 
-                        Save
+                            Save
 
-                    </button>
+                        </button>
 
 
-                    {{-- Save Continue --}}
-                    <button type="submit"
+                        {{-- =================================================
+                             SAVE & CONTINUE
+                        ================================================== --}}
+
+                        <button
+                            type="submit"
                             name="action"
                             value="continue"
-                            class="btn btn-primary px-4">
+                            class="btn btn-primary">
 
-                        Save & Continue
+                            Save & Continue
 
-                        <i class="bi bi-arrow-right ms-1"></i>
+                            <i class="bi bi-arrow-right ms-1"></i>
 
-                    </button>
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -521,9 +888,7 @@
 
         </div>
 
-    </div>
-
-</form>
+    </form>
 
 </div>
 

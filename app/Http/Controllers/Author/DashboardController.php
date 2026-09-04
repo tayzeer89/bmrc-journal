@@ -9,12 +9,9 @@ use App\Models\AuthorProfile;
 
 class DashboardController extends Controller
 {
-
     public function index()
     {
-
         $user = Auth::user();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -22,9 +19,8 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $authorProfile = AuthorProfile::where('user_id',$user->id)
+        $authorProfile = AuthorProfile::where('user_id', $user->id)
             ->first();
-
 
 
         /*
@@ -33,10 +29,14 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $manuscripts = Manuscript::where('submitted_by',$user->id)
+        $manuscripts = Manuscript::where('submitted_by', $user->id)
+            ->with([
+                'articleType',
+                'payments',
+                'versions',
+            ])
             ->latest()
             ->get();
-
 
 
         /*
@@ -49,79 +49,63 @@ class DashboardController extends Controller
 
             'total' => $manuscripts->count(),
 
-
             'drafts' => $manuscripts
-                ->where('status','draft')
+                ->where('status', 'draft')
                 ->count(),
-
 
             'submitted' => $manuscripts
-                ->where('status','submitted')
+                ->where('status', 'submitted')
                 ->count(),
-
 
             'under_review' => $manuscripts
-                ->where('status','under_review')
+                ->where('status', 'under_review')
                 ->count(),
-
 
             'accepted' => $manuscripts
-                ->where('status','accepted')
+                ->where('status', 'accepted')
                 ->count(),
 
-
             'published' => $manuscripts
-                ->where('status','published')
+                ->where('status', 'published')
                 ->count(),
 
         ];
-
 
 
         /*
         |--------------------------------------------------------------------------
         | Profile Completion
         |--------------------------------------------------------------------------
+        | The author_profiles table already contains the
+        | profile_completed field.
+        |
+        | Therefore, we use that value directly instead of
+        | recalculating the percentage from individual fields.
+        |--------------------------------------------------------------------------
         */
 
-        $profileCompletion = 0;
+        $profileCompletion = (int) (
+            $authorProfile->profile_completed ?? 0
+        );
 
 
-        if($authorProfile)
-        {
+        /*
+        |--------------------------------------------------------------------------
+        | Make Sure Percentage Is Between 0 and 100
+        |--------------------------------------------------------------------------
+        */
 
-            $fields = [
-
-                'first_name',
-                'last_name',
-                'email',
-                'phone',
-                'affiliation',
-                'country'
-
-            ];
+        $profileCompletion = max(
+            0,
+            min(100, $profileCompletion)
+        );
 
 
-            $completed = 0;
-
-
-            foreach($fields as $field)
-            {
-
-                if(!empty($authorProfile->$field))
-                {
-                    $completed++;
-                }
-
-            }
-
-
-            $profileCompletion =
-                round(($completed/count($fields))*100);
-
-        }
-
-
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard View
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'author.dashboard',
@@ -132,8 +116,5 @@ class DashboardController extends Controller
                 'profileCompletion'
             )
         );
-
-
     }
-
 }

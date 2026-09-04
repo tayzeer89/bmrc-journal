@@ -49,6 +49,7 @@ use App\Http\Controllers\Author\DraftSubmissionController;
 use App\Http\Controllers\Author\MyManuscriptController;
 use App\Http\Controllers\Author\SubmittedManuscriptController;
 use App\Http\Controllers\Author\PaymentController as AuthorPaymentController;
+use App\Http\Controllers\Author\TechnicalCorrectionController;
 
 
 /*
@@ -502,9 +503,10 @@ Route::middleware(['auth'])
     ->name('author.')
     ->group(function () {
 
+       
         /*
         |--------------------------------------------------------------------------
-        | My Manuscript
+        | My Manuscripts
         |--------------------------------------------------------------------------
         */
 
@@ -516,6 +518,13 @@ Route::middleware(['auth'])
             ]
         )->name('manuscripts.index');
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Manuscript Details
+        |--------------------------------------------------------------------------
+        */
+
         Route::get(
             '/manuscripts/{manuscript}',
             [
@@ -525,6 +534,27 @@ Route::middleware(['auth'])
         )->name('manuscripts.show');
 
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submit Technical Correction
+        |--------------------------------------------------------------------------
+        |
+        | Author uses this route after Technical Review returns the
+        | manuscript for correction.
+        |
+        */
+
+        Route::post(
+            '/manuscripts/{manuscript}/technical-correction',
+            [
+                TechnicalCorrectionController::class,
+                'submit'
+            ]
+        )->name('manuscripts.technical-correction.submit');
+
+
+       
         /*
         |--------------------------------------------------------------------------
         | Author Payment
@@ -1207,16 +1237,7 @@ Route::prefix('admin')
         ->name('manuscripts.technical-check')
         ->middleware('permission:technical_check.view');
 
-
-    Route::post(
-        '/manuscripts/{manuscript}/technical-check/start',
-        [TechnicalCheckController::class, 'start']
-    )
-        ->name('manuscripts.technical-check.start')
-        ->middleware('permission:technical_check.perform');
-
-
-    /*
+/*
     |--------------------------------------------------------------------------
     | Technical Check Actions
     |--------------------------------------------------------------------------
@@ -1254,12 +1275,23 @@ Route::prefix('admin')
         ->middleware('permission:technical_check.perform');
 
 
+
+
     Route::post(
-        '/technical-checks/{technicalCheck}/assign',
-        [TechnicalCheckController::class, 'assign']
+        '/manuscripts/{manuscript}/technical-check/start',
+        [TechnicalCheckController::class, 'start']
     )
-        ->name('manuscripts.technical-check.assign')
-        ->middleware('permission:technical_check.assign');
+        ->name('manuscripts.technical-check.start')
+        ->middleware('permission:technical_check.perform');
+
+
+
+    // Route::post(
+    //     '/technical-checks/{technicalCheck}/assign',
+    //     [TechnicalCheckController::class, 'assign']
+    // )
+    //     ->name('manuscripts.technical-check.assign')
+    //     ->middleware('permission:technical_check.assign');
 
 
    /*
