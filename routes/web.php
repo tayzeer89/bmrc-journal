@@ -1286,15 +1286,7 @@ Route::prefix('admin')
 
 
 
-    // Route::post(
-    //     '/technical-checks/{technicalCheck}/assign',
-    //     [TechnicalCheckController::class, 'assign']
-    // )
-    //     ->name('manuscripts.technical-check.assign')
-    //     ->middleware('permission:technical_check.assign');
-
-
-   /*
+/*
 |--------------------------------------------------------------------------
 | Payment Details
 |--------------------------------------------------------------------------
@@ -1384,6 +1376,21 @@ Route::prefix('payments')
             ->whereNumber('payment')
             ->name('verification.reject')
             ->middleware('permission:payment.verify');
+
+
+
+           /*
+            |--------------------------------------------------------------------------
+            | Verified Payment History
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/verified',
+                [PaymentVerificationController::class, 'verified']
+            )
+                ->name('verified')
+                ->middleware('permission:payment.view');
 
     });
 

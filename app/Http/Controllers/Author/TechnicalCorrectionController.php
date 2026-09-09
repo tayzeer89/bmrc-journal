@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Author;
 
 use App\Http\Controllers\Controller;
 use App\Models\Manuscript;
-use App\Models\ManuscriptFile;
-use App\Models\ManuscriptVersion;
-use App\Models\TechnicalCheck;
 use App\Models\TechnicalCorrectionResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,41 +13,26 @@ use Illuminate\Support\Str;
 class TechnicalCorrectionController extends Controller
 {
     /**
-     * Submit technical correction.
-     *
-     * Workflow:
-     *
-     * technical_correction
-     *          ↓
-     * Author uploads corrected files
-     *          ↓
-     * New manuscript version
-     *          ↓
-     * Old files remain preserved
-     *          ↓
-     * New files linked through replacement_file_id
-     *          ↓
-     * Manuscript → technical_check
-     *          ↓
-     * Technical Review → new check
+     * Submit technical corrections by author.
      */
-    public function submit(
-        Request $request,
-        Manuscript $manuscript
-    ) {
+    public function submit(Request $request, Manuscript $manuscript)
+    {
+        $user = auth()->user();
+
         /*
         |--------------------------------------------------------------------------
-        | 1. Verify author ownership
+        | 1. Check manuscript ownership
         |--------------------------------------------------------------------------
         */
-
-        $user = auth()->user();
 
         $isOwner = false;
 
-        /*
-        | submitter_id
-        */
+        if (
+            Schema::hasColumn('manuscripts', 'submitted_by') &&
+            (int) $manuscript->submitted_by === (int) $user->id
+        ) {
+            $isOwner = true;
+        }
 
         if (
             Schema::hasColumn('manuscripts', 'submitter_id') &&
@@ -59,10 +41,6 @@ class TechnicalCorrectionController extends Controller
             $isOwner = true;
         }
 
-        /*
-        | user_id
-        */
-
         if (
             Schema::hasColumn('manuscripts', 'user_id') &&
             (int) $manuscript->user_id === (int) $user->id
@@ -70,23 +48,16 @@ class TechnicalCorrectionController extends Controller
             $isOwner = true;
         }
 
-        /*
-        | Try submitter relationship.
-        */
-
         if (!$isOwner) {
-
             try {
-
                 if (
                     $manuscript->submitter &&
                     (int) $manuscript->submitter->id === (int) $user->id
                 ) {
                     $isOwner = true;
                 }
-
             } catch (\Throwable $e) {
-                // Ignore unavailable relationship.
+                // Ignore relationship errors.
             }
         }
 
@@ -95,165 +66,120 @@ class TechnicalCorrectionController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 2. Check manuscript status
+        | 2. Manuscript must be waiting for technical correction
         |--------------------------------------------------------------------------
         */
 
         if ($manuscript->status !== 'technical_correction') {
-
-            return back()
-                ->with(
-                    'error',
-                    'This manuscript is not currently waiting for technical correction.'
-                );
-
+            return back()->with(
+                'error',
+                'This manuscript is not currently waiting for technical correction.'
+            );
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | 3. Get latest technical check
+        | 3. Find active correction-required technical check
         |--------------------------------------------------------------------------
         */
 
         $technicalCheck = $manuscript
             ->technicalChecks()
-            ->with([
-                'items',
-                'issues',
-            ])
+            ->where(function ($query) {
+                $query
+                    ->where('status', 'correction_required')
+                    ->orWhere(
+                        'overall_result',
+                        'correction_required'
+                    );
+            })
             ->latest('check_number')
             ->first();
 
-
         if (!$technicalCheck) {
-
-            return back()
-                ->with(
-                    'error',
-                    'No technical correction request was found.'
-                );
-
+            return back()->with(
+                'error',
+                'No active technical correction request was found.'
+            );
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | 4. Verify technical check status
+        | 4. Validate author submission
         |--------------------------------------------------------------------------
-        */
-
-        if (
-            !in_array(
-                $technicalCheck->status,
-                [
-                    'correction_required',
-                    'failed',
-                ],
-                true
-            )
-        ) {
-
-            return back()
-                ->with(
-                    'error',
-                    'This technical check is not waiting for author correction.'
-                );
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | 5. Validate uploaded files
-        |--------------------------------------------------------------------------
-        |
-        | Files are submitted as:
-        |
-        | files[OLD_FILE_ID]
-        |
         */
 
         $validated = $request->validate([
+            'response' => [
+                'required',
+                'string',
+                'min:10',
+                'max:10000',
+            ],
+
+            'confirmation' => [
+                'required',
+                'accepted',
+            ],
 
             'files' => [
-                'required',
+                'nullable',
                 'array',
             ],
 
             'files.*' => [
-                'required',
+                'nullable',
                 'file',
                 'max:20480',
                 'mimes:pdf,doc,docx,rtf,txt',
             ],
-
-            'comments' => [
-                'nullable',
-                'string',
-                'max:10000',
-            ],
-
         ]);
 
 
         /*
         |--------------------------------------------------------------------------
-        | 6. Get current manuscript files
+        | 5. Get active manuscript files
         |--------------------------------------------------------------------------
         */
 
         $currentFiles = $manuscript
             ->files()
+            ->where('status', 'active')
             ->get();
 
 
         /*
         |--------------------------------------------------------------------------
-        | 7. Verify every selected file belongs to manuscript
+        | 6. Validate selected file IDs
         |--------------------------------------------------------------------------
         */
 
-        foreach (
-            array_keys($validated['files'])
-            as $oldFileId
-        ) {
+        if (!empty($validated['files'])) {
 
-            $oldFile = $currentFiles
-                ->firstWhere('id', $oldFileId);
+            foreach (array_keys($validated['files']) as $oldFileId) {
 
-            if (!$oldFile) {
+                $oldFile = $currentFiles->firstWhere(
+                    'id',
+                    $oldFileId
+                );
 
-                return back()
-                    ->withInput()
-                    ->with(
-                        'error',
-                        'Invalid manuscript file selected.'
-                    );
-
+                if (!$oldFile) {
+                    return back()
+                        ->withInput()
+                        ->with(
+                            'error',
+                            'Invalid manuscript file selected.'
+                        );
+                }
             }
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | 8. Determine next manuscript version
-        |--------------------------------------------------------------------------
-        */
-
-        $latestVersion = (int) (
-            $currentFiles->max(
-                fn ($file) =>
-                    (int) ($file->version_number ?? 1)
-            ) ?? 1
-        );
-
-        $newVersionNumber = $latestVersion + 1;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | 9. Database transaction
+        | 7. Database transaction
         |--------------------------------------------------------------------------
         */
 
@@ -261,13 +187,35 @@ class TechnicalCorrectionController extends Controller
             $manuscript,
             $technicalCheck,
             $validated,
-            $currentFiles,
-            $newVersionNumber
+            $currentFiles
         ) {
 
             /*
             |--------------------------------------------------------------------------
-            | Create Manuscript Version
+            | Determine next manuscript version
+            |--------------------------------------------------------------------------
+            */
+
+            $newVersionNumber = 1;
+
+            if (Schema::hasTable('manuscript_versions')) {
+
+                $lastVersion = DB::table('manuscript_versions')
+                    ->where(
+                        'manuscript_id',
+                        $manuscript->id
+                    )
+                    ->lockForUpdate()
+                    ->max('version_number');
+
+                $newVersionNumber =
+                    ((int) $lastVersion) + 1;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create manuscript version
             |--------------------------------------------------------------------------
             */
 
@@ -277,14 +225,14 @@ class TechnicalCorrectionController extends Controller
                 method_exists(
                     $manuscript,
                     'versions'
+                ) &&
+                Schema::hasTable(
+                    'manuscript_versions'
                 )
             ) {
 
-                /*
-                | Only send fields that actually exist.
-                */
-
                 $versionData = [];
+
 
                 if (
                     Schema::hasColumn(
@@ -296,6 +244,7 @@ class TechnicalCorrectionController extends Controller
                         $manuscript->id;
                 }
 
+
                 if (
                     Schema::hasColumn(
                         'manuscript_versions',
@@ -305,6 +254,7 @@ class TechnicalCorrectionController extends Controller
                     $versionData['version_number'] =
                         $newVersionNumber;
                 }
+
 
                 if (
                     Schema::hasColumn(
@@ -316,6 +266,7 @@ class TechnicalCorrectionController extends Controller
                         auth()->id();
                 }
 
+
                 if (
                     Schema::hasColumn(
                         'manuscript_versions',
@@ -326,6 +277,7 @@ class TechnicalCorrectionController extends Controller
                         'submitted';
                 }
 
+
                 $manuscriptVersion =
                     $manuscript
                         ->versions()
@@ -335,150 +287,159 @@ class TechnicalCorrectionController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Process replacement files
+            | Upload corrected files
             |--------------------------------------------------------------------------
             */
 
-            foreach (
-                $validated['files']
-                as $oldFileId => $uploadedFile
-            ) {
+            if (!empty($validated['files'])) {
 
-                $oldFile = $currentFiles
-                    ->firstWhere('id', $oldFileId);
+                foreach (
+                    $validated['files']
+                    as $oldFileId => $uploadedFile
+                ) {
 
-                if (!$oldFile) {
-                    continue;
-                }
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Skip empty upload
+                    |--------------------------------------------------------------------------
+                    */
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Storage directory
-                |--------------------------------------------------------------------------
-                */
-
-                $directory =
-                    'manuscripts/' .
-                    $manuscript->id .
-                    '/versions/' .
-                    $newVersionNumber;
+                    if (!$uploadedFile) {
+                        continue;
+                    }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Stored filename
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Find old file
+                    |--------------------------------------------------------------------------
+                    */
 
-                $extension =
-                    strtolower(
+                    $oldFile =
+                        $currentFiles->firstWhere(
+                            'id',
+                            $oldFileId
+                        );
+
+                    if (!$oldFile) {
+                        continue;
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Storage directory
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $directory =
+                        'manuscripts/' .
+                        $manuscript->id .
+                        '/versions/' .
+                        $newVersionNumber;
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Original extension
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $extension = strtolower(
                         $uploadedFile
                             ->getClientOriginalExtension()
                     );
 
-                $storedName =
-                    Str::uuid()->toString() .
-                    ($extension
-                        ? '.' . $extension
-                        : '');
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Generate unique stored file name
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $storedName =
+                        Str::uuid()->toString() .
+                        (
+                            $extension
+                                ? '.' . $extension
+                                : ''
+                        );
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Store file
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Store file
+                    |--------------------------------------------------------------------------
+                    */
 
-                $path = $uploadedFile->storeAs(
-                    $directory,
-                    $storedName,
-                    'public'
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | New file data
-                |--------------------------------------------------------------------------
-                */
-
-                $newFileData = [
-
-                    'manuscript_id' =>
-                        $manuscript->id,
-
-                    'file_type' =>
-                        $oldFile->file_type,
-
-                    'original_name' =>
-                        $uploadedFile->getClientOriginalName(),
-
-                    'stored_name' =>
+                    $path = $uploadedFile->storeAs(
+                        $directory,
                         $storedName,
-
-                    'file_path' =>
-                        $path,
-
-                    'file_size' =>
-                        $uploadedFile->getSize(),
-
-                    'mime_type' =>
-                        $uploadedFile->getMimeType(),
-
-                    'version_number' =>
-                        $newVersionNumber,
-
-                    'uploaded_by' =>
-                        auth()->id(),
-
-                    'status' =>
-                        'active',
-
-                    'replacement_file_id' =>
-                        $oldFile->id,
-
-                ];
+                        'public'
+                    );
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | manuscript_version_id
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Generate NEW unique file_id
+                    |--------------------------------------------------------------------------
+                    |
+                    | IMPORTANT:
+                    |
+                    | manuscript_files.file_id is UNIQUE.
+                    |
+                    | Therefore we MUST NOT use:
+                    |
+                    |     $oldFile->file_id
+                    |
+                    | We create a completely new file ID.
+                    |
+                    */
 
-                if ($manuscriptVersion) {
+                    do {
 
-                    $newFileData[
-                        'manuscript_version_id'
-                    ] =
-                        $manuscriptVersion->id;
+                        $newFileId =
+                            'MF-' .
+                            strtoupper(
+                                Str::random(12)
+                            );
 
-                }
+                    } while (
+                        DB::table('manuscript_files')
+                            ->where(
+                                'file_id',
+                                $newFileId
+                            )
+                            ->exists()
+                    );
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | file_id
-                |--------------------------------------------------------------------------
-                |
-                | Do not set this unless your existing system requires it.
-                |
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Prepare new manuscript file
+                    |--------------------------------------------------------------------------
+                    */
 
                     $newFileData = [
 
                         'manuscript_id' =>
                             $manuscript->id,
 
+                        /*
+                        |--------------------------------------------------------------------------
+                        | NEW UNIQUE file_id
+                        |--------------------------------------------------------------------------
+                        */
+
                         'file_id' =>
-                            'MF-' . strtoupper(Str::random(12)),
+                            $newFileId,
 
                         'file_type' =>
                             $oldFile->file_type,
 
                         'original_name' =>
-                            $uploadedFile->getClientOriginalName(),
+                            $uploadedFile
+                                ->getClientOriginalName(),
 
                         'stored_name' =>
                             $storedName,
@@ -501,49 +462,193 @@ class TechnicalCorrectionController extends Controller
                         'status' =>
                             'active',
 
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Keep relationship with previous manuscript file
+                        |--------------------------------------------------------------------------
+                        */
+
                         'replacement_file_id' =>
                             $oldFile->id,
                     ];
 
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Link manuscript version
+                    |--------------------------------------------------------------------------
+                    */
+
                     if ($manuscriptVersion) {
 
-                        $newFileData['manuscript_version_id'] =
+                        $newFileData[
+                            'manuscript_version_id'
+                        ] =
                             $manuscriptVersion->id;
                     }
-                    
-                /*
-                |--------------------------------------------------------------------------
-                | Create new file
-                |--------------------------------------------------------------------------
-                */
 
-                $newFile =
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Create new manuscript file
+                    |--------------------------------------------------------------------------
+                    */
+
                     $manuscript
                         ->files()
-                        ->create($newFileData);
+                        ->create(
+                            $newFileData
+                        );
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Mark previous file as replaced
-                |--------------------------------------------------------------------------
-                */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Mark old file as replaced
+                    |--------------------------------------------------------------------------
+                    */
 
-                $oldFile->update([
-                    'status' => 'replaced',
-                ]);
+                    $oldFile->update([
+                        'status' => 'replaced',
+                    ]);
+                }
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | Save author's response
+            | Save technical correction response
             |--------------------------------------------------------------------------
             */
 
             if (
-                !empty($validated['comments']) &&
+                Schema::hasTable(
+                    'technical_correction_responses'
+                )
+            ) {
+
+                $responseData = [];
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | manuscript_id
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    Schema::hasColumn(
+                        'technical_correction_responses',
+                        'manuscript_id'
+                    )
+                ) {
+
+                    $responseData['manuscript_id'] =
+                        $manuscript->id;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | technical_check_id
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    Schema::hasColumn(
+                        'technical_correction_responses',
+                        'technical_check_id'
+                    )
+                ) {
+
+                    $responseData[
+                        'technical_check_id'
+                    ] =
+                        $technicalCheck->id;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | submitted_by / user_id
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    Schema::hasColumn(
+                        'technical_correction_responses',
+                        'submitted_by'
+                    )
+                ) {
+
+                    $responseData[
+                        'submitted_by'
+                    ] =
+                        auth()->id();
+
+                } elseif (
+                    Schema::hasColumn(
+                        'technical_correction_responses',
+                        'user_id'
+                    )
+                ) {
+
+                    $responseData[
+                        'user_id'
+                    ] =
+                        auth()->id();
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | response / comments
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    Schema::hasColumn(
+                        'technical_correction_responses',
+                        'response'
+                    )
+                ) {
+
+                    $responseData['response'] =
+                        $validated['response'];
+
+                } elseif (
+                    Schema::hasColumn(
+                        'technical_correction_responses',
+                        'comments'
+                    )
+                ) {
+
+                    $responseData['comments'] =
+                        $validated['response'];
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create response
+                |--------------------------------------------------------------------------
+                */
+
+                if (!empty($responseData)) {
+
+                    TechnicalCorrectionResponse::create(
+                        $responseData
+                    );
+                }
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save author comments
+            |--------------------------------------------------------------------------
+            */
+
+            if (
                 Schema::hasColumn(
                     'technical_checks',
                     'author_comments'
@@ -552,14 +657,14 @@ class TechnicalCorrectionController extends Controller
 
                 $technicalCheck->update([
                     'author_comments' =>
-                        $validated['comments'],
+                        $validated['response'],
                 ]);
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | Update manuscript workflow
+            | Return manuscript to Technical Review
             |--------------------------------------------------------------------------
             */
 
@@ -570,15 +675,13 @@ class TechnicalCorrectionController extends Controller
 
                 'current_stage' =>
                     'technical_review',
-
             ]);
-
         });
 
 
         /*
         |--------------------------------------------------------------------------
-        | 10. Redirect
+        | 8. Redirect
         |--------------------------------------------------------------------------
         */
 

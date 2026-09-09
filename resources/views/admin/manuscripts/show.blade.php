@@ -2582,16 +2582,20 @@
 
     @endif
 
+{{-- ============================================================
+     TECHNICAL ISSUES / AUTHOR CORRECTION INSTRUCTIONS
+============================================================= --}}
 
-    {{-- ============================================================
-         TECHNICAL ISSUES
-    ============================================================= --}}
+@if($technicalCheck && $issues->count() > 0)
 
-    @if($technicalCheck && $issues->count() > 0)
+    <div class="tc-card mb-4">
 
-        <div class="tc-card mb-4">
+        <div class="tc-card-header">
 
-            <div class="tc-card-header">
+            <div class="d-flex flex-column flex-md-row
+                        justify-content-between
+                        align-items-start
+                        align-items-md-center gap-2">
 
                 <h5 class="section-title">
 
@@ -2599,116 +2603,328 @@
                         <i class="bi bi-exclamation-diamond"></i>
                     </span>
 
-                    Technical Issues
+                    Technical Issues / Author Correction Instructions
 
-                    <span class="badge bg-light text-dark border ms-1">
+                    <span class="badge bg-danger-subtle text-danger ms-1">
                         {{ $issues->count() }}
                     </span>
 
                 </h5>
 
+                @if($technicalCheck->status === 'correction_required')
+
+                    <span class="badge bg-warning-subtle text-warning-emphasis">
+                        <i class="bi bi-arrow-return-left me-1"></i>
+                        Sent to Author
+                    </span>
+
+                @endif
+
             </div>
 
-            <div class="tc-card-body">
+        </div>
 
-                @foreach($issues as $issue)
 
-                    <div class="issue-item">
+        <div class="tc-card-body">
 
-                        <div class="d-flex flex-wrap
-                                    justify-content-between
-                                    align-items-start gap-2">
+            {{-- ====================================================
+                 INFORMATION SENT TO AUTHOR
+            ===================================================== --}}
 
-                            <div class="issue-title">
+            @if($technicalCheck->status === 'correction_required')
 
-                                {{ ucwords(str_replace(
-                                    '_',
-                                    ' ',
-                                    $issue->category ?? 'Other'
-                                )) }}
+                <div class="alert alert-warning tc-alert mb-4">
 
+                    <div class="d-flex align-items-start gap-2">
+
+                        <i class="bi bi-send-fill mt-1"></i>
+
+                        <div>
+
+                            <div class="fw-bold mb-1">
+                                Information Sent to Author
                             </div>
 
+                            <div>
+                                The following technical issues and
+                                correction instructions were provided
+                                to the author for correction.
+                            </div>
 
-                            <div class="d-flex flex-wrap gap-1">
+                        </div>
 
-                                @if($issue->severity)
+                    </div>
 
-                                    @php
-                                        $severityClass = match($issue->severity) {
-                                            'critical' => 'bg-danger-subtle text-danger',
-                                            'major' => 'bg-warning-subtle text-warning-emphasis',
-                                            default => 'bg-secondary-subtle text-secondary',
-                                        };
-                                    @endphp
+                </div>
 
-                                    <span class="badge {{ $severityClass }}">
-                                        {{ ucfirst($issue->severity) }}
-                                    </span>
-
-                                @endif
+            @endif
 
 
-                                @if($issue->status)
+            {{-- ====================================================
+                 ISSUES
+            ===================================================== --}}
 
-                                    @php
-                                        $issueStatusClass = match($issue->status) {
-                                            'resolved' => 'bg-success-subtle text-success',
-                                            'not_applicable' => 'bg-secondary-subtle text-secondary',
-                                            default => 'bg-danger-subtle text-danger',
-                                        };
-                                    @endphp
+            @foreach($issues as $index => $issue)
 
-                                    <span class="badge {{ $issueStatusClass }}">
-                                        {{ ucwords(str_replace(
-                                            '_',
-                                            ' ',
-                                            $issue->status
-                                        )) }}
-                                    </span>
+                <div class="issue-item">
 
-                                @endif
+                    {{-- Issue Header --}}
+
+                    <div class="d-flex flex-column flex-md-row
+                                justify-content-between
+                                align-items-start gap-2">
+
+                        <div class="d-flex align-items-start gap-2">
+
+                            <span class="badge bg-danger rounded-pill">
+                                Issue {{ $index + 1 }}
+                            </span>
+
+                            <div>
+
+                                <div class="issue-title">
+
+                                    {{ ucwords(str_replace(
+                                        '_',
+                                        ' ',
+                                        $issue->category ?? 'Other'
+                                    )) }}
+
+                                </div>
 
                             </div>
 
                         </div>
 
 
-                        @if($issue->description)
+                        <div class="d-flex flex-wrap gap-1">
 
-                            <div class="issue-description">
+                            {{-- Severity --}}
 
-                                <strong>Description:</strong>
+                            @if($issue->severity)
+
+                                @php
+
+                                    $severityClass = match(
+                                        $issue->severity
+                                    ) {
+
+                                        'critical' =>
+                                            'bg-danger-subtle text-danger',
+
+                                        'major' =>
+                                            'bg-warning-subtle text-warning-emphasis',
+
+                                        'minor' =>
+                                            'bg-info-subtle text-info',
+
+                                        default =>
+                                            'bg-secondary-subtle text-secondary',
+
+                                    };
+
+                                @endphp
+
+                                <span class="badge {{ $severityClass }}">
+
+                                    {{ ucfirst($issue->severity) }}
+
+                                </span>
+
+                            @endif
+
+
+                            {{-- Status --}}
+
+                            @if($issue->status)
+
+                                @php
+
+                                    $issueStatusClass = match(
+                                        $issue->status
+                                    ) {
+
+                                        'resolved' =>
+                                            'bg-success-subtle text-success',
+
+                                        'not_applicable' =>
+                                            'bg-secondary-subtle text-secondary',
+
+                                        default =>
+                                            'bg-danger-subtle text-danger',
+
+                                    };
+
+                                @endphp
+
+                                <span class="badge {{ $issueStatusClass }}">
+
+                                    {{ ucwords(str_replace(
+                                        '_',
+                                        ' ',
+                                        $issue->status
+                                    )) }}
+
+                                </span>
+
+                            @endif
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- =================================================
+                         DESCRIPTION / PROBLEM
+                    ================================================== --}}
+
+                    @if($issue->description)
+
+                        <div class="mt-3">
+
+                            <div class="small fw-bold text-dark mb-1">
+
+                                <i class="bi bi-x-circle text-danger me-1"></i>
+
+                                Problem Identified
+
+                            </div>
+
+                            <div class="p-3 bg-light border rounded-3 small"
+                                 style="line-height:1.6;">
 
                                 {!! nl2br(e($issue->description)) !!}
 
                             </div>
 
-                        @endif
+                        </div>
+
+                    @endif
 
 
-                        @if($issue->required_action)
+                    {{-- =================================================
+                         REQUIRED ACTION
+                    ================================================== --}}
 
-                            <div class="issue-description">
+                    @if($issue->required_action)
 
-                                <strong>Required Action:</strong>
+                        <div class="mt-3">
+
+                            <div class="small fw-bold text-dark mb-1">
+
+                                <i class="bi bi-check2-square text-success me-1"></i>
+
+                                Required Correction / Action
+
+                            </div>
+
+                            <div class="p-3 border rounded-3 small"
+                                 style="
+                                    background:#f1fbf5;
+                                    border-color:#b7dfc9 !important;
+                                    line-height:1.6;
+                                 ">
 
                                 {!! nl2br(e($issue->required_action)) !!}
 
                             </div>
 
-                        @endif
+                        </div>
+
+                    @endif
+
+
+                    {{-- =================================================
+                         ISSUE CREATED INFORMATION
+                    ================================================== --}}
+
+                    <div class="mt-3 pt-3 border-top">
+
+                        <div class="row g-2 small text-muted">
+
+                            <div class="col-md-4">
+
+                                <strong>Issue ID:</strong>
+
+                                #{{ $issue->id }}
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <strong>Created:</strong>
+
+                                {{ $issue->created_at
+                                    ? $issue->created_at->format(
+                                        'd M Y, h:i A'
+                                    )
+                                    : '—'
+                                }}
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <strong>Last Updated:</strong>
+
+                                {{ $issue->updated_at
+                                    ? $issue->updated_at->format(
+                                        'd M Y, h:i A'
+                                    )
+                                    : '—'
+                                }}
+
+                            </div>
+
+                        </div>
 
                     </div>
 
-                @endforeach
+                </div>
 
-            </div>
+            @endforeach
+
+
+            {{-- ====================================================
+                 AUTHOR INSTRUCTION SUMMARY
+            ===================================================== --}}
+
+            @if($technicalCheck->status === 'correction_required')
+
+                <div class="mt-4 p-3 rounded-3 border"
+                     style="
+                        background:#fffaf0;
+                        border-color:#e7c46a !important;
+                     ">
+
+                    <div class="fw-bold text-warning-emphasis mb-2">
+
+                        <i class="bi bi-info-circle me-1"></i>
+
+                        Author Correction Requirement
+
+                    </div>
+
+                    <div class="small"
+                         style="line-height:1.6; color:#6c5a26;">
+
+                        The author must address all technical issues listed
+                        above and resubmit the corrected manuscript.
+                        After resubmission, the editorial system should
+                        create a new technical check while preserving this
+                        technical check as historical record.
+
+                    </div>
+
+                </div>
+
+            @endif
 
         </div>
 
-    @endif
+    </div>
 
+@endif
 
     {{-- ============================================================
          WORKFLOW EXPLANATION

@@ -24,8 +24,14 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->foreignId('manuscript_id')
-                ->constrained('manuscripts')
+            $table->unsignedBigInteger('manuscript_id');
+
+            $table->foreign(
+                'manuscript_id',
+                'tcr_manuscript_fk'
+            )
+                ->references('id')
+                ->on('manuscripts')
                 ->cascadeOnDelete();
 
 
@@ -38,8 +44,14 @@ return new class extends Migration
             |
             */
 
-            $table->foreignId('technical_check_id')
-                ->constrained('technical_checks')
+            $table->unsignedBigInteger('technical_check_id');
+
+            $table->foreign(
+                'technical_check_id',
+                'tcr_technical_check_fk'
+            )
+                ->references('id')
+                ->on('technical_checks')
                 ->cascadeOnDelete();
 
 
@@ -52,9 +64,15 @@ return new class extends Migration
             |
             */
 
-            $table->foreignId('manuscript_version_id')
-                ->nullable()
-                ->constrained('manuscript_versions')
+            $table->unsignedBigInteger('manuscript_version_id')
+                ->nullable();
+
+            $table->foreign(
+                'manuscript_version_id',
+                'tcr_manuscript_version_fk'
+            )
+                ->references('id')
+                ->on('manuscript_versions')
                 ->nullOnDelete();
 
 
@@ -64,8 +82,14 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->foreignId('submitted_by')
-                ->constrained('users')
+            $table->unsignedBigInteger('submitted_by');
+
+            $table->foreign(
+                'submitted_by',
+                'tcr_submitted_by_fk'
+            )
+                ->references('id')
+                ->on('users')
                 ->restrictOnDelete();
 
 
@@ -75,7 +99,8 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->text('response')->nullable();
+            $table->text('response')
+                ->nullable();
 
 
             /*
@@ -103,10 +128,13 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->index([
-                'manuscript_id',
-                'technical_check_id',
-            ]);
+            $table->index(
+                [
+                    'manuscript_id',
+                    'technical_check_id',
+                ],
+                'tcr_manuscript_check_idx'
+            );
         });
     }
 

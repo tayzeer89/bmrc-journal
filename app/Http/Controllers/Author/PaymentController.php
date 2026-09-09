@@ -52,9 +52,11 @@ class PaymentController extends Controller
         | Author can only view payment belonging to their own manuscript.
         */
 
+        $manuscript = $payment->manuscript;
+
         abort_unless(
-            $payment->manuscript &&
-            (int) $payment->manuscript->submitted_by === (int) Auth::id(),
+            $manuscript &&
+            (int) $manuscript->submitted_by === (int) Auth::id(),
             403
         );
 
@@ -84,13 +86,26 @@ class PaymentController extends Controller
 
     public function submit(Request $request, Payment $payment)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Load Manuscript
+        |--------------------------------------------------------------------------
+        */
+
         $manuscript = $payment->manuscript;
+
 
         /*
         |--------------------------------------------------------------------------
         | Security
         |--------------------------------------------------------------------------
+        | Make sure this payment belongs to the logged-in author.
         */
+
+        abort_unless(
+            Auth::check(),
+            403
+        );
 
         abort_unless(
             $manuscript &&
@@ -98,10 +113,12 @@ class PaymentController extends Controller
             403
         );
 
+
         /*
         |--------------------------------------------------------------------------
         | Payment Status Validation
         |--------------------------------------------------------------------------
+        | Payment information can only be submitted while payment is pending.
         */
 
         abort_unless(
@@ -109,10 +126,27 @@ class PaymentController extends Controller
             403
         );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Manuscript Payment Stage Validation
+        |--------------------------------------------------------------------------
+        | Allow both statuses because the payment may initially be created
+        | during payment_setup and then become payment_required.
+        */
+
         abort_unless(
-            $manuscript->status === 'payment_required',
+            in_array(
+                $manuscript->status,
+                [
+                    'payment_setup',
+                    'payment_required',
+                ],
+                true
+            ),
             403
         );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -149,7 +183,13 @@ class PaymentController extends Controller
                 'required',
                 'date',
             ],
+
+            'confirmation' => [
+                'required',
+                'accepted',
+            ],
         ]);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -168,6 +208,7 @@ class PaymentController extends Controller
             'verification_status' => 'pending',
         ]);
 
+
         /*
         |--------------------------------------------------------------------------
         | Keep Manuscript in Payment Stage
@@ -178,6 +219,7 @@ class PaymentController extends Controller
             'status' => 'payment_required',
             'current_stage' => 'payment',
         ]);
+
 
         /*
         |--------------------------------------------------------------------------

@@ -467,30 +467,33 @@
                                     </a>
 
 
-                                    {{-- =================================================
-                                         PAYMENT REQUIRED
-                                    ================================================== --}}
-
+                                    {{-- Payment Action --}}
                                     @if(
-                                        $manuscript->status === 'payment_required'
-                                        &&
-                                        $payment
+                                        in_array(
+                                            $manuscript->status,
+                                            ['payment_setup', 'payment_required']
+                                        )
                                     )
 
-                                        <a
-                                            href="{{ route(
-                                                'author.payments.show',
-                                                $payment
-                                            ) }}"
+                                        @if($manuscript->latestPayment)
+
+                                            <a href="{{ route('author.payments.show', $manuscript->latestPayment) }}"
                                             class="btn btn-sm btn-success">
+                                                <i class="bi bi-credit-card me-1"></i>
+                                                Pay Now
+                                            </a>
 
-                                            <i class="bi bi-credit-card me-1"></i>
+                                        @else
 
-                                            Pay Now
+                                            <span class="btn btn-sm btn-secondary disabled">
+                                                <i class="bi bi-hourglass-split me-1"></i>
+                                                Payment Setup
+                                            </span>
 
-                                        </a>
+                                        @endif
 
                                     @endif
+
 
 
                                     {{-- =================================================

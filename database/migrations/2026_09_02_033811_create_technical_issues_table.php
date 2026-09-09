@@ -19,10 +19,21 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->foreignId('technical_check_id')
-                ->constrained('technical_checks')
-                ->cascadeOnDelete()
-                ->index();
+            // $table->foreignId('technical_check_id')
+            //     ->constrained('technical_checks')
+            //     ->cascadeOnDelete()
+            //     ->index();
+
+
+            $table->unsignedBigInteger('technical_check_id');
+
+            $table->foreign(
+                'technical_check_id',
+                'technical_issues_technical_check_id_fk'
+            )
+                ->references('id')
+                ->on('technical_checks')
+                ->cascadeOnDelete();
 
 
             /*
@@ -31,10 +42,18 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->foreignId('technical_check_item_id')
-                ->nullable()
-                ->constrained('technical_check_items')
+            $table->unsignedBigInteger('technical_check_item_id')
+                ->nullable();
+
+            $table->foreign(
+                'technical_check_item_id',
+                'technical_issues_technical_check_item_id_fk'
+            )
+                ->references('id')
+                ->on('technical_check_items')
                 ->nullOnDelete();
+
+            $table->index('technical_check_item_id');
 
 
             /*
@@ -46,11 +65,18 @@ return new class extends Migration
             |
             */
 
-            $table->foreignId('manuscript_file_id')
-                ->nullable()
-                ->constrained('manuscript_files')
-                ->nullOnDelete()
-                ->index();
+            $table->unsignedBigInteger('manuscript_file_id')
+                ->nullable();
+
+            $table->foreign(
+                'manuscript_file_id',
+                'technical_issues_manuscript_file_id_fk'
+            )
+                ->references('id')
+                ->on('manuscript_files')
+                ->nullOnDelete();
+
+            $table->index('manuscript_file_id');
 
 
             /*
@@ -165,10 +191,18 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->foreignId('created_by')
-                ->nullable()
-                ->constrained('users')
+            $table->unsignedBigInteger('created_by')
+                ->nullable();
+
+            $table->foreign(
+                'created_by',
+                'technical_issues_created_by_fk'
+            )
+                ->references('id')
+                ->on('users')
                 ->nullOnDelete();
+
+            $table->index('created_by');
 
 
             /*
@@ -177,10 +211,18 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->foreignId('resolved_by')
-                ->nullable()
-                ->constrained('users')
+            $table->unsignedBigInteger('resolved_by')
+                ->nullable();
+
+            $table->foreign(
+                'resolved_by',
+                'technical_issues_resolved_by_fk'
+            )
+                ->references('id')
+                ->on('users')
                 ->nullOnDelete();
+
+            $table->index('resolved_by');
 
 
             /*

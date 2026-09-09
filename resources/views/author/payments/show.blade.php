@@ -6,7 +6,10 @@
 
 <div class="container-fluid py-4">
 
-    {{-- Page Header --}}
+    {{-- =========================================================
+         PAGE HEADER
+    ========================================================== --}}
+
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
 
         <div>
@@ -21,54 +24,83 @@
 
         <a href="{{ route('author.payments.index') }}"
            class="btn btn-outline-secondary">
+
             <i class="bi bi-arrow-left me-1"></i>
             Back to Payments
+
         </a>
 
     </div>
 
 
-    {{-- Success Message --}}
+    {{-- =========================================================
+         SUCCESS MESSAGE
+    ========================================================== --}}
+
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
             <i class="bi bi-check-circle me-2"></i>
+
             {{ session('success') }}
 
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert">
             </button>
+
         </div>
+
     @endif
 
 
-    {{-- Error Message --}}
+    {{-- =========================================================
+         ERROR MESSAGE
+    ========================================================== --}}
+
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
             <i class="bi bi-exclamation-triangle me-2"></i>
+
             {{ session('error') }}
 
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert">
             </button>
+
         </div>
+
     @endif
 
 
     <div class="row g-4">
 
-        {{-- LEFT: Invoice Information --}}
+        {{-- =====================================================
+             LEFT: INVOICE INFORMATION
+        ====================================================== --}}
+
         <div class="col-lg-7">
 
             <div class="card border-0 shadow-sm">
 
                 <div class="card-header bg-white py-3">
+
                     <h5 class="mb-0 fw-bold">
+
                         <i class="bi bi-receipt me-2"></i>
+
                         Invoice Information
+
                     </h5>
+
                 </div>
+
 
                 <div class="card-body">
 
@@ -76,6 +108,7 @@
 
                         {{-- Invoice Number --}}
                         <div class="col-md-6">
+
                             <label class="form-label text-muted">
                                 Invoice Number
                             </label>
@@ -83,26 +116,32 @@
                             <div class="fw-bold">
                                 {{ $payment->invoice_no }}
                             </div>
+
                         </div>
 
 
                         {{-- Invoice Date --}}
                         <div class="col-md-6">
+
                             <label class="form-label text-muted">
                                 Invoice Date
                             </label>
 
                             <div>
+
                                 {{ $payment->invoice_date
                                     ? \Carbon\Carbon::parse($payment->invoice_date)->format('d M Y')
                                     : 'N/A'
                                 }}
+
                             </div>
+
                         </div>
 
 
                         {{-- Fee Type --}}
                         <div class="col-md-6">
+
                             <label class="form-label text-muted">
                                 Fee Type
                             </label>
@@ -110,19 +149,25 @@
                             <div>
                                 {{ $payment->fee_type }}
                             </div>
+
                         </div>
 
 
                         {{-- Amount --}}
                         <div class="col-md-6">
+
                             <label class="form-label text-muted">
                                 Amount
                             </label>
 
                             <div class="fs-4 fw-bold text-primary">
+
                                 {{ number_format($payment->amount, 2) }}
+
                                 {{ $payment->currency }}
+
                             </div>
+
                         </div>
 
 
@@ -137,7 +182,9 @@
 
                                 @if($payment->payment_deadline)
 
-                                    {{ \Carbon\Carbon::parse($payment->payment_deadline)->format('d M Y') }}
+                                    {{ \Carbon\Carbon::parse(
+                                        $payment->payment_deadline
+                                    )->format('d M Y') }}
 
                                 @else
 
@@ -244,8 +291,11 @@
                                 @if($payment->sent_to_author_at)
 
                                     <span class="text-success">
+
                                         <i class="bi bi-check-circle me-1"></i>
+
                                         Sent to Author
+
                                     </span>
 
                                 @else
@@ -263,12 +313,16 @@
                     </div>
 
 
-                    {{-- Manuscript --}}
+                    {{-- =================================================
+                         MANUSCRIPT INFORMATION
+                    ================================================== --}}
+
                     <hr class="my-4">
 
                     <h6 class="fw-bold mb-3">
                         Manuscript Information
                     </h6>
+
 
                     @if($payment->manuscript)
 
@@ -345,13 +399,26 @@
         </div>
 
 
-        {{-- RIGHT: Payment Form --}}
+        {{-- =====================================================
+             RIGHT: PAYMENT ACTION
+        ====================================================== --}}
+
         <div class="col-lg-5">
 
+
+            {{-- =================================================
+                 PAYMENT FORM
+            ================================================== --}}
+
             @if(
-                $payment->payment_status === 'pending' &&
-                $payment->manuscript &&
-                $payment->manuscript->status === 'payment_required'
+                $payment->payment_status === 'pending'
+                &&
+                $payment->manuscript
+                &&
+                in_array(
+                    $payment->manuscript->status,
+                    ['payment_setup', 'payment_required']
+                )
             )
 
                 <div class="card border-0 shadow-sm">
@@ -359,8 +426,11 @@
                     <div class="card-header bg-white py-3">
 
                         <h5 class="mb-0 fw-bold text-success">
+
                             <i class="bi bi-credit-card me-2"></i>
+
                             Submit Payment
+
                         </h5>
 
                     </div>
@@ -368,20 +438,33 @@
 
                     <div class="card-body">
 
+                        {{-- Amount --}}
                         <div class="alert alert-info">
 
-                            <strong>Amount Payable:</strong>
+                            <strong>
+                                Amount Payable:
+                            </strong>
 
                             <span class="float-end fw-bold">
+
                                 {{ number_format($payment->amount, 2) }}
+
                                 {{ $payment->currency }}
+
                             </span>
 
                         </div>
 
 
+                        {{-- =================================================
+                             PAYMENT FORM
+                        ================================================== --}}
+
                         <form method="POST"
-                              action="{{ route('author.payments.submit', $payment->id) }}">
+                              action="{{ route(
+                                  'author.payments.submit',
+                                  $payment->id
+                              ) }}">
 
                             @csrf
 
@@ -390,9 +473,15 @@
                             <div class="mb-3">
 
                                 <label class="form-label fw-semibold">
+
                                     Payment Method
-                                    <span class="text-danger">*</span>
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
                                 </label>
+
 
                                 <select name="payment_method"
                                         class="form-select @error('payment_method') is-invalid @enderror"
@@ -429,10 +518,13 @@
 
                                 </select>
 
+
                                 @error('payment_method')
+
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
+
                                 @enderror
 
                             </div>
@@ -442,9 +534,15 @@
                             <div class="mb-3">
 
                                 <label class="form-label fw-semibold">
+
                                     Transaction ID
-                                    <span class="text-danger">*</span>
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
                                 </label>
+
 
                                 <input type="text"
                                        name="transaction_id"
@@ -453,10 +551,13 @@
                                        placeholder="Enter transaction ID"
                                        required>
 
+
                                 @error('transaction_id')
+
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
+
                                 @enderror
 
                             </div>
@@ -466,33 +567,51 @@
                             <div class="mb-3">
 
                                 <label class="form-label fw-semibold">
+
                                     Payer Name
-                                    <span class="text-danger">*</span>
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
                                 </label>
+
 
                                 <input type="text"
                                        name="payer_name"
-                                       value="{{ old('payer_name', Auth::user()->name ?? '') }}"
+                                       value="{{ old(
+                                           'payer_name',
+                                           Auth::user()->name ?? ''
+                                       ) }}"
                                        class="form-control @error('payer_name') is-invalid @enderror"
                                        placeholder="Enter payer name"
                                        required>
 
+
                                 @error('payer_name')
+
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
+
                                 @enderror
 
                             </div>
 
 
-                            {{-- Mobile --}}
+                            {{-- Payer Mobile --}}
                             <div class="mb-3">
 
                                 <label class="form-label fw-semibold">
+
                                     Payer Mobile
-                                    <span class="text-danger">*</span>
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
                                 </label>
+
 
                                 <input type="text"
                                        name="payer_mobile"
@@ -501,10 +620,13 @@
                                        placeholder="01XXXXXXXXX"
                                        required>
 
+
                                 @error('payer_mobile')
+
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
+
                                 @enderror
 
                             </div>
@@ -514,20 +636,32 @@
                             <div class="mb-3">
 
                                 <label class="form-label fw-semibold">
+
                                     Payment Date
-                                    <span class="text-danger">*</span>
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
                                 </label>
+
 
                                 <input type="date"
                                        name="payment_date"
-                                       value="{{ old('payment_date', now()->format('Y-m-d')) }}"
+                                       value="{{ old(
+                                           'payment_date',
+                                           now()->format('Y-m-d')
+                                       ) }}"
                                        class="form-control @error('payment_date') is-invalid @enderror"
                                        required>
 
+
                                 @error('payment_date')
+
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
+
                                 @enderror
 
                             </div>
@@ -538,8 +672,11 @@
 
                                 <input class="form-check-input"
                                        type="checkbox"
+                                       name="confirmation"
+                                       value="1"
                                        id="payment_confirmation"
                                        required>
+
 
                                 <label class="form-check-label"
                                        for="payment_confirmation">
@@ -569,6 +706,10 @@
                 </div>
 
 
+            {{-- =================================================
+                 PAYMENT SUBMITTED
+            ================================================== --}}
+
             @elseif($payment->payment_status === 'submitted')
 
                 <div class="card border-0 shadow-sm">
@@ -576,20 +717,28 @@
                     <div class="card-body text-center py-5">
 
                         <i class="bi bi-hourglass-split text-info"
-                           style="font-size: 3rem;"></i>
+                           style="font-size: 3rem;">
+                        </i>
 
                         <h5 class="mt-3">
                             Payment Under Verification
                         </h5>
 
                         <p class="text-muted">
+
                             Your payment information has been submitted
                             successfully and is waiting for verification.
+
                         </p>
+
 
                         <div class="alert alert-info text-start">
 
-                            <strong>Transaction ID:</strong><br>
+                            <strong>
+                                Transaction ID:
+                            </strong>
+
+                            <br>
 
                             {{ $payment->transaction_id ?? 'N/A' }}
 
@@ -600,8 +749,13 @@
                 </div>
 
 
+            {{-- =================================================
+                 PAYMENT VERIFIED
+            ================================================== --}}
+
             @elseif(
-                $payment->payment_status === 'paid' &&
+                $payment->payment_status === 'paid'
+                &&
                 $payment->verification_status === 'verified'
             )
 
@@ -610,7 +764,8 @@
                     <div class="card-body text-center py-5">
 
                         <i class="bi bi-check-circle-fill text-success"
-                           style="font-size: 4rem;"></i>
+                           style="font-size: 4rem;">
+                        </i>
 
                         <h4 class="mt-3 text-success">
                             Payment Verified
@@ -619,6 +774,7 @@
                         <p class="text-muted">
                             Your payment has been successfully verified.
                         </p>
+
 
                         @if($payment->transaction_id)
 
@@ -641,6 +797,10 @@
                 </div>
 
 
+            {{-- =================================================
+                 PAYMENT REJECTED
+            ================================================== --}}
+
             @elseif($payment->verification_status === 'rejected')
 
                 <div class="card border-0 shadow-sm">
@@ -650,14 +810,19 @@
                         <div class="alert alert-danger">
 
                             <h5 class="alert-heading">
+
                                 <i class="bi bi-x-circle me-2"></i>
+
                                 Payment Rejected
+
                             </h5>
 
                             <p class="mb-0">
+
                                 Your payment information was rejected.
                                 Please contact the journal administration
                                 for further instructions.
+
                             </p>
 
                         </div>
@@ -667,6 +832,10 @@
                 </div>
 
 
+            {{-- =================================================
+                 DEFAULT
+            ================================================== --}}
+
             @else
 
                 <div class="card border-0 shadow-sm">
@@ -674,7 +843,8 @@
                     <div class="card-body text-center py-5">
 
                         <i class="bi bi-info-circle text-secondary"
-                           style="font-size: 3rem;"></i>
+                           style="font-size: 3rem;">
+                        </i>
 
                         <h5 class="mt-3">
                             Payment Information

@@ -261,4 +261,38 @@ class PaymentVerificationController extends Controller
                 'Payment has been rejected and returned to the author for correction.'
             );
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Verified Payment History
+    |--------------------------------------------------------------------------
+    */
+
+    public function verified()
+    {
+        abort_unless(
+            auth()->user()->can('payment.view'),
+            403
+        );
+
+        $payments = Payment::query()
+            ->where('payment_status', 'paid')
+            ->where('verification_status', 'verified')
+            ->with([
+                'manuscript.submitter',
+                'manuscript.articleType',
+                'manuscript.journal',
+                'createdBy',
+                'verifiedBy',
+            ])
+            ->latest('verified_at')
+            ->paginate(15);
+
+        return view(
+            'admin.payments.verification.verified',
+            compact('payments')
+        );
+    }
+
 }

@@ -19,12 +19,17 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->foreignId('technical_check_id')
-                ->constrained('technical_checks')
-                ->cascadeOnDelete()
-                ->index();
+            // $table->foreignId('technical_check_id')
+            //     ->constrained('technical_checks')
+            //     ->cascadeOnDelete()
+            //     ->index();
 
+            $table->unsignedBigInteger('technical_check_id');
 
+            $table->foreign('technical_check_id', 'technical_check_items_technical_check_id_fk')
+                ->references('id')
+                ->on('technical_checks')
+                ->cascadeOnDelete();
             /*
             |--------------------------------------------------------------------------
             | Checklist Information
