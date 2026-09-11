@@ -4,43 +4,42 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Controllers
+| COMMON / INTERNAL CONTROLLERS
 |--------------------------------------------------------------------------
 */
 
 use App\Http\Controllers\ProfileController;
-
-/*
-|--------------------------------------------------------------------------
-| Internal Dashboard Controller
-|--------------------------------------------------------------------------
-*/
-
 use App\Http\Controllers\InternalDashboardController;
-
+use App\Http\Controllers\Auth\LoginController;
 
 
 /*
 |--------------------------------------------------------------------------
-| Admin Controllers
+| ADMIN CONTROLLERS
 |--------------------------------------------------------------------------
 */
+
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\JournalController;
-use App\Http\Controllers\ArticleTypeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TechnicalCheckController;
 use App\Http\Controllers\Admin\ManuscriptController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentVerificationController;
+use App\Http\Controllers\Admin\ReviewerController;
+use App\Http\Controllers\Admin\ReviewerRequestController;
+use App\Http\Controllers\Admin\ReviewerInvitationController;
+use App\Http\Controllers\Admin\ReviewerAssignmentController;
+
+use App\Http\Controllers\ArticleTypeController;
+
 
 /*
 |--------------------------------------------------------------------------
-| Author Controllers
+| AUTHOR CONTROLLERS
 |--------------------------------------------------------------------------
 */
-
 
 use App\Http\Controllers\Author\Auth\AuthorAuthController;
 use App\Http\Controllers\Author\DashboardController as AuthorDashboardController;
@@ -54,25 +53,27 @@ use App\Http\Controllers\Author\TechnicalCorrectionController;
 
 /*
 |--------------------------------------------------------------------------
-| Reviewer Controllers
+| REVIEWER CONTROLLERS
 |--------------------------------------------------------------------------
 */
 
 use App\Http\Controllers\Reviewer\Auth\ReviewerAuthController;
+use App\Http\Controllers\Reviewer\ReviewerDashboardController;
 use App\Http\Controllers\Reviewer\ReviewerApplicationController;
+use App\Http\Controllers\Reviewer\ReviewerPasswordController;
+use App\Http\Controllers\Reviewer\ReviewerProfileController;
 
+use App\Http\Controllers\Reviewer\ReviewerInvitationController
+    as ReviewerPortalInvitationController;
+
+use App\Http\Controllers\Reviewer\ReviewerReviewController
+    as ReviewerPortalReviewController;
+
+use App\Http\Controllers\Reviewer\ReviewerPaymentController
+    as ReviewerPortalPaymentController;
 /*
 |--------------------------------------------------------------------------
-| Internal Authentication
-|--------------------------------------------------------------------------
-*/
-
-use App\Http\Controllers\Auth\LoginController;
-
-
-/*
-|--------------------------------------------------------------------------
-| PUBLIC HOME
+| PUBLIC WEBSITE
 |--------------------------------------------------------------------------
 */
 
@@ -127,141 +128,154 @@ Route::prefix('author')
 
         /*
         |--------------------------------------------------------------------------
-        | Author Protected Area
+        | Protected Author Area
         |--------------------------------------------------------------------------
         */
 
-        Route::middleware('auth')->group(function () {
+        Route::middleware('auth')
+            ->group(function () {
 
-            Route::post(
-                '/logout',
-                [AuthorAuthController::class, 'logout']
-            )->name('logout');
+                /*
+                |--------------------------------------------------------------------------
+                | Logout
+                |--------------------------------------------------------------------------
+                */
 
-
-            /*
-            | Author Dashboard
-            */
-
-            Route::get(
-                '/dashboard',
-                [
-                    AuthorDashboardController::class,
-                    'index'
-                ]
-            )->name('dashboard');
+                Route::post(
+                    '/logout',
+                    [AuthorAuthController::class, 'logout']
+                )->name('logout');
 
 
-            /*
-            | Author Profile Step 1
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | Dashboard
+                |--------------------------------------------------------------------------
+                */
 
-            Route::get(
-                '/profile/step-1',
-                [AuthorAuthController::class, 'step1']
-            )->name('profile.step1');
-
-            Route::patch(
-                '/profile/step-1',
-                [AuthorAuthController::class, 'step1Update']
-            )->name('profile.step1.update');
+                Route::get(
+                    '/dashboard',
+                    [AuthorDashboardController::class, 'index']
+                )->name('dashboard');
 
 
-            /*
-            | Author Profile Step 2
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | Author Profile - Step 1
+                |--------------------------------------------------------------------------
+                */
 
-            Route::get(
-                '/profile/step-2',
-                [AuthorAuthController::class, 'step2']
-            )->name('profile.step2');
+                Route::get(
+                    '/profile/step-1',
+                    [AuthorAuthController::class, 'step1']
+                )->name('profile.step1');
 
-            Route::patch(
-                '/profile/step-2',
-                [AuthorAuthController::class, 'step2Update']
-            )->name('profile.step2.update');
-
-
-            /*
-            | Author Profile Step 3
-            */
-
-            Route::get(
-                '/profile/step-3',
-                [AuthorAuthController::class, 'step3']
-            )->name('profile.step3');
-
-            Route::patch(
-                '/profile/step-3',
-                [AuthorAuthController::class, 'step3Update']
-            )->name('profile.step3.update');
+                Route::patch(
+                    '/profile/step-1',
+                    [AuthorAuthController::class, 'step1Update']
+                )->name('profile.step1.update');
 
 
-            /*
-            | General Author Profile
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | Author Profile - Step 2
+                |--------------------------------------------------------------------------
+                */
 
-            Route::get(
-                '/profile',
-                [AuthorAuthController::class, 'editProfile']
-            )->name('profile.edit');
+                Route::get(
+                    '/profile/step-2',
+                    [AuthorAuthController::class, 'step2']
+                )->name('profile.step2');
 
-            Route::patch(
-                '/profile',
-                [AuthorAuthController::class, 'updateProfile']
-            )->name('profile.update');
+                Route::patch(
+                    '/profile/step-2',
+                    [AuthorAuthController::class, 'step2Update']
+                )->name('profile.step2.update');
 
-        });
+
+                /*
+                |--------------------------------------------------------------------------
+                | Author Profile - Step 3
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/profile/step-3',
+                    [AuthorAuthController::class, 'step3']
+                )->name('profile.step3');
+
+                Route::patch(
+                    '/profile/step-3',
+                    [AuthorAuthController::class, 'step3Update']
+                )->name('profile.step3.update');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | General Author Profile
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/profile',
+                    [AuthorAuthController::class, 'editProfile']
+                )->name('profile.edit');
+
+                Route::patch(
+                    '/profile',
+                    [AuthorAuthController::class, 'updateProfile']
+                )->name('profile.update');
+            });
     });
 
 
+/*
+|--------------------------------------------------------------------------
+| AUTHOR - NEW ARTICLE SUBMISSION
+|--------------------------------------------------------------------------
+*/
 
-    Route::middleware(['auth'])
-    ->prefix('author')
-    ->group(function(){
-
-
-        Route::get(
-            '/submission/create',
-            [SubmissionController::class,'create']
-        )
-        ->name('author.submission.create');
-
-
-
-        Route::post(
-            '/submission/step1',
-            [SubmissionController::class,'storeStep1']
-        )
-        ->name('author.submission.step1.store');
-
-
+Route::middleware('auth')
+    ->prefix('author/submission')
+    ->name('author.submission.')
+    ->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | Step 2 Show Form
+        | Step 1 - Basic Manuscript Information
         |--------------------------------------------------------------------------
         */
 
         Route::get(
-            '/submission/step2/{manuscript}',
-            [SubmissionController::class,'step2']
-        )
-        ->name('author.submission.step2');
+            '/create',
+            [SubmissionController::class, 'create']
+        )->name('create');
 
+        Route::post(
+            '/step1',
+            [SubmissionController::class, 'storeStep1']
+        )->name('step1.store');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Step 2 Save Data
+        | Step 2
         |--------------------------------------------------------------------------
         */
 
-        Route::post(
-            '/submission/step2/{manuscript}',
-            [SubmissionController::class,'storeStep2']
+        Route::get(
+            '/step2/{manuscript}',
+            [SubmissionController::class, 'step2']
         )
-        ->name('author.submission.step2.store');
+            ->whereNumber('manuscript')
+            ->name('step2');
+
+        Route::post(
+            '/step2/{manuscript}',
+            [SubmissionController::class, 'storeStep2']
+        )
+            ->whereNumber('manuscript')
+            ->name('step2.store');
 
 
         /*
@@ -271,61 +285,60 @@ Route::prefix('author')
         */
 
         Route::get(
-        '/submission/step3/{manuscript}',
-        [SubmissionController::class,'step3']
+            '/step3/{manuscript}',
+            [SubmissionController::class, 'step3']
         )
-        ->name('author.submission.step3');
-
+            ->whereNumber('manuscript')
+            ->name('step3');
 
         Route::post(
-        '/submission/step3/{manuscript}',
-        [SubmissionController::class,'storeStep3']
+            '/step3/{manuscript}',
+            [SubmissionController::class, 'storeStep3']
         )
-        ->name('author.submission.step3.store');
+            ->whereNumber('manuscript')
+            ->name('step3.store');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Step 4 Affiliation
+        | Step 4 - Affiliations
         |--------------------------------------------------------------------------
         */
 
         Route::get(
-            '/submission/step4/{manuscript}',
-            [SubmissionController::class,'step4']
+            '/step4/{manuscript}',
+            [SubmissionController::class, 'step4']
         )
-        ->name('author.submission.step4');
-
+            ->whereNumber('manuscript')
+            ->name('step4');
 
         Route::post(
-            '/submission/step4/{manuscript}',
-            [SubmissionController::class,'storeStep4']
+            '/step4/{manuscript}',
+            [SubmissionController::class, 'storeStep4']
         )
-        ->name('author.submission.step4.store');
-
-
+            ->whereNumber('manuscript')
+            ->name('step4.store');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Step 5 Corresponding Author Declaration
+        | Step 5 - Corresponding Author Declaration
         |--------------------------------------------------------------------------
         */
 
         Route::get(
-            '/author/submission/step5/{manuscript}',
-            [SubmissionController::class,'step5']
+            '/step5/{manuscript}',
+            [SubmissionController::class, 'step5']
         )
-        ->name('author.submission.step5');
-
-
+            ->whereNumber('manuscript')
+            ->name('step5');
 
         Route::post(
-            '/author/submission/step5/{manuscript}',
-            [SubmissionController::class,'storeStep5']
+            '/step5/{manuscript}',
+            [SubmissionController::class, 'storeStep5']
         )
-        ->name('author.submission.step5.store');
-
+            ->whereNumber('manuscript')
+            ->name('step5.store');
 
 
         /*
@@ -335,83 +348,81 @@ Route::prefix('author')
         */
 
         Route::get(
-            '/author/submission/step6/{manuscript}',
+            '/step6/{manuscript}',
             [SubmissionController::class, 'step6']
         )
-        ->name('author.submission.step6');
-
+            ->whereNumber('manuscript')
+            ->name('step6');
 
         Route::post(
-            '/author/submission/step6/{manuscript}',
-            [
-                SubmissionController::class,
-                'storeStep6'
-            ]
+            '/step6/{manuscript}',
+            [SubmissionController::class, 'storeStep6']
         )
-        ->name('author.submission.step6.store');
+            ->whereNumber('manuscript')
+            ->name('step6.store');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Step 7 - Ethical Information 
+        | Step 7 - Ethical Information
         |--------------------------------------------------------------------------
         */
 
         Route::get(
-            '/author/submission/step7/{manuscript}',
-            [
-                SubmissionController::class,
-                'step7'
-            ]
+            '/step7/{manuscript}',
+            [SubmissionController::class, 'step7']
         )
-        ->name('author.submission.step7');
-
+            ->whereNumber('manuscript')
+            ->name('step7');
 
         Route::post(
-        '/author/submission/step7/{manuscript}',
-        [SubmissionController::class,'storeStep7']
+            '/step7/{manuscript}',
+            [SubmissionController::class, 'storeStep7']
         )
-        ->name('author.submission.step7.store');
-
+            ->whereNumber('manuscript')
+            ->name('step7.store');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Step 8 - Ethical Information Upload
+        | Step 8 - Ethical Documents
         |--------------------------------------------------------------------------
         */
-    
+
         Route::get(
-            '/author/submission/step8/{manuscript}',
+            '/step8/{manuscript}',
             [SubmissionController::class, 'step8']
-        )->name('author.submission.step8');
-
+        )
+            ->whereNumber('manuscript')
+            ->name('step8');
 
         Route::post(
-            '/author/submission/step8/{manuscript}',
+            '/step8/{manuscript}',
             [SubmissionController::class, 'storeStep8']
-        )->name('author.submission.step8.store');
+        )
+            ->whereNumber('manuscript')
+            ->name('step8.store');
 
 
-         /*
+        /*
         |--------------------------------------------------------------------------
         | Step 9 - Conflict of Interest
         |--------------------------------------------------------------------------
         */
 
         Route::get(
-            '/author/submission/step9/{manuscript}',
+            '/step9/{manuscript}',
             [SubmissionController::class, 'step9']
         )
-        ->name('author.submission.step9');
-
+            ->whereNumber('manuscript')
+            ->name('step9');
 
         Route::post(
-            '/author/submission/step9/{manuscript}',
+            '/step9/{manuscript}',
             [SubmissionController::class, 'storeStep9']
         )
-        ->name('author.submission.step9.store');
-
+            ->whereNumber('manuscript')
+            ->name('step9.store');
 
 
         /*
@@ -421,38 +432,40 @@ Route::prefix('author')
         */
 
         Route::get(
-        '/author/submission/step10/{id}',
-        [SubmissionController::class,'step10']
+            '/step10/{manuscript}',
+            [SubmissionController::class, 'step10']
         )
-        ->name('author.submission.step10');
-
-
+            ->whereNumber('manuscript')
+            ->name('step10');
 
         Route::post(
-        '/author/submission/step10/{id}',
-        [SubmissionController::class,'storeStep10']
+            '/step10/{manuscript}',
+            [SubmissionController::class, 'storeStep10']
         )
-        ->name('author.submission.step10.store');
+            ->whereNumber('manuscript')
+            ->name('step10.store');
 
-         /*
+
+        /*
         |--------------------------------------------------------------------------
         | Step 11 - Acknowledgement
         |--------------------------------------------------------------------------
         */
-        
-         Route::get(
-        '/author/submission/step11/{id}',
-        [SubmissionController::class,'step11']
+
+        Route::get(
+            '/step11/{manuscript}',
+            [SubmissionController::class, 'step11']
         )
-        ->name('author.submission.step11');
-
-
+            ->whereNumber('manuscript')
+            ->name('step11');
 
         Route::post(
-        '/author/submission/step11/{id}',
-        [SubmissionController::class,'storeStep11']
+            '/step11/{manuscript}',
+            [SubmissionController::class, 'storeStep11']
         )
-        ->name('author.submission.step11.store');
+            ->whereNumber('manuscript')
+            ->name('step11.store');
+
 
         /*
         |--------------------------------------------------------------------------
@@ -461,49 +474,60 @@ Route::prefix('author')
         */
 
         Route::get(
-            '/author/submission/{manuscript}/step12',
-            [SubmissionController::class,'step12']
+            '/step12/{manuscript}',
+            [SubmissionController::class, 'step12']
         )
-        ->name('author.submission.step12');
-
-
+            ->whereNumber('manuscript')
+            ->name('step12');
 
         Route::post(
-            '/author/submission/{manuscript}/step12',
-            [SubmissionController::class,'storeStep12']
+            '/step12/{manuscript}',
+            [SubmissionController::class, 'storeStep12']
         )
-        ->name('author.submission.step12.store');
+            ->whereNumber('manuscript')
+            ->name('step12.store');
+
 
         /*
         |--------------------------------------------------------------------------
         | Step 13 - Submission Confirmation
         |--------------------------------------------------------------------------
         */
-            Route::get(
-            '/author/submission/step13/{manuscript}',
-            [SubmissionController::class,'step13']
-            )->name('author.submission.step13');
+
+        Route::get(
+            '/step13/{manuscript}',
+            [SubmissionController::class, 'step13']
+        )
+            ->whereNumber('manuscript')
+            ->name('step13');
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Final Submit
+        |--------------------------------------------------------------------------
+        */
 
-            Route::post(
-            '/submission/{manuscript}/final-submit',
-            [
-                SubmissionController::class,
-                'finalSubmit'
-            ]
-            )
-            ->name('author.submission.finalSubmit');
-
+        Route::post(
+            '/{manuscript}/final-submit',
+            [SubmissionController::class, 'finalSubmit']
+        )
+            ->whereNumber('manuscript')
+            ->name('finalSubmit');
     });
 
 
-Route::middleware(['auth'])
+/*
+|--------------------------------------------------------------------------
+| AUTHOR - MANUSCRIPT MANAGEMENT
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')
     ->prefix('author')
     ->name('author.')
     ->group(function () {
 
-       
         /*
         |--------------------------------------------------------------------------
         | My Manuscripts
@@ -512,211 +536,133 @@ Route::middleware(['auth'])
 
         Route::get(
             '/manuscripts',
-            [
-                MyManuscriptController::class,
-                'index'
-            ]
+            [MyManuscriptController::class, 'index']
         )->name('manuscripts.index');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Manuscript Details
-        |--------------------------------------------------------------------------
-        */
 
         Route::get(
             '/manuscripts/{manuscript}',
-            [
-                MyManuscriptController::class,
-                'show'
-            ]
-        )->name('manuscripts.show');
-
+            [MyManuscriptController::class, 'show']
+        )
+            ->whereNumber('manuscript')
+            ->name('manuscripts.show');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Submit Technical Correction
+        | Technical Correction
         |--------------------------------------------------------------------------
-        |
-        | Author uses this route after Technical Review returns the
-        | manuscript for correction.
-        |
         */
 
         Route::post(
             '/manuscripts/{manuscript}/technical-correction',
-            [
-                TechnicalCorrectionController::class,
-                'submit'
-            ]
-        )->name('manuscripts.technical-correction.submit');
+            [TechnicalCorrectionController::class, 'submit']
+        )
+            ->whereNumber('manuscript')
+            ->name('manuscripts.technical-correction.submit');
 
 
-       
         /*
         |--------------------------------------------------------------------------
-        | Author Payment
+        | Draft Manuscripts
         |--------------------------------------------------------------------------
         */
 
         Route::get(
-            '/payments',
-            [
-                AuthorPaymentController::class,
-                'index'
-            ]
-        )->name('payments.index');
+            '/drafts',
+            [DraftSubmissionController::class, 'index']
+        )->name('drafts.index');
 
         Route::get(
-            '/payments/{payment}',
-            [
-                AuthorPaymentController::class,
-                'show'
-            ]
-        )->name('payments.show');
-
-        Route::post(
-            '/payments/{payment}/submit',
-            [
-                AuthorPaymentController::class,
-                'submit'
-            ]
-        )->name('payments.submit');
-
-    });
-
-     /*
-    |--------------------------------------------------------------------------
-    | Draft Manuscript
-    |--------------------------------------------------------------------------
-    */
-
-        Route::middleware(['auth'])
-        ->prefix('author')
-        ->name('author.')
-        ->group(function(){
-
-
-            Route::get(
-                '/drafts',
-                [
-                    DraftSubmissionController::class,
-                    'index'
-                ]
-            )
-            ->name('drafts.index');
-
-
-
-            Route::get(
-                '/drafts/{id}/edit',
-                [
-                    DraftSubmissionController::class,
-                    'edit'
-                ]
-            )
+            '/drafts/{id}/edit',
+            [DraftSubmissionController::class, 'edit']
+        )
+            ->whereNumber('id')
             ->name('drafts.edit');
 
-
-
-            Route::delete(
-                '/drafts/{id}',
-                [
-                    DraftSubmissionController::class,
-                    'destroy'
-                ]
-            )
+        Route::delete(
+            '/drafts/{id}',
+            [DraftSubmissionController::class, 'destroy']
+        )
+            ->whereNumber('id')
             ->name('drafts.destroy');
 
 
-
-
-        });
-
-
         /*
         |--------------------------------------------------------------------------
-        | SUBMITTED MANUSCRIPTS
+        | Submitted Manuscripts
         |--------------------------------------------------------------------------
         */
 
-        Route::middleware(['auth'])
-            ->prefix('author')
-            ->name('author.')
-            ->group(function(){
-
-
-                Route::get(
-                    '/submitted-manuscripts',
-                    [
-                        SubmittedManuscriptController::class,
-                        'index'
-                    ]
-                )
-                ->name('submitted.index');
-
-
-
-                Route::get(
-                    '/submitted-manuscripts/{manuscript}',
-                    [
-                        SubmittedManuscriptController::class,
-                        'show'
-                    ]
-                )
-                ->name('submitted.show');
-
-
-            });
-
-
-
-        /*
-|--------------------------------------------------------------------------
-| SUBMITTED MANUSCRIPTS / AUTHOR PAYMENTS
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth'])
-    ->prefix('author')
-    ->name('author.')
-    ->group(function () {
+        Route::get(
+            '/submitted-manuscripts',
+            [SubmittedManuscriptController::class, 'index']
+        )->name('submitted.index');
 
         Route::get(
-            '/payments',
-            [
-                AuthorPaymentController::class,
-                'index'
-            ]
-        )->name('payments.index');
+            '/submitted-manuscripts/{manuscript}',
+            [SubmittedManuscriptController::class, 'show']
+        )
+            ->whereNumber('manuscript')
+            ->name('submitted.show');
 
-
-        Route::get(
-            '/payments/{payment}',
-            [
-                AuthorPaymentController::class,
-                'show'
-            ]
-        )->name('payments.show');
-
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | REVIEWER PORTAL
-    |--------------------------------------------------------------------------
-    */
-
-    Route::prefix('reviewer')
-        ->name('reviewer.')
-        ->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | Reviewer Registration
+        | Author Payments
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/payments',
+            [AuthorPaymentController::class, 'index']
+        )->name('payments.index');
+
+        Route::get(
+            '/payments/{payment}',
+            [AuthorPaymentController::class, 'show']
+        )
+            ->whereNumber('payment')
+            ->name('payments.show');
+
+        Route::post(
+            '/payments/{payment}/submit',
+            [AuthorPaymentController::class, 'submit']
+        )
+            ->whereNumber('payment')
+            ->name('payments.submit');
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| REVIEWER PORTAL
+|--------------------------------------------------------------------------
+|
+| Separate reviewer authentication system.
+|
+| Flow:
+|
+| Register
+|    ↓
+| Reviewer account created
+|    ↓
+| Complete Reviewer Application
+|    ↓
+| Pending Editorial Approval
+|    ↓
+| Approved
+|    ↓
+| Reviewer Dashboard
+|
+|--------------------------------------------------------------------------
+*/
+Route::prefix('reviewer')
+    ->name('reviewer.')
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | GUEST REVIEWER ROUTES
         |--------------------------------------------------------------------------
         */
 
@@ -729,13 +675,6 @@ Route::middleware(['auth'])
             '/register',
             [ReviewerAuthController::class, 'register']
         )->name('register.submit');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Reviewer Login
-        |--------------------------------------------------------------------------
-        */
 
         Route::get(
             '/login',
@@ -750,100 +689,242 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------------------
-        | Reviewer Protected Area
+        | AUTHENTICATED REVIEWER ROUTES
         |--------------------------------------------------------------------------
         */
 
-        Route::middleware('auth:reviewer')->group(function () {
+        Route::middleware('auth:reviewer')
+            ->group(function () {
 
-            /*
-            | Reviewer Logout
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | LOGOUT
+                |--------------------------------------------------------------------------
+                */
 
-            Route::post(
-                '/logout',
-                [ReviewerAuthController::class, 'logout']
-            )->name('logout');
-
-
-            /*
-            | Reviewer Application
-            */
-
-            Route::get(
-                '/application',
-                [ReviewerApplicationController::class, 'edit']
-            )->name('application');
-
-            Route::patch(
-                '/application',
-                [ReviewerApplicationController::class, 'update']
-            )->name('application.update');
+                Route::post(
+                    '/logout',
+                    [ReviewerAuthController::class, 'logout']
+                )->name('logout');
 
 
-            /*
-            | Reviewer Application Status
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | PASSWORD CHANGE
+                |--------------------------------------------------------------------------
+                |
+                | Must remain outside reviewer.approved middleware.
+                | A pending reviewer may need to change a temporary password.
+                |
+                */
 
-            Route::get(
-                '/application/status',
-                [ReviewerApplicationController::class, 'status']
-            )->name('application.status');
+                Route::get(
+                    '/password/change',
+                    [ReviewerPasswordController::class, 'edit']
+                )->name('password.change');
 
-
-            /*
-            | Reviewer Dashboard
-            */
-
-            Route::get(
-                '/dashboard',
-                [ReviewerAuthController::class, 'dashboard']
-            )->name('dashboard');
-
-        });
-    });
+                Route::patch(
+                    '/password/change',
+                    [ReviewerPasswordController::class, 'update']
+                )->name('password.update');
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | REVIEWER APPLICATION
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/application',
+                    [ReviewerApplicationController::class, 'edit']
+                )->name('application.edit');
+
+                Route::patch(
+                    '/application',
+                    [ReviewerApplicationController::class, 'update']
+                )->name('application.update');
+
+                Route::post(
+                    '/application/submit',
+                    [ReviewerApplicationController::class, 'submit']
+                )->name('application.submit');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | APPLICATION STATUS
+                |--------------------------------------------------------------------------
+                |
+                | Possible profile approval statuses:
+                |
+                | draft
+                | pending_approval
+                | update_requested
+                | approved
+                | rejected
+                |
+                */
+
+                Route::get(
+                    '/application/status',
+                    [ReviewerApplicationController::class, 'status']
+                )->name('application.status');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | REVIEWER PROFILE
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/profile',
+                    [ReviewerProfileController::class, 'show']
+                )->name('profile.show');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | REVIEWER DASHBOARD
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/dashboard',
+                    [ReviewerDashboardController::class, 'index']
+                )->name('dashboard');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | APPROVED REVIEWER ONLY
+                |--------------------------------------------------------------------------
+                |
+                | Requirements:
+                |
+                | reviewers.status = approved
+                | reviewer_profiles.approval_status = approved
+                |
+                */
+
+                Route::middleware('reviewer.approved')
+                    ->group(function () {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | REVIEW INVITATIONS
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/invitations',
+                            [
+                                ReviewerPortalInvitationController::class,
+                                'index'
+                            ]
+                        )->name('invitations.index');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | ACTIVE REVIEWS
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/reviews/active',
+                            [
+                                ReviewerPortalReviewController::class,
+                                'active'
+                            ]
+                        )->name('reviews.active');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | COMPLETED REVIEWS
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/reviews/completed',
+                            [
+                                ReviewerPortalReviewController::class,
+                                'completed'
+                            ]
+                        )->name('reviews.completed');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | REVIEW HISTORY
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/reviews/history',
+                            [
+                                ReviewerPortalReviewController::class,
+                                'history'
+                            ]
+                        )->name('reviews.history');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | REVIEWER PAYMENTS
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/payments',
+                            [
+                                ReviewerPortalPaymentController::class,
+                                'index'
+                            ]
+                        )->name('payments.index');
+
+                    }); // reviewer.approved
+
+            }); // auth:reviewer
+
+    }); // reviewer prefix
 /*
 |--------------------------------------------------------------------------
-| INTERNAL SYSTEM LOGIN
+| INTERNAL SYSTEM AUTHENTICATION
 |--------------------------------------------------------------------------
 |
-| System Administrator
-| Editorial Officer
-| Editor-in-Chief
-| Associate Editor
-| Accounts Officer
-| Copy Editor
-| Proofreader
-| Production/Web Administrator
-| Journal Manager
+| Internal roles:
+|
+| - System Administrator
+| - Editorial Officer
+| - Journal Officer
+| - Assistant Editor
+| - Associate / Handling Editor
+| - Editor-in-Chief
+| - Accounts / Finance Officer
+| - Copy Editor
+| - Proofreader
+| - Production Administrator
+| - Journal Manager
 |
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('guest')->group(function () {
+Route::middleware('guest')
+    ->group(function () {
 
-    /*
-    | Login Page
-    */
+        Route::get(
+            '/login',
+            [LoginController::class, 'showLogin']
+        )->name('login');
 
-    Route::get(
-        '/login',
-        [LoginController::class, 'showLogin']
-    )->name('login');
-
-
-    /*
-    | Login Submit
-    */
-
-    Route::post(
-        '/login',
-        [LoginController::class, 'login']
-    )->name('login.submit');
-
-});
+        Route::post(
+            '/login',
+            [LoginController::class, 'login']
+        )->name('login.submit');
+    });
 
 
 /*
@@ -856,8 +937,8 @@ Route::post(
     '/logout',
     [LoginController::class, 'logout']
 )
-->middleware('auth')
-->name('logout');
+    ->middleware('auth')
+    ->name('logout');
 
 
 /*
@@ -866,144 +947,24 @@ Route::post(
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
-
-    Route::get(
-        '/profile',
-        [ProfileController::class, 'edit']
-    )->name('profile.edit');
-
-    Route::patch(
-        '/profile',
-        [ProfileController::class, 'update']
-    )->name('profile.update');
-
-    Route::delete(
-        '/profile',
-        [ProfileController::class, 'destroy']
-    )->name('profile.destroy');
-
-});
-
-
-/*
-|--------------------------------------------------------------------------
-| SYSTEM ADMINISTRATOR
-|--------------------------------------------------------------------------
-|
-| ONLY users with:
-|
-| system_administrator
-|
-| can access these routes.
-|
-*/
-
-    Route::middleware([
-        'auth',
-        'role:system_administrator',
-    ])
-    ->prefix('admin')
-    ->name('admin.')
+Route::middleware('auth')
     ->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Dashboard
-    |--------------------------------------------------------------------------
-    |
-    | URL:
-    | http://127.0.0.1:8000/admin/dashboard
-    |
-    | Route name:
-    | admin.dashboard
-    |
-    */
+        Route::get(
+            '/profile',
+            [ProfileController::class, 'edit']
+        )->name('profile.edit');
 
-    Route::get(
-        '/dashboard',
-        [DashboardController::class, 'index']
-    )->name('dashboard');
+        Route::patch(
+            '/profile',
+            [ProfileController::class, 'update']
+        )->name('profile.update');
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | User Management
-    |--------------------------------------------------------------------------
-    */
-
-    Route::resource(
-        'users',
-        UserController::class
-    )
-    ->middleware(
-        'permission:user.view|user.create|user.edit|user.delete'
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Role Management
-    |--------------------------------------------------------------------------
-    */
-
-    Route::resource(
-        'roles',
-        RoleController::class
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Journal Management
-    |--------------------------------------------------------------------------
-    */
-
-    Route::resource(
-        'journals',
-        JournalController::class
-    )
-    ->middleware(
-        'permission:settings.manage'
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Article Type Management
-    |--------------------------------------------------------------------------
-    */
-
-    Route::resource(
-        'article-types',
-        ArticleTypeController::class
-    )
-    ->middleware(
-        'permission:settings.manage'
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Article Type Status
-    |--------------------------------------------------------------------------
-    */
-
-    Route::patch(
-        '/article-types/{articleType}/toggle-status',
-        [
-            ArticleTypeController::class,
-            'toggleStatus'
-        ]
-    )
-    ->middleware(
-        'permission:settings.manage'
-    )
-    ->name(
-        'article-types.toggle-status'
-    );
-
-});
+        Route::delete(
+            '/profile',
+            [ProfileController::class, 'destroy']
+        )->name('profile.destroy');
+    });
 
 
 /*
@@ -1012,316 +973,1002 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')
+    ->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Common Dashboard Entry
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | Common Dynamic Dashboard
+        |--------------------------------------------------------------------------
+        */
 
-    Route::get(
-        '/dashboard',
-        [InternalDashboardController::class, 'index']
-    )->name('dashboard');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Editorial Officer
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/editorial/dashboard',
-        function () {
-            return view('editorial.dashboard');
-        }
-    )->name('editorial.dashboard');
+        Route::get(
+            '/dashboard',
+            [InternalDashboardController::class, 'index']
+        )->name('dashboard');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Editor Dashboard
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | Editorial Officer Dashboard
+        |--------------------------------------------------------------------------
+        */
 
-    Route::get(
-        '/editor/dashboard',
-        function () {
-            return view('editor.dashboard');
-        }
-    )->name('editor.dashboard');
+        Route::view(
+            '/editorial/dashboard',
+            'editorial.dashboard'
+        )->name('editorial.dashboard');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Assistant Editor Dashboard
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | Editor Dashboard
+        |--------------------------------------------------------------------------
+        */
 
-    Route::get(
-        '/assistant/dashboard',
-        function () {
-            return view('assistant.dashboard');
-        }
-    )->name('assistant.dashboard');
+        Route::view(
+            '/editor/dashboard',
+            'editor.dashboard'
+        )->name('editor.dashboard');
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Assistant Editor Dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        Route::view(
+            '/assistant/dashboard',
+            'assistant.dashboard'
+        )->name('assistant.dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Copyediting Dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        Route::view(
+            '/copyediting/dashboard',
+            'copyediting.dashboard'
+        )->name('copyediting.dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Proofreading Dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        Route::view(
+            '/proofreading/dashboard',
+            'proofreading.dashboard'
+        )->name('proofreading.dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Production Dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        Route::view(
+            '/production/dashboard',
+            'production.dashboard'
+        )->name('production.dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Journal Manager Dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        Route::view(
+            '/journal/dashboard',
+            'journal.dashboard'
+        )->name('journal.dashboard');
+    });
 
 
 /*
 |--------------------------------------------------------------------------
-| FINANCE / ACCOUNTS
+| SYSTEM ADMINISTRATOR
 |--------------------------------------------------------------------------
 */
 
-    Route::middleware([
-        'auth',
-        'permission:finance.view',
-    ])
-    ->prefix('finance')
-    ->name('finance.')
+Route::middleware([
+    'auth',
+    'role:system_administrator',
+])
+    ->prefix('admin')
+    ->name('admin.')
     ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Dashboard
+        |--------------------------------------------------------------------------
+        */
 
         Route::get(
             '/dashboard',
             [DashboardController::class, 'index']
         )->name('dashboard');
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | User Management
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'users',
+            UserController::class
+        )
+            ->middleware(
+                'permission:user.view|user.create|user.edit|user.delete'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Role Management
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'roles',
+            RoleController::class
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Journal Management
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'journals',
+            JournalController::class
+        )
+            ->middleware(
+                'permission:settings.manage'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Article Type - Toggle Status
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            '/article-types/{articleType}/toggle-status',
+            [
+                ArticleTypeController::class,
+                'toggleStatus'
+            ]
+        )
+            ->whereNumber('articleType')
+            ->middleware(
+                'permission:settings.manage'
+            )
+            ->name(
+                'article-types.toggle-status'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Article Type Management
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'article-types',
+            ArticleTypeController::class
+        )
+            ->middleware(
+                'permission:settings.manage'
+            );
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Copyediting Dashboard
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/copyediting/dashboard',
-        function () {
-            return view('copyediting.dashboard');
-        }
-    )->name('copyediting.dashboard');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Proofreading Dashboard
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/proofreading/dashboard',
-        function () {
-            return view('proofreading.dashboard');
-        }
-    )->name('proofreading.dashboard');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Production Dashboard
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/production/dashboard',
-        function () {
-            return view('production.dashboard');
-        }
-    )->name('production.dashboard');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Journal Manager Dashboard
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/journal/dashboard',
-        function () {
-            return view('journal.dashboard');
-        }
-    )->name('journal.dashboard');
-
-});
-
-Route::prefix('admin')
-    ->name('admin.')
-    ->middleware(['auth'])
-    ->group(function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Manuscripts
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/manuscripts',
-        [ManuscriptController::class, 'index']
-    )
-        ->name('manuscripts.index')
-        ->middleware('permission:manuscript.view');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Technical Review
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/manuscripts/technical-review',
-        [TechnicalCheckController::class, 'index']
-    )
-        ->name('manuscripts.technical-review.index')
-        ->middleware('permission:technical_check.view');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Payment Management
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/manuscripts/payment',
-        [PaymentController::class, 'index']
-    )
-        ->name('manuscripts.payment.index')
-        ->middleware('permission:payment.view');
-
-
-    Route::get(
-        '/manuscripts/{manuscript}/payment/create',
-        [PaymentController::class, 'create']
-    )
-        ->name('manuscripts.payment.create')
-        ->middleware('permission:payment.create');
-
-
-    Route::post(
-        '/manuscripts/{manuscript}/payment',
-        [PaymentController::class, 'store']
-    )
-        ->name('manuscripts.payment.store')
-        ->middleware('permission:payment.create');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Manuscript Details
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/manuscripts/{manuscript}',
-        [ManuscriptController::class, 'show']
-    )
-        ->name('manuscripts.show')
-        ->middleware('permission:manuscript.view');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Technical Check
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/manuscripts/{manuscript}/technical-check',
-        [TechnicalCheckController::class, 'show']
-    )
-        ->name('manuscripts.technical-check')
-        ->middleware('permission:technical_check.view');
-
-/*
-    |--------------------------------------------------------------------------
-    | Technical Check Actions
-    |--------------------------------------------------------------------------
-    */
-
-    Route::put(
-        '/technical-checks/{technicalCheck}',
-        [TechnicalCheckController::class, 'update']
-    )
-        ->name('manuscripts.technical-check.update')
-        ->middleware('permission:technical_check.perform');
-
-
-    Route::post(
-        '/technical-checks/{technicalCheck}/complete',
-        [TechnicalCheckController::class, 'complete']
-    )
-        ->name('manuscripts.technical-check.complete')
-        ->middleware('permission:technical_check.complete');
-
-
-    Route::post(
-        '/technical-checks/{technicalCheck}/return',
-        [TechnicalCheckController::class, 'returnToAuthor']
-    )
-        ->name('manuscripts.technical-check.return')
-        ->middleware('permission:technical_check.return');
-
-
-    Route::post(
-        '/technical-checks/{technicalCheck}/issues',
-        [TechnicalCheckController::class, 'addIssue']
-    )
-        ->name('manuscripts.technical-check.issue')
-        ->middleware('permission:technical_check.perform');
-
-
-
-
-    Route::post(
-        '/manuscripts/{manuscript}/technical-check/start',
-        [TechnicalCheckController::class, 'start']
-    )
-        ->name('manuscripts.technical-check.start')
-        ->middleware('permission:technical_check.perform');
-
-
 
 /*
 |--------------------------------------------------------------------------
-| Payment Details
+| ADMIN / EDITORIAL REVIEWER MANAGEMENT
+|--------------------------------------------------------------------------
+|
+| Reviewer self-service belongs to:
+|
+| /reviewer/...
+|
+| Internal reviewer management belongs to:
+|
+| /admin/reviewers/...
+|
 |--------------------------------------------------------------------------
 */
-
-Route::get(
-    '/payments/{payment}',
-    [PaymentController::class, 'show']
-)
-    ->whereNumber('payment')
-    ->name('payments.show')
-    ->middleware('permission:payment.view');
-
-Route::post(
-    '/payments/{payment}/send-to-author',
-    [PaymentController::class, 'sendToAuthor']
-)
-    ->whereNumber('payment')
-    ->name('payments.send-to-author')
-    ->middleware('permission:payment.send');
-
-
-/*
-|--------------------------------------------------------------------------
-| Payment Verification
-|--------------------------------------------------------------------------
-*/
-
-Route::prefix('payments')
-    ->name('payments.')
+Route::middleware('auth')
+    ->prefix('admin/reviewers')
+    ->name('admin.reviewers.')
     ->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | Verification Queue
+        | Reviewer List / Pool
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/',
+            [ReviewerController::class, 'index']
+        )
+            ->middleware('permission:reviewer.view')
+            ->name('index');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Add Reviewer
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/create',
+            [ReviewerController::class, 'create']
+        )
+            ->middleware('permission:reviewer.create')
+            ->name('create');
+
+        Route::post(
+            '/',
+            [ReviewerController::class, 'store']
+        )
+            ->middleware('permission:reviewer.create')
+            ->name('store');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Static Reviewer Status Routes
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/profile-incomplete',
+            [ReviewerController::class, 'profileIncomplete']
+        )
+            ->middleware('permission:reviewer.view')
+            ->name('profile-incomplete');
+
+
+        Route::get(
+            '/pending',
+            [ReviewerController::class, 'pending']
+        )
+            ->middleware('permission:reviewer.view')
+            ->name('pending');
+
+
+        Route::get(
+            '/update-requested',
+            [ReviewerController::class, 'updateRequested']
+        )
+            ->middleware('permission:reviewer.view')
+            ->name('update-requested');
+
+
+        Route::get(
+            '/approved',
+            [ReviewerController::class, 'approved']
+        )
+            ->middleware('permission:reviewer.view')
+            ->name('approved');
+
+
+        Route::get(
+            '/rejected',
+            [ReviewerController::class, 'rejected']
+        )
+            ->middleware('permission:reviewer.view')
+            ->name('rejected');
+
+
+        Route::get(
+            '/suspended',
+            [ReviewerController::class, 'suspended']
+        )
+            ->middleware('permission:reviewer.view')
+            ->name('suspended');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reviewer Search
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/search',
+            [ReviewerController::class, 'search']
+        )
+            ->middleware('permission:reviewer.search')
+            ->name('search');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reviewer Workload
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/workload',
+            [ReviewerController::class, 'workload']
+        )
+            ->middleware('permission:reviewer.workload.view')
+            ->name('workload');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reviewer History
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/review-history',
+            [ReviewerController::class, 'reviewHistory']
+        )
+            ->middleware('permission:reviewer.history.view')
+            ->name('review-history');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reviewer Performance
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/performance',
+            [ReviewerController::class, 'performance']
+        )
+            ->middleware('permission:reviewer.performance.view')
+            ->name('performance');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reviewer Approval
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            '/{reviewer}/approve',
+            [ReviewerController::class, 'approve']
+        )
+            ->whereNumber('reviewer')
+            ->middleware('permission:reviewer.approve')
+            ->name('approve');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reviewer Rejection
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            '/{reviewer}/reject',
+            [ReviewerController::class, 'reject']
+        )
+            ->whereNumber('reviewer')
+            ->middleware('permission:reviewer.reject')
+            ->name('reject');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Request Reviewer Update
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            '/{reviewer}/request-update',
+            [ReviewerController::class, 'requestUpdate']
+        )
+            ->whereNumber('reviewer')
+            ->middleware('permission:reviewer.request_update')
+            ->name('request-update');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Suspend Reviewer
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            '/{reviewer}/suspend',
+            [ReviewerController::class, 'suspend']
+        )
+            ->whereNumber('reviewer')
+            ->middleware('permission:reviewer.suspend')
+            ->name('suspend');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Activate Reviewer
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            '/{reviewer}/activate',
+            [ReviewerController::class, 'activate']
+        )
+            ->whereNumber('reviewer')
+            ->middleware('permission:reviewer.activate')
+            ->name('activate');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Edit Reviewer
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/{reviewer}/edit',
+            [ReviewerController::class, 'edit']
+        )
+            ->whereNumber('reviewer')
+            ->middleware('permission:reviewer.edit')
+            ->name('edit');
+
+
+        Route::put(
+            '/{reviewer}',
+            [ReviewerController::class, 'update']
+        )
+            ->whereNumber('reviewer')
+            ->middleware('permission:reviewer.edit')
+            ->name('update');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reviewer Details
+        |--------------------------------------------------------------------------
+        |
+        | Dynamic route LAST.
+        |
+        */
+
+        Route::get(
+            '/{reviewer}',
+            [ReviewerController::class, 'show']
+        )
+            ->whereNumber('reviewer')
+            ->middleware('permission:reviewer.view')
+            ->name('show');
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| REVIEWER INVITATION MANAGEMENT
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')
+    ->prefix('admin/reviewer-invitations')
+    ->name('admin.reviewer-invitations.')
+    ->group(function () {
+
+        Route::get(
+            '/',
+            [ReviewerInvitationController::class, 'index']
+        )
+            ->middleware('permission:reviewer.invitation.view')
+            ->name('index');
+
+        Route::get(
+            '/create',
+            [ReviewerInvitationController::class, 'create']
+        )
+            ->middleware('permission:reviewer.invite')
+            ->name('create');
+
+        Route::post(
+            '/',
+            [ReviewerInvitationController::class, 'store']
+        )
+            ->middleware('permission:reviewer.invite')
+            ->name('store');
+
+        Route::get(
+            '/{invitation}',
+            [ReviewerInvitationController::class, 'show']
+        )
+            ->whereNumber('invitation')
+            ->middleware('permission:reviewer.invitation.view')
+            ->name('show');
+
+        Route::patch(
+            '/{invitation}/remind',
+            [ReviewerInvitationController::class, 'remind']
+        )
+            ->whereNumber('invitation')
+            ->middleware('permission:reviewer.invitation.remind')
+            ->name('remind');
+
+        Route::patch(
+            '/{invitation}/cancel',
+            [ReviewerInvitationController::class, 'cancel']
+        )
+            ->whereNumber('invitation')
+            ->middleware('permission:reviewer.invitation.cancel')
+            ->name('cancel');
+    });
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | REVIEWER REQUESTS
+    |--------------------------------------------------------------------------
+    */
+
+        Route::middleware('auth')
+            ->prefix('admin/reviewers/requests')
+            ->name('admin.reviewers.requests.')
+            ->group(function () {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Reviewer Request List
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/',
+                    [ReviewerRequestController::class, 'index']
+                )
+                    ->middleware('permission:reviewer.request')
+                    ->name('index');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create Reviewer Request
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/create',
+                    [ReviewerRequestController::class, 'create']
+                )
+                    ->middleware('permission:reviewer.request')
+                    ->name('create');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Store Reviewer Request
+                |--------------------------------------------------------------------------
+                */
+
+                Route::post(
+                    '/',
+                    [ReviewerRequestController::class, 'store']
+                )
+                    ->middleware('permission:reviewer.request')
+                    ->name('store');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | View Reviewer Request
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/{reviewerRequest}',
+                    [ReviewerRequestController::class, 'show']
+                )
+                    ->whereNumber('reviewerRequest')
+                    ->middleware('permission:reviewer.request')
+                    ->name('show');
+            });
+    
+/*
+|--------------------------------------------------------------------------
+| REVIEWER ASSIGNMENT MANAGEMENT
+|--------------------------------------------------------------------------
+|
+| Assistant Editor / Handling Editor assigns reviewers
+| to submitted manuscripts.
+|
+*/
+
+Route::middleware('auth')
+    ->prefix('admin/reviewer-assignments')
+    ->name('admin.reviewer-assignments.')
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Assignment Dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/',
+            [ReviewerAssignmentController::class, 'index']
+        )
+        ->middleware('permission:reviewer.assign')
+        ->name('index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pending Manuscripts for Assignment
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/pending',
+            [ReviewerAssignmentController::class, 'pending']
+        )
+        ->middleware('permission:reviewer.assign')
+        ->name('pending');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Assignment Form
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/create/{manuscript}',
+            [ReviewerAssignmentController::class, 'create']
+        )
+        ->whereNumber('manuscript')
+        ->middleware('permission:reviewer.assign')
+        ->name('create');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Save Assignment
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/',
+            [ReviewerAssignmentController::class, 'store']
+        )
+        ->middleware('permission:reviewer.assign')
+        ->name('store');
+
+        /*
+        |--------------------------------------------------------------------------
+        | View Assignment
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/{assignment}',
+            [ReviewerAssignmentController::class, 'show']
+        )
+        ->whereNumber('assignment')
+        ->middleware('permission:reviewer.assign')
+        ->name('show');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Assignment
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/{assignment}/edit',
+            [ReviewerAssignmentController::class, 'edit']
+        )
+        ->whereNumber('assignment')
+        ->middleware('permission:reviewer.assign')
+        ->name('edit');
+
+        Route::put(
+            '/{assignment}',
+            [ReviewerAssignmentController::class, 'update']
+        )
+        ->whereNumber('assignment')
+        ->middleware('permission:reviewer.assign')
+        ->name('update');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Reviewer Assignment
+        |--------------------------------------------------------------------------
+        */
+
+        Route::delete(
+            '/{assignment}',
+            [ReviewerAssignmentController::class, 'destroy']
+        )
+        ->whereNumber('assignment')
+        ->middleware('permission:reviewer.assign')
+        ->name('destroy');
+
+    });
+
+
+
+/*
+|--------------------------------------------------------------------------
+| INTERNAL MANUSCRIPT MANAGEMENT
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Manuscript List
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/manuscripts',
+            [ManuscriptController::class, 'index']
+        )
+            ->middleware(
+                'permission:manuscript.view'
+            )
+            ->name('manuscripts.index');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Technical Review Queue
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/manuscripts/technical-review',
+            [TechnicalCheckController::class, 'index']
+        )
+            ->middleware(
+                'permission:technical_check.view'
+            )
+            ->name(
+                'manuscripts.technical-review.index'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Payment Request Queue
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/manuscripts/payment',
+            [PaymentController::class, 'index']
+        )
+            ->middleware(
+                'permission:payment.view'
+            )
+            ->name(
+                'manuscripts.payment.index'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Payment Request
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/manuscripts/{manuscript}/payment/create',
+            [PaymentController::class, 'create']
+        )
+            ->whereNumber('manuscript')
+            ->middleware(
+                'permission:payment.create'
+            )
+            ->name(
+                'manuscripts.payment.create'
+            );
+
+        Route::post(
+            '/manuscripts/{manuscript}/payment',
+            [PaymentController::class, 'store']
+        )
+            ->whereNumber('manuscript')
+            ->middleware(
+                'permission:payment.create'
+            )
+            ->name(
+                'manuscripts.payment.store'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Technical Check - Details
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/manuscripts/{manuscript}/technical-check',
+            [TechnicalCheckController::class, 'show']
+        )
+            ->whereNumber('manuscript')
+            ->middleware(
+                'permission:technical_check.view'
+            )
+            ->name(
+                'manuscripts.technical-check'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Start Technical Check
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/manuscripts/{manuscript}/technical-check/start',
+            [TechnicalCheckController::class, 'start']
+        )
+            ->whereNumber('manuscript')
+            ->middleware(
+                'permission:technical_check.perform'
+            )
+            ->name(
+                'manuscripts.technical-check.start'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Technical Check
+        |--------------------------------------------------------------------------
+        */
+
+        Route::put(
+            '/technical-checks/{technicalCheck}',
+            [TechnicalCheckController::class, 'update']
+        )
+            ->whereNumber('technicalCheck')
+            ->middleware(
+                'permission:technical_check.perform'
+            )
+            ->name(
+                'manuscripts.technical-check.update'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Complete Technical Check
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/technical-checks/{technicalCheck}/complete',
+            [TechnicalCheckController::class, 'complete']
+        )
+            ->whereNumber('technicalCheck')
+            ->middleware(
+                'permission:technical_check.complete'
+            )
+            ->name(
+                'manuscripts.technical-check.complete'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return Manuscript to Author
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/technical-checks/{technicalCheck}/return',
+            [TechnicalCheckController::class, 'returnToAuthor']
+        )
+            ->whereNumber('technicalCheck')
+            ->middleware(
+                'permission:technical_check.return'
+            )
+            ->name(
+                'manuscripts.technical-check.return'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Add Technical Issue
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/technical-checks/{technicalCheck}/issues',
+            [TechnicalCheckController::class, 'addIssue']
+        )
+            ->whereNumber('technicalCheck')
+            ->middleware(
+                'permission:technical_check.perform'
+            )
+            ->name(
+                'manuscripts.technical-check.issue'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Manuscript Details
+        |--------------------------------------------------------------------------
+        |
+        | Keep after static / workflow routes.
+        |
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/manuscripts/{manuscript}',
+            [ManuscriptController::class, 'show']
+        )
+            ->whereNumber('manuscript')
+            ->middleware(
+                'permission:manuscript.view'
+            )
+            ->name(
+                'manuscripts.show'
+            );
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| INTERNAL PAYMENT MANAGEMENT
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')
+    ->prefix('admin/payments')
+    ->name('admin.payments.')
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Payment Verification Queue
         |--------------------------------------------------------------------------
         */
 
@@ -1329,13 +1976,37 @@ Route::prefix('payments')
             '/verification',
             [PaymentVerificationController::class, 'index']
         )
-            ->name('verification.index')
-            ->middleware('permission:payment.verify');
+            ->middleware(
+                'permission:payment.verify'
+            )
+            ->name(
+                'verification.index'
+            );
 
 
         /*
         |--------------------------------------------------------------------------
-        | Verification Details
+        | Verified Payment History
+        |--------------------------------------------------------------------------
+        |
+        | Static route is intentionally before /{payment}.
+        |
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/verified',
+            [PaymentVerificationController::class, 'verified']
+        )
+            ->middleware(
+                'permission:payment.view'
+            )
+            ->name('verified');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Payment Verification Details
         |--------------------------------------------------------------------------
         */
 
@@ -1344,8 +2015,12 @@ Route::prefix('payments')
             [PaymentVerificationController::class, 'show']
         )
             ->whereNumber('payment')
-            ->name('verification.show')
-            ->middleware('permission:payment.verify');
+            ->middleware(
+                'permission:payment.verify'
+            )
+            ->name(
+                'verification.show'
+            );
 
 
         /*
@@ -1359,8 +2034,12 @@ Route::prefix('payments')
             [PaymentVerificationController::class, 'verify']
         )
             ->whereNumber('payment')
-            ->name('verification.verify')
-            ->middleware('permission:payment.verify');
+            ->middleware(
+                'permission:payment.verify'
+            )
+            ->name(
+                'verification.verify'
+            );
 
 
         /*
@@ -1374,26 +2053,97 @@ Route::prefix('payments')
             [PaymentVerificationController::class, 'reject']
         )
             ->whereNumber('payment')
-            ->name('verification.reject')
-            ->middleware('permission:payment.verify');
-
-
-
-           /*
-            |--------------------------------------------------------------------------
-            | Verified Payment History
-            |--------------------------------------------------------------------------
-            */
-
-            Route::get(
-                '/verified',
-                [PaymentVerificationController::class, 'verified']
+            ->middleware(
+                'permission:payment.verify'
             )
-                ->name('verified')
-                ->middleware('permission:payment.view');
+            ->name(
+                'verification.reject'
+            );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Send Payment Request to Author
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/{payment}/send-to-author',
+            [PaymentController::class, 'sendToAuthor']
+        )
+            ->whereNumber('payment')
+            ->middleware(
+                'permission:payment.send'
+            )
+            ->name(
+                'send-to-author'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Payment Details
+        |--------------------------------------------------------------------------
+        |
+        | Keep dynamic route at bottom.
+        |
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/{payment}',
+            [PaymentController::class, 'show']
+        )
+            ->whereNumber('payment')
+            ->middleware(
+                'permission:payment.view'
+            )
+            ->name('show');
     });
 
-});
 
-  
+/*
+|--------------------------------------------------------------------------
+| FINANCE / ACCOUNTS
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware([
+    'auth',
+    'permission:finance.view',
+])
+    ->prefix('finance')
+    ->name('finance.')
+    ->group(function () {
+
+        Route::get(
+            '/dashboard',
+            [DashboardController::class, 'index']
+        )->name('dashboard');
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| FUTURE WORKFLOW MODULES
+|--------------------------------------------------------------------------
+|
+| Add future routes here in workflow order:
+|
+| 1. Similarity Check
+| 2. Editor Assignment
+| 3. Editorial Assessment
+| 4. Reviewer Selection
+| 5. Reviewer Invitation
+| 6. Peer Review
+| 7. Editorial Recommendation
+| 8. Editor-in-Chief Decision
+| 9. Author Revision
+| 10. Re-review
+| 11. Final Decision
+| 12. Copyediting
+| 13. Proofreading
+| 14. Publication
+|
+|--------------------------------------------------------------------------
+*/

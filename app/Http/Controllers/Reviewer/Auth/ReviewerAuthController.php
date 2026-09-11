@@ -4,36 +4,91 @@ namespace App\Http\Controllers\Reviewer\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reviewer;
+use App\Models\ReviewerLookupOption;
 use App\Models\ReviewerProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 
 class ReviewerAuthController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | REGISTRATION
+    | REGISTRATION FORM
     |--------------------------------------------------------------------------
     */
 
     public function showRegister()
     {
-        return view('reviewer.auth.register');
+        if (Auth::guard('reviewer')->check()) {
+            return redirect()->route('reviewer.dashboard');
+        }
+
+        $lookup = function (string $type) {
+            return ReviewerLookupOption::query()
+                ->where('type', $type)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('value')
+                ->pluck('value');
+        };
+
+        $divisions = $lookup('division_state');
+
+        $districts = ReviewerLookupOption::query()
+            ->where('type', 'city_district')
+            ->where('is_active', true)
+            ->orderBy('parent_value')
+            ->orderBy('value')
+            ->get([
+                'value',
+                'parent_value',
+            ]);
+
+        $institutions = $lookup('institution');
+        $departments = $lookup('department');
+        $designations = $lookup('designation');
+        $highestDegrees = $lookup('highest_degree');
+        $specializations = $lookup('specialization');
+        $researchInterests = $lookup('research_interest');
+        $reviewKeywords = $lookup('review_keyword');
+
+        return view(
+            'reviewer.auth.register',
+            compact(
+                'divisions',
+                'districts',
+                'institutions',
+                'departments',
+                'designations',
+                'highestDegrees',
+                'specializations',
+                'researchInterests',
+                'reviewKeywords'
+            )
+        );
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | REGISTER REVIEWER
+    |--------------------------------------------------------------------------
+    */
+
     public function register(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Validate Registration
-        |--------------------------------------------------------------------------
-        */
-
         $validated = $request->validate([
+
+            /*
+            |--------------------------------------------------------------------------
+            | Personal Information
+            |--------------------------------------------------------------------------
+            */
 
             'title' => [
                 'required',
@@ -59,22 +114,6 @@ class ReviewerAuthController extends Controller
                 'max:100',
             ],
 
-            /*
-            |--------------------------------------------------------------------------
-            | Reviewer Email
-            |--------------------------------------------------------------------------
-            |
-            | IMPORTANT:
-            |
-            | We check the email ONLY in reviewers table.
-            |
-            | Therefore the same email can exist in:
-            |
-            | users.email
-            | reviewers.email
-            |
-            */
-
             'email' => [
                 'required',
                 'email',
@@ -88,60 +127,438 @@ class ReviewerAuthController extends Controller
                 'max:30',
             ],
 
-            'password' => [
+
+            /*
+            |--------------------------------------------------------------------------
+            | Location
+            |--------------------------------------------------------------------------
+            */
+
+            'division_state' => [
                 'required',
                 'string',
-                'min:8',
+                'max:255',
+            ],
+
+            'division_state_other' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'city_district' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'city_district_other' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Institution / Professional Information
+            |--------------------------------------------------------------------------
+            */
+
+            'institution' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'institution_other' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'department' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'department_other' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'designation' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'designation_other' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Highest Degree
+            |--------------------------------------------------------------------------
+            */
+
+            'highest_degree' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'highest_degree_other' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Specialization - Multiple
+            |--------------------------------------------------------------------------
+            */
+
+            'specialization' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'specialization.*' => [
+                'string',
+                'max:255',
+            ],
+
+            'specialization_other' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Research Interests - Multiple
+            |--------------------------------------------------------------------------
+            */
+
+            'research_interests' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'research_interests.*' => [
+                'string',
+                'max:255',
+            ],
+
+            'research_interest_other' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Research / Review Keywords - Multiple
+            |--------------------------------------------------------------------------
+            */
+
+            'review_keywords' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'review_keywords.*' => [
+                'string',
+                'max:255',
+            ],
+
+            'review_keyword_other' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CV - PDF Only
+            |--------------------------------------------------------------------------
+            */
+
+            'cv_file' => [
+                'required',
+                'file',
+                'mimes:pdf',
+                'mimetypes:application/pdf',
+                'max:5120',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Password
+            |--------------------------------------------------------------------------
+            */
+
+            'password' => [
+                'required',
                 'confirmed',
+
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers(),
             ],
         ]);
 
 
-        DB::beginTransaction();
+        /*
+        |--------------------------------------------------------------------------
+        | Resolve Single Dropdown Values
+        |--------------------------------------------------------------------------
+        */
 
+        $divisionState = $this->resolveSingleOption(
+            $validated,
+            'division_state',
+            'division_state_other'
+        );
+
+        $cityDistrict = $this->resolveSingleOption(
+            $validated,
+            'city_district',
+            'city_district_other'
+        );
+
+        $institution = $this->resolveSingleOption(
+            $validated,
+            'institution',
+            'institution_other'
+        );
+
+        $department = $this->resolveSingleOption(
+            $validated,
+            'department',
+            'department_other'
+        );
+
+        $designation = $this->resolveSingleOption(
+            $validated,
+            'designation',
+            'designation_other'
+        );
+
+        $highestDegree = $this->resolveSingleOption(
+            $validated,
+            'highest_degree',
+            'highest_degree_other'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate "Other" fields
+        |--------------------------------------------------------------------------
+        */
+
+        $this->ensureResolvedValue(
+            $divisionState,
+            'division_state',
+            'Division / State'
+        );
+
+        $this->ensureResolvedValue(
+            $cityDistrict,
+            'city_district',
+            'City / District'
+        );
+
+        $this->ensureResolvedValue(
+            $institution,
+            'institution',
+            'Institution / Organization'
+        );
+
+        $this->ensureResolvedValue(
+            $department,
+            'department',
+            'Department'
+        );
+
+        $this->ensureResolvedValue(
+            $designation,
+            'designation',
+            'Current Designation'
+        );
+
+        $this->ensureResolvedValue(
+            $highestDegree,
+            'highest_degree',
+            'Highest Academic Degree'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Resolve Multiple Values
+        |--------------------------------------------------------------------------
+        */
+
+        $specializations = $this->resolveMultipleOptions(
+            $validated['specialization'],
+            $validated['specialization_other'] ?? null
+        );
+
+        $researchInterests = $this->resolveMultipleOptions(
+            $validated['research_interests'],
+            $validated['research_interest_other'] ?? null
+        );
+
+        $reviewKeywords = $this->resolveMultipleOptions(
+            $validated['review_keywords'],
+            $validated['review_keyword_other'] ?? null
+        );
+
+
+        if (empty($specializations)) {
+            throw ValidationException::withMessages([
+                'specialization' =>
+                    'Please select or enter at least one specialization.',
+            ]);
+        }
+
+        if (empty($researchInterests)) {
+            throw ValidationException::withMessages([
+                'research_interests' =>
+                    'Please select or enter at least one research interest.',
+            ]);
+        }
+
+        if (empty($reviewKeywords)) {
+            throw ValidationException::withMessages([
+                'review_keywords' =>
+                    'Please select or enter at least one research/review keyword.',
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Store CV
+        |--------------------------------------------------------------------------
+        */
+
+        $cvPath = $request
+            ->file('cv_file')
+            ->store(
+                'reviewers/cv',
+                'public'
+            );
+
+
+        DB::beginTransaction();
 
         try {
 
             /*
             |--------------------------------------------------------------------------
-            | Create Reviewer Account
+            | Build Reviewer Name
+            |--------------------------------------------------------------------------
+            */
+
+            $nameParts = array_filter([
+                trim($validated['first_name']),
+
+                filled($validated['middle_name'] ?? null)
+                    ? trim($validated['middle_name'])
+                    : null,
+
+                trim($validated['last_name']),
+            ]);
+
+            $fullName = implode(
+                ' ',
+                $nameParts
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Reviewer Authentication Account
+            |--------------------------------------------------------------------------
+            |
+            | Reviewer model already has:
+            |
+            | 'password' => 'hashed'
+            |
+            | Therefore DO NOT use Hash::make().
             |--------------------------------------------------------------------------
             */
 
             $reviewer = Reviewer::create([
 
-                'name' => trim(
-                    $validated['first_name']
-                    . ' '
-                    . ($validated['middle_name'] ?? '')
-                    . ' '
-                    . $validated['last_name']
-                ),
+                'name' =>
+                    $fullName,
 
-                'email' => $validated['email'],
+                'email' =>
+                    strtolower(
+                        trim($validated['email'])
+                    ),
 
-                'password' => Hash::make(
-                    $validated['password']
-                ),
+                'password' =>
+                    $validated['password'],
+
+                'status' =>
+                    'pending',
+
+                'created_source' =>
+                    'self_registration',
+
+                'created_by' =>
+                    null,
 
                 /*
-                |--------------------------------------------------------------------------
-                | IMPORTANT
-                |--------------------------------------------------------------------------
-                |
-                | Do NOT use "active".
-                |
-                | Your reviewers.status column contains:
-                |
-                | pending
-                | approved
-                | rejected
-                | suspended
-                |
+                | User chose their own password.
                 */
 
-                'status' => 'pending',
+                'must_change_password' =>
+                    false,
+
+                'password_changed_at' =>
+                    now(),
             ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Generate Application ID
+            |--------------------------------------------------------------------------
+            */
+
+            $applicationId =
+                'BMRC-REV-'
+                . now()->format('Y')
+                . '-'
+                . str_pad(
+                    $reviewer->id,
+                    6,
+                    '0',
+                    STR_PAD_LEFT
+                );
 
 
             /*
@@ -149,25 +566,26 @@ class ReviewerAuthController extends Controller
             | Generate Reviewer Code
             |--------------------------------------------------------------------------
             |
-            | Example:
-            |
-            | BMRC-REV-A8K29XQP
-            |
+            | You may later decide to generate reviewer_code only after approval.
+            | This keeps your existing behaviour for now.
+            |--------------------------------------------------------------------------
             */
 
             do {
 
                 $reviewerCode =
-                    'BMRC-REV-' .
-                    strtoupper(
+                    'BMRC-REV-'
+                    . strtoupper(
                         Str::random(8)
                     );
 
             } while (
-                ReviewerProfile::where(
-                    'reviewer_code',
-                    $reviewerCode
-                )->exists()
+                ReviewerProfile::query()
+                    ->where(
+                        'reviewer_code',
+                        $reviewerCode
+                    )
+                    ->exists()
             );
 
 
@@ -177,184 +595,327 @@ class ReviewerAuthController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            ReviewerProfile::create([
+            $profile = ReviewerProfile::create([
 
-                /*
-                |--------------------------------------------------------------------------
-                | Relationship
-                |--------------------------------------------------------------------------
-                */
+                'reviewer_id' =>
+                    $reviewer->id,
 
-                'reviewer_id' => $reviewer->id,
+                'application_id' =>
+                    $applicationId,
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Reviewer Identification
-                |--------------------------------------------------------------------------
-                */
-
-                'reviewer_code' => $reviewerCode,
+                'reviewer_code' =>
+                    $reviewerCode,
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Personal Information
+                | Personal
                 |--------------------------------------------------------------------------
                 */
 
                 'title' =>
-                    $validated['title'],
+                    trim($validated['title']),
 
                 'first_name' =>
-                    $validated['first_name'],
+                    trim($validated['first_name']),
 
                 'middle_name' =>
-                    $validated['middle_name'] ?? null,
+                    filled($validated['middle_name'] ?? null)
+                        ? trim($validated['middle_name'])
+                        : null,
 
                 'last_name' =>
-                    $validated['last_name'],
+                    trim($validated['last_name']),
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Display Name
-                |--------------------------------------------------------------------------
-                */
-
-                'display_name' => trim(
-                    $validated['title']
-                    . ' '
-                    . $validated['first_name']
-                    . ' '
-                    . ($validated['middle_name'] ?? '')
-                    . ' '
-                    . $validated['last_name']
-                ),
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Contact Information
-                |--------------------------------------------------------------------------
-                */
+                'display_name' =>
+                    trim(
+                        $validated['title']
+                        . ' '
+                        . $fullName
+                    ),
 
                 'mobile' =>
-                    $validated['mobile'],
+                    trim($validated['mobile']),
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Default Country
+                | Location
                 |--------------------------------------------------------------------------
                 */
 
                 'country' =>
                     'Bangladesh',
 
+                'division_state' =>
+                    $divisionState,
+
+                'city_district' =>
+                    $cityDistrict,
+
 
                 /*
                 |--------------------------------------------------------------------------
-                | Application Status
+                | Professional
                 |--------------------------------------------------------------------------
                 */
 
-                'status' =>
-                    'pending',
+                'institution' =>
+                    $institution,
 
-                'applied_at' =>
-                    now(),
+                'department' =>
+                    $department,
+
+                'designation' =>
+                    $designation,
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Profile Completion
+                | Academic
+                |--------------------------------------------------------------------------
+                */
+
+                'highest_degree' =>
+                    $highestDegree,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Expertise / Research
+                |--------------------------------------------------------------------------
+                |
+                | Current database columns are TEXT.
+                |--------------------------------------------------------------------------
+                */
+
+                'specialization' =>
+                    implode(
+                        ', ',
+                        $specializations
+                    ),
+
+                'research_interests' =>
+                    implode(
+                        ', ',
+                        $researchInterests
+                    ),
+
+                'expertise_keywords' =>
+                    implode(
+                        ', ',
+                        $reviewKeywords
+                    ),
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CV
+                |--------------------------------------------------------------------------
+                */
+
+                'cv_file' =>
+                    $cvPath,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Profile Lifecycle
+                |--------------------------------------------------------------------------
+                |
+                | IMPORTANT:
+                | Your ReviewerProfile model uses approval_status,
+                | NOT status.
                 |--------------------------------------------------------------------------
                 */
 
                 'profile_completed' =>
                     false,
 
+                'profile_completion_percentage' =>
+                    60,
 
-                /*
-                |--------------------------------------------------------------------------
-                | Reviewer Availability
-                |--------------------------------------------------------------------------
-                */
+                'profile_completed_at' =>
+                    null,
+
+                'approval_status' =>
+                    'draft',
+
+                'submitted_for_approval_at' =>
+                    null,
 
                 'available_for_review' =>
                     false,
+
+                'maximum_active_reviews' =>
+                    3,
+
+                'preferred_communication_method' =>
+                    'email',
+
+                'receive_review_invitations' =>
+                    true,
+
+                'receive_reminders' =>
+                    true,
+
+                'requires_reverification' =>
+                    false,
+
+                'last_profile_updated_at' =>
+                    now(),
             ]);
 
 
             /*
             |--------------------------------------------------------------------------
-            | Commit Transaction
+            | Add Dynamic Values to Lookup Master
             |--------------------------------------------------------------------------
             */
+
+            $this->saveLookup(
+                'division_state',
+                $divisionState
+            );
+
+            $this->saveLookup(
+                'city_district',
+                $cityDistrict,
+                $divisionState
+            );
+
+            $this->saveLookup(
+                'institution',
+                $institution
+            );
+
+            $this->saveLookup(
+                'department',
+                $department
+            );
+
+            $this->saveLookup(
+                'designation',
+                $designation
+            );
+
+            $this->saveLookup(
+                'highest_degree',
+                $highestDegree
+            );
+
+
+            foreach ($specializations as $item) {
+                $this->saveLookup(
+                    'specialization',
+                    $item
+                );
+            }
+
+
+            foreach ($researchInterests as $item) {
+                $this->saveLookup(
+                    'research_interest',
+                    $item
+                );
+            }
+
+
+            foreach ($reviewKeywords as $item) {
+                $this->saveLookup(
+                    'review_keyword',
+                    $item
+                );
+            }
+
 
             DB::commit();
 
 
             /*
             |--------------------------------------------------------------------------
-            | Login Reviewer
+            | Auto Login
             |--------------------------------------------------------------------------
             */
 
-            Auth::guard('reviewer')->login(
-                $reviewer
-            );
+            Auth::guard('reviewer')
+                ->login($reviewer);
+
+            $request
+                ->session()
+                ->regenerate();
 
 
             /*
             |--------------------------------------------------------------------------
-            | Regenerate Session
-            |--------------------------------------------------------------------------
-            */
-
-            $request->session()->regenerate();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Redirect to Application
+            | Registration goes to Dashboard
             |--------------------------------------------------------------------------
             */
 
             return redirect()
-                ->route('reviewer.application')
+                ->route('reviewer.dashboard')
                 ->with(
                     'success',
-                    'Reviewer registration submitted successfully. Please complete your reviewer application. Your application will then be sent to the BMRC Editorial Office for approval.'
+                    'Your reviewer account has been created successfully. Please complete the remaining reviewer profile information before submitting your application for editorial approval.'
                 );
 
 
         } catch (\Throwable $e) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Rollback Transaction
-            |--------------------------------------------------------------------------
-            */
 
             DB::rollBack();
 
 
             /*
             |--------------------------------------------------------------------------
-            | Return Error
+            | Delete CV if registration failed
             |--------------------------------------------------------------------------
             */
+
+            if (
+                filled($cvPath)
+                &&
+                Storage::disk('public')
+                    ->exists($cvPath)
+            ) {
+
+                Storage::disk('public')
+                    ->delete($cvPath);
+            }
+
+
+            report($e);
+
 
             return back()
                 ->withInput()
                 ->withErrors([
                     'register' =>
-                        'Unable to submit reviewer application. '
+                        'Unable to create reviewer account. '
                         . $e->getMessage(),
                 ]);
         }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN FORM
+    |--------------------------------------------------------------------------
+    */
+
+    public function showLogin()
+    {
+        if (
+            Auth::guard('reviewer')
+                ->check()
+        ) {
+            return redirect()
+                ->route('reviewer.dashboard');
+        }
+
+        return view(
+            'reviewer.auth.login'
+        );
     }
 
 
@@ -364,20 +925,8 @@ class ReviewerAuthController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function showLogin()
-    {
-        return view('reviewer.auth.login');
-    }
-
-
     public function login(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Validate Login
-        |--------------------------------------------------------------------------
-        */
-
         $credentials = $request->validate([
 
             'email' => [
@@ -387,27 +936,36 @@ class ReviewerAuthController extends Controller
 
             'password' => [
                 'required',
+                'string',
             ],
         ]);
 
 
         /*
         |--------------------------------------------------------------------------
-        | Login Using Reviewer Guard
+        | Authenticate Reviewer
         |--------------------------------------------------------------------------
         */
 
         if (
-            !Auth::guard('reviewer')->attempt(
-                [
-                    'email' =>
-                        $credentials['email'],
+            ! Auth::guard('reviewer')
+                ->attempt(
+                    [
+                        'email' =>
+                            strtolower(
+                                trim(
+                                    $credentials['email']
+                                )
+                            ),
 
-                    'password' =>
-                        $credentials['password'],
-                ],
-                $request->boolean('remember')
-            )
+                        'password' =>
+                            $credentials['password'],
+                    ],
+
+                    $request->boolean(
+                        'remember'
+                    )
+                )
         ) {
 
             return back()
@@ -419,49 +977,77 @@ class ReviewerAuthController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Regenerate Session
-        |--------------------------------------------------------------------------
-        */
+        $request
+            ->session()
+            ->regenerate();
 
-        $request->session()->regenerate();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Get Logged-in Reviewer
-        |--------------------------------------------------------------------------
-        */
 
         $reviewer =
-            Auth::guard('reviewer')->user();
+            Auth::guard('reviewer')
+                ->user();
 
 
         /*
         |--------------------------------------------------------------------------
-        | Check Reviewer Account Status
+        | Update Login Time
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $reviewer->status === 'suspended'
-        ) {
+        $reviewer->update([
+            'last_login_at' => now(),
+        ]);
 
-            Auth::guard('reviewer')->logout();
 
-            return back()
+        /*
+        |--------------------------------------------------------------------------
+        | Suspended Reviewer
+        |--------------------------------------------------------------------------
+        */
+
+        if ($reviewer->isSuspended()) {
+
+            Auth::guard('reviewer')
+                ->logout();
+
+            $request
+                ->session()
+                ->invalidate();
+
+            $request
+                ->session()
+                ->regenerateToken();
+
+
+            return redirect()
+                ->route('reviewer.login')
                 ->withErrors([
                     'email' =>
                         'Your reviewer account is currently suspended.',
-                ])
-                ->onlyInput('email');
+                ]);
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | Get Reviewer Profile
+        | Forced Password Change
+        |--------------------------------------------------------------------------
+        |
+        | Used for reviewers created by Editorial Officer.
+        |--------------------------------------------------------------------------
+        */
+
+        if ($reviewer->mustChangePassword()) {
+
+            return redirect()
+                ->route(
+                    'reviewer.password.change'
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Profile Check
         |--------------------------------------------------------------------------
         */
 
@@ -469,110 +1055,49 @@ class ReviewerAuthController extends Controller
             $reviewer->profile;
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Profile Not Found
-        |--------------------------------------------------------------------------
-        */
-
         if (!$profile) {
 
-            Auth::guard('reviewer')->logout();
+            Auth::guard('reviewer')
+                ->logout();
 
-            return back()
+            $request
+                ->session()
+                ->invalidate();
+
+            $request
+                ->session()
+                ->regenerateToken();
+
+
+            return redirect()
+                ->route('reviewer.login')
                 ->withErrors([
                     'email' =>
-                        'Reviewer profile was not found.',
-                ])
-                ->onlyInput('email');
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PENDING
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $profile->status === 'pending'
-        ) {
-
-            return redirect()
-                ->route(
-                    'reviewer.application'
-                );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | REJECTED
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $profile->status === 'rejected'
-        ) {
-
-            return redirect()
-                ->route(
-                    'reviewer.application'
-                )
-                ->withErrors([
-                    'application' =>
-                        'Your reviewer application was rejected. Please review the rejection reason and update your application.',
+                        'Reviewer profile was not found. Please contact the BMRC Editorial Office.',
                 ]);
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | SUSPENDED
+        | Every Valid Reviewer Can Enter Dashboard
         |--------------------------------------------------------------------------
-        */
-
-        if (
-            $profile->status === 'suspended'
-        ) {
-
-            Auth::guard('reviewer')->logout();
-
-            return back()
-                ->withErrors([
-                    'email' =>
-                        'Your reviewer account is currently suspended.',
-                ])
-                ->onlyInput('email');
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | APPROVED
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $profile->status === 'approved'
-        ) {
-
-            return redirect()
-                ->intended(
-                    route('reviewer.dashboard')
-                );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Fallback
+        |
+        | Dashboard handles:
+        |
+        | draft
+        | pending_approval
+        | update_requested
+        | approved
+        | rejected
         |--------------------------------------------------------------------------
         */
 
         return redirect()
-            ->route(
-                'reviewer.application'
+            ->intended(
+                route(
+                    'reviewer.dashboard'
+                )
             );
     }
 
@@ -585,38 +1110,17 @@ class ReviewerAuthController extends Controller
 
     public function logout(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Logout Reviewer Guard
-        |--------------------------------------------------------------------------
-        */
+        Auth::guard('reviewer')
+            ->logout();
 
-        Auth::guard('reviewer')->logout();
+        $request
+            ->session()
+            ->invalidate();
 
+        $request
+            ->session()
+            ->regenerateToken();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Invalidate Session
-        |--------------------------------------------------------------------------
-        */
-
-        $request->session()->invalidate();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Regenerate CSRF Token
-        |--------------------------------------------------------------------------
-        */
-
-        $request->session()->regenerateToken();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Redirect
-        |--------------------------------------------------------------------------
-        */
 
         return redirect()
             ->route(
@@ -637,21 +1141,10 @@ class ReviewerAuthController extends Controller
 
     public function application()
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Get Logged-in Reviewer
-        |--------------------------------------------------------------------------
-        */
-
         $reviewer =
-            Auth::guard('reviewer')->user();
+            Auth::guard('reviewer')
+                ->user();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Safety Check
-        |--------------------------------------------------------------------------
-        */
 
         if (!$reviewer) {
 
@@ -662,21 +1155,9 @@ class ReviewerAuthController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Get Reviewer Profile
-        |--------------------------------------------------------------------------
-        */
-
         $profile =
             $reviewer->profile;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Profile Not Found
-        |--------------------------------------------------------------------------
-        */
 
         if (!$profile) {
 
@@ -689,13 +1170,29 @@ class ReviewerAuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Application View
+        | Approved profile should normally be read-only.
         |--------------------------------------------------------------------------
         */
 
+        if ($profile->isApproved()) {
+
+            return redirect()
+                ->route(
+                    'reviewer.dashboard'
+                )
+                ->with(
+                    'info',
+                    'Your reviewer profile has already been approved.'
+                );
+        }
+
+
         return view(
             'reviewer.application.edit',
-            compact('profile')
+            compact(
+                'reviewer',
+                'profile'
+            )
         );
     }
 
@@ -708,21 +1205,10 @@ class ReviewerAuthController extends Controller
 
     public function dashboard()
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Get Logged-in Reviewer
-        |--------------------------------------------------------------------------
-        */
-
         $reviewer =
-            Auth::guard('reviewer')->user();
+            Auth::guard('reviewer')
+                ->user();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Safety Check
-        |--------------------------------------------------------------------------
-        */
 
         if (!$reviewer) {
 
@@ -733,21 +1219,14 @@ class ReviewerAuthController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Get Reviewer Profile
-        |--------------------------------------------------------------------------
-        */
+        $reviewer->load(
+            'profile'
+        );
+
 
         $profile =
             $reviewer->profile;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Profile Not Found
-        |--------------------------------------------------------------------------
-        */
 
         if (!$profile) {
 
@@ -760,34 +1239,205 @@ class ReviewerAuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Only Approved Reviewer
+        | IMPORTANT
         |--------------------------------------------------------------------------
-        */
-
-        if (
-            $profile->status !== 'approved'
-        ) {
-
-            return redirect()
-                ->route(
-                    'reviewer.application'
-                )
-                ->with(
-                    'info',
-                    'Your reviewer application has not yet been approved.'
-                );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Dashboard
+        |
+        | Do NOT block pending reviewers from dashboard.
+        |
+        | Registration → Dashboard
+        |
+        | The dashboard tells the reviewer what action is required.
         |--------------------------------------------------------------------------
         */
 
         return view(
             'reviewer.dashboard',
-            compact('profile')
+            compact(
+                'reviewer',
+                'profile'
+            )
         );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESOLVE SINGLE DROPDOWN
+    |--------------------------------------------------------------------------
+    */
+
+    private function resolveSingleOption(
+        array $validated,
+        string $field,
+        string $otherField
+    ): string {
+
+        if (
+            ($validated[$field] ?? null)
+            === '__other__'
+        ) {
+
+            return trim(
+                $validated[$otherField]
+                    ?? ''
+            );
+        }
+
+
+        return trim(
+            $validated[$field]
+                ?? ''
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESOLVE MULTIPLE DROPDOWN
+    |--------------------------------------------------------------------------
+    */
+
+    private function resolveMultipleOptions(
+        array $values,
+        ?string $otherValue = null
+    ): array {
+
+        $items = collect($values)
+
+            ->reject(
+                fn ($value) =>
+                    $value === '__other__'
+            )
+
+            ->map(
+                fn ($value) =>
+                    trim($value)
+            )
+
+            ->filter();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Add Custom "Other" Values
+        |--------------------------------------------------------------------------
+        |
+        | Supports:
+        |
+        | Cardiac Surgery, Thoracic Surgery
+        |
+        | or
+        |
+        | Cardiac Surgery; Thoracic Surgery
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            in_array(
+                '__other__',
+                $values,
+                true
+            )
+            &&
+            filled($otherValue)
+        ) {
+
+            $customValues =
+                preg_split(
+                    '/[,;]+/',
+                    $otherValue
+                );
+
+
+            foreach ($customValues as $value) {
+
+                $value =
+                    trim($value);
+
+
+                if ($value !== '') {
+
+                    $items->push(
+                        $value
+                    );
+                }
+            }
+        }
+
+
+        return $items
+
+            ->unique(
+                fn ($value) =>
+                    mb_strtolower(
+                        $value
+                    )
+            )
+
+            ->values()
+
+            ->all();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SAVE LOOKUP OPTION
+    |--------------------------------------------------------------------------
+    */
+
+    private function saveLookup(
+        string $type,
+        ?string $value,
+        ?string $parentValue = null
+    ): void {
+
+        if (!filled($value)) {
+            return;
+        }
+
+
+        ReviewerLookupOption::firstOrCreate(
+            [
+                'type' =>
+                    $type,
+
+                'value' =>
+                    trim($value),
+
+                'parent_value' =>
+                    $parentValue,
+            ],
+            [
+                'is_active' =>
+                    true,
+
+                'sort_order' =>
+                    0,
+            ]
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENSURE OTHER VALUE
+    |--------------------------------------------------------------------------
+    */
+
+    private function ensureResolvedValue(
+        string $value,
+        string $field,
+        string $label
+    ): void {
+
+        if ($value === '') {
+
+            throw ValidationException::withMessages([
+                $field =>
+                    $label
+                    . ' is required.',
+            ]);
+        }
     }
 }

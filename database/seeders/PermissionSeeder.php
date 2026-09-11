@@ -10,32 +10,76 @@ class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        /*
+        |--------------------------------------------------------------------------
+        | Clear Permission Cache
+        |--------------------------------------------------------------------------
+        */
+
+        app()[PermissionRegistrar::class]
+            ->forgetCachedPermissions();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Permissions
+        |--------------------------------------------------------------------------
+        */
 
         $permissions = [
-            // Dashboard
+
+            /*
+            |--------------------------------------------------------------------------
+            | Dashboard
+            |--------------------------------------------------------------------------
+            */
+
             'dashboard.view',
 
-            // Users
+
+            /*
+            |--------------------------------------------------------------------------
+            | Users
+            |--------------------------------------------------------------------------
+            */
+
             'user.view',
             'user.create',
             'user.edit',
             'user.delete',
 
-            // Roles
+
+            /*
+            |--------------------------------------------------------------------------
+            | Roles & Permissions
+            |--------------------------------------------------------------------------
+            */
+
             'role.view',
             'role.create',
             'role.edit',
             'role.delete',
 
-            // Manuscripts
+
+            /*
+            |--------------------------------------------------------------------------
+            | Manuscripts
+            |--------------------------------------------------------------------------
+            */
+
             'manuscript.view',
             'manuscript.create',
             'manuscript.edit',
             'manuscript.submit',
             'manuscript.delete',
 
-            // Technical Screening
+
+            /*
+            |--------------------------------------------------------------------------
+            | Technical Screening
+            |--------------------------------------------------------------------------
+            */
+
             'technical_check.view',
             'technical_check.perform',
             'technical_check.assign',
@@ -45,41 +89,110 @@ class PermissionSeeder extends Seeder
             'technical_check.history',
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Similarity Check
+            |--------------------------------------------------------------------------
+            */
 
-            // Similarity
             'similarity.view',
             'similarity.check',
             'similarity.approve',
 
-            // Editorial
+
+            /*
+            |--------------------------------------------------------------------------
+            | Editorial
+            |--------------------------------------------------------------------------
+            */
+
             'editor.assign',
             'editor.assessment',
             'editor.recommend',
             'editor.decision',
             'editor.final_decision',
 
-            // Reviewers
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reviewer Management
+            |--------------------------------------------------------------------------
+            */
+
+            // General reviewer access
             'reviewer.view',
+
+            // Search approved reviewer pool
+            'reviewer.search',
+
+            // Handling Editor requests a new reviewer
+            'reviewer.request',
+
+            // Editorial Officer creates basic reviewer account
             'reviewer.create',
+
+            // Edit basic reviewer information
             'reviewer.edit',
+
+            // Reviewer approval workflow
+            'reviewer.approve',
+            'reviewer.reject',
+            'reviewer.request_update',
+
+            // Reviewer account management
+            'reviewer.suspend',
+            'reviewer.activate',
+
+            // Reviewer invitation
             'reviewer.invite',
+            'reviewer.invitation.view',
+            'reviewer.invitation.remind',
+            'reviewer.invitation.cancel',
+
+            // Reviewer assignment
             'reviewer.assign',
+            'reviewer.reassign',
             'reviewer.remove',
 
-            // Reviews
+            // Reviewer history / workload / performance
+            'reviewer.workload.view',
+            'reviewer.history.view',
+            'reviewer.performance.view',
+
+            // Reviewer profile audit
+            'reviewer.audit.view',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Peer Review
+            |--------------------------------------------------------------------------
+            */
+
             'review.view',
             'review.create',
             'review.submit',
             'review.re_review',
 
-            // Revision
+
+            /*
+            |--------------------------------------------------------------------------
+            | Revision
+            |--------------------------------------------------------------------------
+            */
+
             'revision.view',
             'revision.request',
             'revision.submit',
             'revision.approve',
 
 
-            // Payments
+            /*
+            |--------------------------------------------------------------------------
+            | Article Payments
+            |--------------------------------------------------------------------------
+            */
+
             'payment.view',
             'payment.create',
             'payment.edit',
@@ -87,65 +200,150 @@ class PermissionSeeder extends Seeder
             'payment.verify',
             'payment.reject',
 
-            // Finance Dashboard
+
+            /*
+            |--------------------------------------------------------------------------
+            | Finance Dashboard
+            |--------------------------------------------------------------------------
+            */
+
             'finance.view',
 
-            // Reviewer Payment
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reviewer Payment
+            |--------------------------------------------------------------------------
+            */
+
             'reviewer_payment.view',
             'reviewer_payment.create',
             'reviewer_payment.approve',
             'reviewer_payment.pay',
 
-            // Tax
+
+            /*
+            |--------------------------------------------------------------------------
+            | Tax
+            |--------------------------------------------------------------------------
+            */
+
             'tax.view',
             'tax.manage',
             'tds.manage',
 
-            // Copyediting
+
+            /*
+            |--------------------------------------------------------------------------
+            | Copyediting
+            |--------------------------------------------------------------------------
+            */
+
             'copyediting.view',
             'copyediting.edit',
             'copyediting.complete',
 
-            // Proofreading
+
+            /*
+            |--------------------------------------------------------------------------
+            | Proofreading
+            |--------------------------------------------------------------------------
+            */
+
             'proofreading.view',
             'proofreading.edit',
             'proofreading.complete',
 
-            // Production
+
+            /*
+            |--------------------------------------------------------------------------
+            | Production
+            |--------------------------------------------------------------------------
+            */
+
             'production.view',
             'production.edit',
             'production.complete',
             'production.publish',
 
-            // DOI
+
+            /*
+            |--------------------------------------------------------------------------
+            | DOI
+            |--------------------------------------------------------------------------
+            */
+
             'doi.view',
             'doi.create',
             'doi.edit',
 
-            // Journal
+
+            /*
+            |--------------------------------------------------------------------------
+            | Journal / Issue
+            |--------------------------------------------------------------------------
+            */
+
             'issue.view',
             'issue.create',
             'issue.edit',
             'issue.delete',
             'issue.publish',
 
-            // Reports
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reports
+            |--------------------------------------------------------------------------
+            */
+
             'report.view',
             'report.export',
 
-            // Audit
+
+            /*
+            |--------------------------------------------------------------------------
+            | Audit
+            |--------------------------------------------------------------------------
+            */
+
             'audit.view',
 
-            // Settings
+
+            /*
+            |--------------------------------------------------------------------------
+            | Settings
+            |--------------------------------------------------------------------------
+            */
+
             'settings.view',
             'settings.manage',
         ];
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Permissions
+        |--------------------------------------------------------------------------
+        */
+
         foreach ($permissions as $permission) {
+
             Permission::firstOrCreate([
-                'name' => $permission,
+                'name'       => $permission,
                 'guard_name' => 'web',
             ]);
+
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Clear Cache Again
+        |--------------------------------------------------------------------------
+        */
+
+        app()[PermissionRegistrar::class]
+            ->forgetCachedPermissions();
     }
 }

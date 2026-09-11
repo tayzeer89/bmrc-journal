@@ -6,20 +6,11 @@
 
 <style>
 
-    /* =========================================
-       PAGE
-    ========================================= */
-
     .reviewer-registration-page {
         min-height: calc(100vh - 70px);
         background: #f4f7f9;
         padding: 45px 0;
     }
-
-
-    /* =========================================
-       MAIN CARD
-    ========================================= */
 
     .reviewer-card {
         background: #ffffff;
@@ -28,11 +19,6 @@
         overflow: hidden;
         box-shadow: 0 12px 35px rgba(13, 59, 102, 0.08);
     }
-
-
-    /* =========================================
-       HEADER
-    ========================================= */
 
     .reviewer-header {
         background: linear-gradient(
@@ -45,7 +31,6 @@
         padding: 30px 35px;
     }
 
-
     .reviewer-logo {
         width: 62px;
         height: 62px;
@@ -53,51 +38,11 @@
         background: #ffffff;
         border-radius: 12px;
         padding: 7px;
-        flex-shrink: 0;
     }
-
-
-    .reviewer-header h3 {
-        font-size: 1.35rem;
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
-
-
-    .reviewer-header p {
-        margin: 0;
-        font-size: .9rem;
-        color: rgba(255,255,255,.82);
-    }
-
-
-    /* =========================================
-       BODY
-    ========================================= */
 
     .reviewer-body {
         padding: 35px;
     }
-
-
-    .intro-title {
-        color: #1d2939;
-        font-size: 1.15rem;
-        font-weight: 700;
-        margin-bottom: 6px;
-    }
-
-
-    .intro-text {
-        color: #667085;
-        font-size: .9rem;
-        line-height: 1.7;
-    }
-
-
-    /* =========================================
-       SECTION TITLE
-    ========================================= */
 
     .section-title {
         display: flex;
@@ -106,266 +51,75 @@
 
         color: #0d3b66;
 
-        font-size: .98rem;
+        font-size: 1rem;
         font-weight: 700;
 
-        border-bottom: 1px solid #eaecf0;
+        border-bottom:
+            1px solid #eaecf0;
 
         padding-bottom: 11px;
         margin-bottom: 20px;
+        margin-top: 35px;
     }
 
-
-    .section-title i {
-        font-size: 1.05rem;
+    .section-title:first-of-type {
+        margin-top: 0;
     }
-
-
-    /* =========================================
-       FORM
-    ========================================= */
 
     .form-label {
         color: #344054;
         font-size: .88rem;
         font-weight: 600;
-        margin-bottom: 7px;
     }
-
 
     .required {
         color: #b42318;
     }
 
-
     .form-control,
     .form-select {
         min-height: 45px;
-
         border: 1px solid #d0d5dd;
-
         border-radius: 7px;
-
-        font-size: .9rem;
-
-        color: #344054;
-
-        transition: all .2s ease;
     }
 
-
-    .form-control:focus,
-    .form-select:focus {
-
-        border-color: #0d3b66;
-
-        box-shadow:
-            0 0 0 .2rem rgba(13, 59, 102, .10);
+    .multiple-select {
+        min-height: 180px;
     }
 
-
-    .form-control::placeholder {
-        color: #98a2b3;
+    .other-field {
+        display: none;
     }
 
-
-    .form-text {
-        font-size: .78rem;
-        color: #667085;
+    .cv-preview-card {
+        display: none;
+        margin-top: 18px;
     }
 
-
-    /* =========================================
-       INPUT ICONS
-    ========================================= */
-
-    .input-group-text {
-        background: #f8fafc;
-        border-color: #d0d5dd;
-        color: #667085;
+    #cvPreview {
+        width: 100%;
+        height: 600px;
+        border: 0;
     }
-
-
-    /* =========================================
-       INFORMATION BOX
-    ========================================= */
-
-    .application-info {
-
-        background: #f5f9fc;
-
-        border: 1px solid #d9e6ef;
-
-        border-left: 4px solid #0d3b66;
-
-        border-radius: 8px;
-
-        padding: 18px 20px;
-
-        margin-top: 28px;
-        margin-bottom: 25px;
-    }
-
-
-    .application-info-title {
-
-        color: #0d3b66;
-
-        font-weight: 700;
-
-        font-size: .92rem;
-
-        margin-bottom: 6px;
-    }
-
-
-    .application-info-text {
-
-        color: #667085;
-
-        font-size: .82rem;
-
-        line-height: 1.7;
-
-        margin-bottom: 0;
-    }
-
-
-    /* =========================================
-       SUBMIT BUTTON
-    ========================================= */
 
     .reviewer-submit {
-
-        min-height: 48px;
-
+        min-height: 50px;
         background: #0d3b66;
-
-        border: 1px solid #0d3b66;
-
-        border-radius: 7px;
-
+        border-color: #0d3b66;
         font-weight: 600;
-
-        font-size: .92rem;
-
-        transition: all .2s ease;
     }
-
 
     .reviewer-submit:hover {
-
         background: #092f52;
-
         border-color: #092f52;
-
-        transform: translateY(-1px);
-
-        box-shadow:
-            0 5px 15px rgba(13, 59, 102, .18);
     }
 
-
-    /* =========================================
-       LOGIN / BACK LINKS
-    ========================================= */
-
-    .login-link {
-
-        color: #0d3b66;
-
-        font-weight: 600;
-
-        text-decoration: none;
-    }
-
-
-    .login-link:hover {
-        text-decoration: underline;
-    }
-
-
-    .back-link {
-
-        color: #667085;
-
-        text-decoration: none;
-
-        font-size: .82rem;
-    }
-
-
-    .back-link:hover {
-        color: #0d3b66;
-    }
-
-
-    /* =========================================
-       ALERT
-    ========================================= */
-
-    .alert {
+    .help-box {
+        background: #f5f9fc;
+        border: 1px solid #d9e6ef;
+        border-left: 4px solid #0d3b66;
         border-radius: 8px;
-        font-size: .85rem;
-    }
-
-
-    /* =========================================
-       MOBILE
-    ========================================= */
-
-    @media (max-width: 767px) {
-
-        .reviewer-registration-page {
-            padding: 25px 0;
-        }
-
-
-        .reviewer-header {
-            padding: 24px 22px;
-        }
-
-
-        .reviewer-body {
-            padding: 24px 20px;
-        }
-
-
-        .reviewer-logo {
-            width: 55px;
-            height: 55px;
-        }
-
-
-        .reviewer-header h3 {
-            font-size: 1.15rem;
-        }
-
-
-        .reviewer-header p {
-            font-size: .82rem;
-        }
-
-    }
-
-
-    @media (max-width: 480px) {
-
-        .reviewer-header {
-            padding: 22px 18px;
-        }
-
-
-        .reviewer-body {
-            padding: 22px 17px;
-        }
-
-
-        .reviewer-logo {
-            width: 50px;
-            height: 50px;
-        }
-
+        padding: 16px 18px;
     }
 
 </style>
@@ -377,45 +131,35 @@
 
         <div class="row justify-content-center">
 
-            <div class="col-12 col-md-10 col-lg-8 col-xl-7">
-
-
-                {{-- =========================================
-                     MAIN CARD
-                ========================================== --}}
+            <div class="col-12 col-xl-10">
 
                 <div class="reviewer-card">
 
-
-                    {{-- =====================================
-                         HEADER
-                    ====================================== --}}
+                    {{-- Header --}}
 
                     <div class="reviewer-header">
 
                         <div class="d-flex align-items-center gap-3">
 
-
                             <img
                                 src="{{ asset('favicon.png') }}"
-                                alt="BMRC Logo"
                                 class="reviewer-logo"
+                                alt="BMRC Logo"
                             >
-
 
                             <div>
 
-                                <h3>
-                                    BMRC Journal
+                                <h3 class="mb-1">
+                                    BMRC Journal Reviewer Registration
                                 </h3>
 
-                                <p>
+                                <div>
                                     Bangladesh Medical Research Council
-                                </p>
+                                </div>
 
-                                <p class="mt-1">
+                                <small class="opacity-75">
                                     Online Journal Submission System
-                                </p>
+                                </small>
 
                             </div>
 
@@ -424,57 +168,38 @@
                     </div>
 
 
-
-                    {{-- =====================================
-                         BODY
-                    ====================================== --}}
-
                     <div class="reviewer-body">
-
-
-                        {{-- Introduction --}}
 
                         <div class="mb-4">
 
-                            <div class="intro-title">
+                            <h4>
+                                Reviewer Application
+                            </h4>
 
-                                Reviewer Registration
+                            <p class="text-muted">
 
-                            </div>
-
-
-                            <p class="intro-text mb-0">
-
-                                Create your reviewer account and submit
-                                your professional profile for consideration
-                                by the BMRC Journal Editorial Office.
+                                Register as a BMRC Journal reviewer.
+                                You may complete additional professional
+                                information from your dashboard after registration.
 
                             </p>
 
                         </div>
 
 
+                        {{-- Validation --}}
 
-                        {{-- =====================================
-                             VALIDATION ERRORS
-                        ====================================== --}}
-
-                        @if ($errors->any())
+                        @if($errors->any())
 
                             <div class="alert alert-danger">
 
-                                <div class="fw-semibold mb-2">
+                                <strong>
+                                    Please correct the following:
+                                </strong>
 
-                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                <ul class="mb-0 mt-2">
 
-                                    Please correct the following errors:
-
-                                </div>
-
-
-                                <ul class="mb-0 ps-3">
-
-                                    @foreach ($errors->all() as $error)
+                                    @foreach($errors->all() as $error)
 
                                         <li>
                                             {{ $error }}
@@ -489,41 +214,18 @@
                         @endif
 
 
-
-                        {{-- =====================================
-                             SUCCESS MESSAGE
-                        ====================================== --}}
-
-                        @if(session('success'))
-
-                            <div class="alert alert-success">
-
-                                <i class="bi bi-check-circle me-2"></i>
-
-                                {{ session('success') }}
-
-                            </div>
-
-                        @endif
-
-
-
-                        {{-- =====================================
-                             REGISTRATION FORM
-                        ====================================== --}}
-
                         <form
                             method="POST"
                             action="{{ route('reviewer.register.submit') }}"
+                            enctype="multipart/form-data"
                         >
 
                             @csrf
 
 
-
-                            {{-- =================================
-                                 PERSONAL INFORMATION
-                            ================================== --}}
+                            {{-- ======================================
+                                 PERSONAL
+                            ======================================= --}}
 
                             <div class="section-title">
 
@@ -536,34 +238,29 @@
 
                             <div class="row g-3">
 
-
-                                {{-- Title --}}
-
-                                <div class="col-md-4">
+                                <div class="col-md-3">
 
                                     <label
                                         for="title"
                                         class="form-label"
                                     >
-
                                         Title
 
-                                        <span class="required">*</span>
-
+                                        <span class="required">
+                                            *
+                                        </span>
                                     </label>
-
 
                                     <select
                                         name="title"
                                         id="title"
-                                        class="form-select @error('title') is-invalid @enderror"
+                                        class="form-select"
                                         required
                                     >
 
                                         <option value="">
-                                            Select Title
+                                            Select
                                         </option>
-
 
                                         @foreach([
                                             'Dr.',
@@ -575,7 +272,10 @@
 
                                             <option
                                                 value="{{ $title }}"
-                                                @selected(old('title') === $title)
+                                                @selected(
+                                                    old('title')
+                                                    === $title
+                                                )
                                             >
                                                 {{ $title }}
                                             </option>
@@ -584,216 +284,874 @@
 
                                     </select>
 
-
-                                    @error('title')
-
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-
-                                    @enderror
-
                                 </div>
 
 
-
-                                {{-- First Name --}}
-
-                                <div class="col-md-4">
+                                <div class="col-md-3">
 
                                     <label
-                                        for="first_name"
                                         class="form-label"
                                     >
-
                                         First Name
-
                                         <span class="required">*</span>
-
                                     </label>
-
 
                                     <input
                                         type="text"
                                         name="first_name"
-                                        id="first_name"
                                         value="{{ old('first_name') }}"
-                                        class="form-control @error('first_name') is-invalid @enderror"
-                                        autocomplete="given-name"
-                                        placeholder="First name"
+                                        class="form-control"
                                         required
                                     >
-
-
-                                    @error('first_name')
-
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-
-                                    @enderror
 
                                 </div>
 
 
+                                <div class="col-md-3">
 
-                                {{-- Last Name --}}
-
-                                <div class="col-md-4">
-
-                                    <label
-                                        for="last_name"
-                                        class="form-label"
-                                    >
-
-                                        Last Name
-
-                                        <span class="required">*</span>
-
+                                    <label class="form-label">
+                                        Middle Name
                                     </label>
 
+                                    <input
+                                        type="text"
+                                        name="middle_name"
+                                        value="{{ old('middle_name') }}"
+                                        class="form-control"
+                                    >
+
+                                </div>
+
+
+                                <div class="col-md-3">
+
+                                    <label class="form-label">
+                                        Last Name
+                                        <span class="required">*</span>
+                                    </label>
 
                                     <input
                                         type="text"
                                         name="last_name"
-                                        id="last_name"
                                         value="{{ old('last_name') }}"
-                                        class="form-control @error('last_name') is-invalid @enderror"
-                                        autocomplete="family-name"
-                                        placeholder="Last name"
+                                        class="form-control"
                                         required
                                     >
 
-
-                                    @error('last_name')
-
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-
-                                    @enderror
-
                                 </div>
 
 
+                                <div class="col-md-6">
 
-                                {{-- Email --}}
-
-                                <div class="col-12">
-
-                                    <label
-                                        for="email"
-                                        class="form-label"
-                                    >
-
+                                    <label class="form-label">
                                         Email Address
-
                                         <span class="required">*</span>
-
                                     </label>
 
-
-                                    <div class="input-group">
-
-                                        <span class="input-group-text">
-
-                                            <i class="bi bi-envelope"></i>
-
-                                        </span>
-
-
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            id="email"
-                                            value="{{ old('email') }}"
-                                            class="form-control @error('email') is-invalid @enderror"
-                                            autocomplete="email"
-                                            placeholder="Enter your professional email address"
-                                            required
-                                        >
-
-                                    </div>
-
-
-                                    @error('email')
-
-                                        <div class="text-danger small mt-1">
-                                            {{ $message }}
-                                        </div>
-
-                                    @enderror
-
-
-                                    <div class="form-text mt-1">
-
-                                        This email address will be used for
-                                        BMRC Journal correspondence.
-
-                                    </div>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value="{{ old('email') }}"
+                                        class="form-control"
+                                        required
+                                    >
 
                                 </div>
 
 
+                                <div class="col-md-6">
 
-                                {{-- Mobile --}}
-
-                                <div class="col-12">
-
-                                    <label
-                                        for="mobile"
-                                        class="form-label"
-                                    >
-
+                                    <label class="form-label">
                                         Mobile Number
-
                                         <span class="required">*</span>
-
                                     </label>
 
-
-                                    <div class="input-group">
-
-                                        <span class="input-group-text">
-
-                                            <i class="bi bi-phone"></i>
-
-                                        </span>
-
-
-                                        <input
-                                            type="tel"
-                                            name="mobile"
-                                            id="mobile"
-                                            value="{{ old('mobile') }}"
-                                            class="form-control @error('mobile') is-invalid @enderror"
-                                            autocomplete="tel"
-                                            placeholder="01XXXXXXXXX"
-                                            required
-                                        >
-
-                                    </div>
-
-
-                                    @error('mobile')
-
-                                        <div class="text-danger small mt-1">
-                                            {{ $message }}
-                                        </div>
-
-                                    @enderror
+                                    <input
+                                        type="tel"
+                                        name="mobile"
+                                        value="{{ old('mobile') }}"
+                                        class="form-control"
+                                        required
+                                    >
 
                                 </div>
 
                             </div>
 
 
+                            {{-- ======================================
+                                 LOCATION
+                            ======================================= --}}
 
-                            {{-- =================================
-                                 ACCOUNT SECURITY
-                            ================================== --}}
+                            <div class="section-title">
 
-                            <div class="section-title mt-5">
+                                <i class="bi bi-geo-alt"></i>
+
+                                Location
+
+                            </div>
+
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Division / State
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="division_state"
+                                        id="division_state"
+                                        class="form-select"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Select Division / State
+                                        </option>
+
+                                        @foreach($divisions as $division)
+
+                                            <option
+                                                value="{{ $division }}"
+                                                @selected(
+                                                    old('division_state')
+                                                    === $division
+                                                )
+                                            >
+                                                {{ $division }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option
+                                            value="__other__"
+                                            @selected(
+                                                old('division_state')
+                                                === '__other__'
+                                            )
+                                        >
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div
+                                    class="col-md-6 other-field"
+                                    id="division_state_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other Division / State
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="division_state_other"
+                                        id="division_state_other"
+                                        value="{{ old('division_state_other') }}"
+                                        class="form-control"
+                                    >
+
+                                </div>
+
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        City / District
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="city_district"
+                                        id="city_district"
+                                        class="form-select"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Select City / District
+                                        </option>
+
+                                        @foreach($districts as $district)
+
+                                            <option
+                                                value="{{ $district->value }}"
+                                                data-parent="{{ $district->parent_value }}"
+                                                @selected(
+                                                    old('city_district')
+                                                    === $district->value
+                                                )
+                                            >
+                                                {{ $district->value }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option
+                                            value="__other__"
+                                            data-parent=""
+                                            @selected(
+                                                old('city_district')
+                                                === '__other__'
+                                            )
+                                        >
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div
+                                    class="col-md-6 other-field"
+                                    id="city_district_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other City / District
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="city_district_other"
+                                        id="city_district_other"
+                                        value="{{ old('city_district_other') }}"
+                                        class="form-control"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ======================================
+                                 PROFESSIONAL
+                            ======================================= --}}
+
+                            <div class="section-title">
+
+                                <i class="bi bi-building"></i>
+
+                                Current Professional Information
+
+                            </div>
+
+
+                            <div class="row g-3">
+
+                                {{-- Institution --}}
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Institution / Organization
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="institution"
+                                        id="institution"
+                                        class="form-select"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Select Institution / Organization
+                                        </option>
+
+                                        @foreach($institutions as $item)
+
+                                            <option
+                                                value="{{ $item }}"
+                                                @selected(
+                                                    old('institution')
+                                                    === $item
+                                                )
+                                            >
+                                                {{ $item }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option
+                                            value="__other__"
+                                            @selected(
+                                                old('institution')
+                                                === '__other__'
+                                            )
+                                        >
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div
+                                    class="col-md-6 other-field"
+                                    id="institution_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other Institution / Organization
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="institution_other"
+                                        id="institution_other"
+                                        value="{{ old('institution_other') }}"
+                                        class="form-control"
+                                    >
+
+                                </div>
+
+
+                                {{-- Department --}}
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Department
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="department"
+                                        id="department"
+                                        class="form-select"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Select Department
+                                        </option>
+
+                                        @foreach($departments as $item)
+
+                                            <option
+                                                value="{{ $item }}"
+                                                @selected(
+                                                    old('department')
+                                                    === $item
+                                                )
+                                            >
+                                                {{ $item }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option
+                                            value="__other__"
+                                            @selected(
+                                                old('department')
+                                                === '__other__'
+                                            )
+                                        >
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div
+                                    class="col-md-6 other-field"
+                                    id="department_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other Department
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="department_other"
+                                        id="department_other"
+                                        value="{{ old('department_other') }}"
+                                        class="form-control"
+                                    >
+
+                                </div>
+
+
+                                {{-- Designation --}}
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Current Designation
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="designation"
+                                        id="designation"
+                                        class="form-select"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Select Designation
+                                        </option>
+
+                                        @foreach($designations as $item)
+
+                                            <option
+                                                value="{{ $item }}"
+                                                @selected(
+                                                    old('designation')
+                                                    === $item
+                                                )
+                                            >
+                                                {{ $item }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option
+                                            value="__other__"
+                                            @selected(
+                                                old('designation')
+                                                === '__other__'
+                                            )
+                                        >
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div
+                                    class="col-md-6 other-field"
+                                    id="designation_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other Designation
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="designation_other"
+                                        id="designation_other"
+                                        value="{{ old('designation_other') }}"
+                                        class="form-control"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ======================================
+                                 ACADEMIC
+                            ======================================= --}}
+
+                            <div class="section-title">
+
+                                <i class="bi bi-mortarboard"></i>
+
+                                Academic Information
+
+                            </div>
+
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Highest Academic Degree
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="highest_degree"
+                                        id="highest_degree"
+                                        class="form-select"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Select Highest Degree
+                                        </option>
+
+                                        @foreach($highestDegrees as $item)
+
+                                            <option
+                                                value="{{ $item }}"
+                                                @selected(
+                                                    old('highest_degree')
+                                                    === $item
+                                                )
+                                            >
+                                                {{ $item }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option
+                                            value="__other__"
+                                            @selected(
+                                                old('highest_degree')
+                                                === '__other__'
+                                            )
+                                        >
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div
+                                    class="col-md-6 other-field"
+                                    id="highest_degree_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other Degree
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="highest_degree_other"
+                                        id="highest_degree_other"
+                                        value="{{ old('highest_degree_other') }}"
+                                        class="form-control"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ======================================
+                                 EXPERTISE
+                            ======================================= --}}
+
+                            <div class="section-title">
+
+                                <i class="bi bi-journal-medical"></i>
+
+                                Reviewer Expertise
+
+                            </div>
+
+
+                            <div class="row g-4">
+
+                                {{-- Specialization --}}
+
+                                <div class="col-lg-4">
+
+                                    <label class="form-label">
+                                        Specialization
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="specialization[]"
+                                        id="specialization"
+                                        class="form-select multiple-select"
+                                        multiple
+                                        required
+                                    >
+
+                                        @foreach($specializations as $item)
+
+                                            <option
+                                                value="{{ $item }}"
+                                                @selected(
+                                                    in_array(
+                                                        $item,
+                                                        old(
+                                                            'specialization',
+                                                            []
+                                                        )
+                                                    )
+                                                )
+                                            >
+                                                {{ $item }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option
+                                            value="__other__"
+                                            @selected(
+                                                in_array(
+                                                    '__other__',
+                                                    old(
+                                                        'specialization',
+                                                        []
+                                                    )
+                                                )
+                                            )
+                                        >
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                    <small class="text-muted">
+                                        You may select multiple values.
+                                    </small>
+
+                                </div>
+
+
+                                {{-- Research interests --}}
+
+                                <div class="col-lg-4">
+
+                                    <label class="form-label">
+                                        Research Interests
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="research_interests[]"
+                                        id="research_interests"
+                                        class="form-select multiple-select"
+                                        multiple
+                                        required
+                                    >
+
+                                        @foreach($researchInterests as $item)
+
+                                            <option
+                                                value="{{ $item }}"
+                                                @selected(
+                                                    in_array(
+                                                        $item,
+                                                        old(
+                                                            'research_interests',
+                                                            []
+                                                        )
+                                                    )
+                                                )
+                                            >
+                                                {{ $item }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option
+                                            value="__other__"
+                                        >
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                    <small class="text-muted">
+                                        Select all relevant areas.
+                                    </small>
+
+                                </div>
+
+
+                                {{-- Keywords --}}
+
+                                <div class="col-lg-4">
+
+                                    <label class="form-label">
+                                        Research / Review Keywords
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        name="review_keywords[]"
+                                        id="review_keywords"
+                                        class="form-select multiple-select"
+                                        multiple
+                                        required
+                                    >
+
+                                        @foreach($reviewKeywords as $item)
+
+                                            <option
+                                                value="{{ $item }}"
+                                                @selected(
+                                                    in_array(
+                                                        $item,
+                                                        old(
+                                                            'review_keywords',
+                                                            []
+                                                        )
+                                                    )
+                                                )
+                                            >
+                                                {{ $item }}
+                                            </option>
+
+                                        @endforeach
+
+                                        <option value="__other__">
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                    <small class="text-muted">
+                                        Used later for manuscript-reviewer matching.
+                                    </small>
+
+                                </div>
+
+
+                                {{-- Other specialization --}}
+
+                                <div
+                                    class="col-12 other-field"
+                                    id="specialization_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other Specialization
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="specialization_other"
+                                        value="{{ old('specialization_other') }}"
+                                        class="form-control"
+                                        placeholder="Separate multiple values with commas"
+                                    >
+
+                                </div>
+
+
+                                <div
+                                    class="col-12 other-field"
+                                    id="research_interest_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other Research Interest
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="research_interest_other"
+                                        value="{{ old('research_interest_other') }}"
+                                        class="form-control"
+                                        placeholder="Separate multiple values with commas"
+                                    >
+
+                                </div>
+
+
+                                <div
+                                    class="col-12 other-field"
+                                    id="review_keyword_other_wrapper"
+                                >
+
+                                    <label class="form-label">
+                                        Other Research / Review Keywords
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="review_keyword_other"
+                                        value="{{ old('review_keyword_other') }}"
+                                        class="form-control"
+                                        placeholder="Separate multiple keywords with commas"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ======================================
+                                 CV
+                            ======================================= --}}
+
+                            <div class="section-title">
+
+                                <i class="bi bi-file-earmark-pdf"></i>
+
+                                Curriculum Vitae
+
+                            </div>
+
+
+                            <div class="row">
+
+                                <div class="col-12">
+
+                                    <label class="form-label">
+                                        Upload CV
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        type="file"
+                                        name="cv_file"
+                                        id="cv_file"
+                                        class="form-control"
+                                        accept=".pdf,application/pdf"
+                                        required
+                                    >
+
+                                    <small class="text-muted">
+                                        PDF only. Maximum 5 MB.
+                                    </small>
+
+                                </div>
+
+
+                                <div
+                                    class="col-12 cv-preview-card"
+                                    id="cvPreviewWrapper"
+                                >
+
+                                    <div class="card mt-3">
+
+                                        <div class="card-header">
+
+                                            <strong>
+                                                CV Preview
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="card-body p-0">
+
+                                            <iframe
+                                                id="cvPreview"
+                                            ></iframe>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ======================================
+                                 SECURITY
+                            ======================================= --}}
+
+                            <div class="section-title">
 
                                 <i class="bi bi-shield-lock"></i>
 
@@ -804,160 +1162,70 @@
 
                             <div class="row g-3">
 
-
-                                {{-- Password --}}
-
                                 <div class="col-md-6">
 
-                                    <label
-                                        for="password"
-                                        class="form-label"
-                                    >
-
+                                    <label class="form-label">
                                         Password
-
                                         <span class="required">*</span>
-
                                     </label>
 
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        id="password"
+                                        class="form-control"
+                                        required
+                                    >
 
-                                    <div class="input-group">
-
-                                        <span class="input-group-text">
-
-                                            <i class="bi bi-lock"></i>
-
-                                        </span>
-
-
-                                        <input
-                                            type="password"
-                                            name="password"
-                                            id="password"
-                                            class="form-control @error('password') is-invalid @enderror"
-                                            autocomplete="new-password"
-                                            placeholder="Create password"
-                                            required
-                                        >
-
-
-                                        <button
-                                            type="button"
-                                            class="btn btn-outline-secondary"
-                                            id="togglePassword"
-                                            aria-label="Show password"
-                                        >
-
-                                            <i
-                                                class="bi bi-eye"
-                                                id="passwordIcon"
-                                            ></i>
-
-                                        </button>
-
-                                    </div>
-
-
-                                    @error('password')
-
-                                        <div class="text-danger small mt-1">
-                                            {{ $message }}
-                                        </div>
-
-                                    @enderror
-
-
-                                    <div class="form-text mt-1">
-
-                                        Use at least 8 characters.
-
-                                    </div>
+                                    <small class="text-muted">
+                                        Minimum 8 characters with upper/lowercase
+                                        letters and number.
+                                    </small>
 
                                 </div>
 
-
-
-                                {{-- Confirm Password --}}
 
                                 <div class="col-md-6">
 
-                                    <label
-                                        for="password_confirmation"
-                                        class="form-label"
-                                    >
-
+                                    <label class="form-label">
                                         Confirm Password
-
                                         <span class="required">*</span>
-
                                     </label>
 
-
-                                    <div class="input-group">
-
-                                        <span class="input-group-text">
-
-                                            <i class="bi bi-lock-fill"></i>
-
-                                        </span>
-
-
-                                        <input
-                                            type="password"
-                                            name="password_confirmation"
-                                            id="password_confirmation"
-                                            class="form-control"
-                                            autocomplete="new-password"
-                                            placeholder="Confirm password"
-                                            required
-                                        >
-
-                                    </div>
+                                    <input
+                                        type="password"
+                                        name="password_confirmation"
+                                        class="form-control"
+                                        required
+                                    >
 
                                 </div>
 
                             </div>
 
 
+                            <div class="help-box mt-4">
 
-                            {{-- =================================
-                                 APPLICATION INFORMATION
-                            ================================== --}}
+                                <strong>
+                                    What happens next?
+                                </strong>
 
-                            <div class="application-info">
+                                <div class="mt-1">
 
-                                <div class="application-info-title">
-
-                                    <i class="bi bi-info-circle me-2"></i>
-
-                                    Reviewer Application Process
+                                    Your account will be created and you will
+                                    automatically enter the Reviewer Dashboard.
+                                    You can then complete the remaining reviewer
+                                    information and submit the profile for
+                                    editorial approval.
 
                                 </div>
 
-
-                                <p class="application-info-text">
-
-                                    Registration creates your BMRC Journal
-                                    reviewer account. After registration,
-                                    please complete your academic,
-                                    professional, research and areas of
-                                    expertise information. The BMRC Journal
-                                    Editorial Office will review your
-                                    application before approval.
-
-                                </p>
-
                             </div>
 
-
-
-                            {{-- =================================
-                                 SUBMIT BUTTON
-                            ================================== --}}
 
                             <button
                                 type="submit"
-                                class="btn reviewer-submit text-white w-100"
+                                class="btn reviewer-submit text-white w-100 mt-4"
                             >
 
                                 <i class="bi bi-person-check me-2"></i>
@@ -966,76 +1234,24 @@
 
                             </button>
 
-
                         </form>
 
 
+                        <div class="text-center mt-4">
 
-                        {{-- =====================================
-                             LOGIN LINK
-                        ====================================== --}}
-
-                        <div class="text-center mt-4 pt-4 border-top">
-
-                            <span class="text-muted small">
-
-                                Already registered?
-
-                            </span>
-
+                            Already registered?
 
                             <a
                                 href="{{ route('reviewer.login') }}"
-                                class="login-link ms-1"
                             >
-
                                 Reviewer Login
-
                             </a>
 
                         </div>
-
-
-
-                        {{-- =====================================
-                             BACK LINK
-                        ====================================== --}}
-
-                        <div class="text-center mt-3">
-
-                            <a
-                                href="{{ url('/') }}"
-                                class="back-link"
-                            >
-
-                                <i class="bi bi-arrow-left me-1"></i>
-
-                                Back to BMRC Journal
-
-                            </a>
-
-                        </div>
-
 
                     </div>
 
                 </div>
-
-
-                {{-- =========================================
-                     PAGE FOOTER
-                ========================================== --}}
-
-                <div class="text-center mt-3">
-
-                    <small class="text-muted">
-
-                        BMRC Journal Online Submission System
-
-                    </small>
-
-                </div>
-
 
             </div>
 
@@ -1046,65 +1262,402 @@
 </div>
 
 
-
-{{-- =========================================
-     PASSWORD TOGGLE
-========================================== --}}
-
 @push('scripts')
 
 <script>
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
 
-    const togglePassword =
-        document.getElementById('togglePassword');
+        /*
+        |--------------------------------------------------------------------------
+        | Single Select "Other"
+        |--------------------------------------------------------------------------
+        */
 
-    const password =
-        document.getElementById('password');
+        function setupOtherField(
+            selectId,
+            wrapperId,
+            inputId
+        ) {
 
-    const passwordIcon =
-        document.getElementById('passwordIcon');
+            const select =
+                document.getElementById(
+                    selectId
+                );
+
+            const wrapper =
+                document.getElementById(
+                    wrapperId
+                );
+
+            const input =
+                document.getElementById(
+                    inputId
+                );
+
+            if (
+                !select
+                ||
+                !wrapper
+            ) {
+                return;
+            }
 
 
-    if (togglePassword && password && passwordIcon) {
+            function refresh() {
 
-        togglePassword.addEventListener('click', function () {
+                const show =
+                    select.value
+                    === '__other__';
 
-            const isPassword =
-                password.getAttribute('type') === 'password';
+                wrapper.style.display =
+                    show
+                        ? 'block'
+                        : 'none';
+
+                if (input) {
+                    input.required = show;
+                }
+
+            }
 
 
-            password.setAttribute(
-                'type',
-                isPassword ? 'text' : 'password'
+            select.addEventListener(
+                'change',
+                refresh
+            );
+
+            refresh();
+        }
+
+
+        setupOtherField(
+            'division_state',
+            'division_state_other_wrapper',
+            'division_state_other'
+        );
+
+        setupOtherField(
+            'city_district',
+            'city_district_other_wrapper',
+            'city_district_other'
+        );
+
+        setupOtherField(
+            'institution',
+            'institution_other_wrapper',
+            'institution_other'
+        );
+
+        setupOtherField(
+            'department',
+            'department_other_wrapper',
+            'department_other'
+        );
+
+        setupOtherField(
+            'designation',
+            'designation_other_wrapper',
+            'designation_other'
+        );
+
+        setupOtherField(
+            'highest_degree',
+            'highest_degree_other_wrapper',
+            'highest_degree_other'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Multiple Select "Other"
+        |--------------------------------------------------------------------------
+        */
+
+        function setupMultipleOther(
+            selectId,
+            wrapperId
+        ) {
+
+            const select =
+                document.getElementById(
+                    selectId
+                );
+
+            const wrapper =
+                document.getElementById(
+                    wrapperId
+                );
+
+            if (
+                !select
+                ||
+                !wrapper
+            ) {
+                return;
+            }
+
+
+            function refresh() {
+
+                const selected =
+                    Array.from(
+                        select.selectedOptions
+                    )
+                    .map(
+                        option =>
+                            option.value
+                    );
+
+                wrapper.style.display =
+                    selected.includes(
+                        '__other__'
+                    )
+                        ? 'block'
+                        : 'none';
+
+            }
+
+
+            select.addEventListener(
+                'change',
+                refresh
+            );
+
+            refresh();
+        }
+
+
+        setupMultipleOther(
+            'specialization',
+            'specialization_other_wrapper'
+        );
+
+        setupMultipleOther(
+            'research_interests',
+            'research_interest_other_wrapper'
+        );
+
+        setupMultipleOther(
+            'review_keywords',
+            'review_keyword_other_wrapper'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Division → District filtering
+        |--------------------------------------------------------------------------
+        */
+
+        const divisionSelect =
+            document.getElementById(
+                'division_state'
+            );
+
+        const districtSelect =
+            document.getElementById(
+                'city_district'
             );
 
 
-            passwordIcon.classList.toggle(
-                'bi-eye',
-                !isPassword
+        if (
+            divisionSelect
+            &&
+            districtSelect
+        ) {
+
+            const districtOptions =
+                Array.from(
+                    districtSelect.options
+                );
+
+
+            function filterDistricts() {
+
+                const division =
+                    divisionSelect.value;
+
+                districtOptions.forEach(
+                    function (option) {
+
+                        if (
+                            option.value === ''
+                            ||
+                            option.value
+                                === '__other__'
+                        ) {
+                            option.hidden =
+                                false;
+
+                            return;
+                        }
+
+                        const parent =
+                            option.dataset.parent;
+
+                        option.hidden =
+                            division
+                            &&
+                            division
+                                !== '__other__'
+                            &&
+                            parent
+                                !== division;
+                    }
+                );
+
+
+                const selected =
+                    districtSelect
+                        .selectedOptions[0];
+
+                if (
+                    selected
+                    &&
+                    selected.hidden
+                ) {
+                    districtSelect.value =
+                        '';
+                }
+
+            }
+
+
+            divisionSelect.addEventListener(
+                'change',
+                filterDistricts
             );
 
+            filterDistricts();
+        }
 
-            passwordIcon.classList.toggle(
-                'bi-eye-slash',
-                isPassword
+
+        /*
+        |--------------------------------------------------------------------------
+        | PDF CV Preview
+        |--------------------------------------------------------------------------
+        */
+
+        const cvInput =
+            document.getElementById(
+                'cv_file'
             );
 
-
-            togglePassword.setAttribute(
-                'aria-label',
-                isPassword
-                    ? 'Hide password'
-                    : 'Show password'
+        const cvPreview =
+            document.getElementById(
+                'cvPreview'
             );
 
-        });
+        const cvPreviewWrapper =
+            document.getElementById(
+                'cvPreviewWrapper'
+            );
+
+        let currentPdfUrl = null;
+
+
+        if (
+            cvInput
+            &&
+            cvPreview
+            &&
+            cvPreviewWrapper
+        ) {
+
+            cvInput.addEventListener(
+                'change',
+                function () {
+
+                    const file =
+                        this.files[0];
+
+
+                    if (!file) {
+
+                        cvPreviewWrapper
+                            .style.display =
+                                'none';
+
+                        return;
+                    }
+
+
+                    const isPdf =
+                        file.type
+                            === 'application/pdf'
+                        ||
+                        file.name
+                            .toLowerCase()
+                            .endsWith('.pdf');
+
+
+                    if (!isPdf) {
+
+                        alert(
+                            'Only PDF CV files are allowed.'
+                        );
+
+                        this.value = '';
+
+                        cvPreviewWrapper
+                            .style.display =
+                                'none';
+
+                        return;
+                    }
+
+
+                    if (
+                        file.size
+                        >
+                        5 * 1024 * 1024
+                    ) {
+
+                        alert(
+                            'CV file must not exceed 5 MB.'
+                        );
+
+                        this.value = '';
+
+                        cvPreviewWrapper
+                            .style.display =
+                                'none';
+
+                        return;
+                    }
+
+
+                    if (currentPdfUrl) {
+                        URL.revokeObjectURL(
+                            currentPdfUrl
+                        );
+                    }
+
+
+                    currentPdfUrl =
+                        URL.createObjectURL(
+                            file
+                        );
+
+
+                    cvPreview.src =
+                        currentPdfUrl;
+
+
+                    cvPreviewWrapper
+                        .style.display =
+                            'block';
+
+                }
+            );
+
+        }
 
     }
-
-});
+);
 
 </script>
 

@@ -15,7 +15,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | Primary Key
+            | PRIMARY KEY
             |--------------------------------------------------------------------------
             */
 
@@ -27,10 +27,10 @@ return new class extends Migration
             | REVIEWER ACCOUNT
             |--------------------------------------------------------------------------
             |
-            | This connects the profile to the separate reviewers table.
+            | One reviewer can have only one reviewer profile.
             |
             | reviewers.id
-            |       ↓
+            |      ↓
             | reviewer_profiles.reviewer_id
             |
             */
@@ -43,8 +43,15 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | APPLICATION IDENTIFICATION
+            | REVIEWER IDENTIFICATION
             |--------------------------------------------------------------------------
+            |
+            | application_id:
+            | Generated when the reviewer profile/application is created.
+            |
+            | reviewer_code:
+            | Permanent reviewer identification code after approval.
+            |
             */
 
             $table->string('application_id')
@@ -62,7 +69,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->string('title')
+            $table->string('title', 30)
                 ->nullable();
 
             $table->string('first_name');
@@ -72,28 +79,36 @@ return new class extends Migration
 
             $table->string('last_name');
 
-            $table->string('display_name');
+            $table->string('display_name')
+                ->nullable();
 
 
             /*
             |--------------------------------------------------------------------------
             | CONTACT INFORMATION
             |--------------------------------------------------------------------------
+            |
+            | Primary email remains in reviewers.email.
+            |
             */
 
             $table->string('alternative_email')
                 ->nullable();
 
-            $table->string('mobile');
+            $table->string('mobile', 30)
+                ->nullable();
+
+            $table->string('alternative_mobile', 30)
+                ->nullable();
 
 
             /*
             |--------------------------------------------------------------------------
-            | PERSONAL DETAILS
+            | PERSONAL / LOCATION INFORMATION
             |--------------------------------------------------------------------------
             */
 
-            $table->string('gender')
+            $table->string('gender', 30)
                 ->nullable();
 
             $table->date('date_of_birth')
@@ -111,6 +126,9 @@ return new class extends Migration
             $table->string('city_district')
                 ->nullable();
 
+            $table->string('postal_code', 30)
+                ->nullable();
+
             $table->text('postal_address')
                 ->nullable();
 
@@ -120,12 +138,13 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | PROFESSIONAL INFORMATION
+            | CURRENT PROFESSIONAL INFORMATION
             |--------------------------------------------------------------------------
             */
 
             $table->string('institution')
-                ->nullable();
+                ->nullable()
+                ->index();
 
             $table->string('department')
                 ->nullable();
@@ -133,28 +152,64 @@ return new class extends Migration
             $table->string('designation')
                 ->nullable();
 
-            $table->text('academic_degree')
-                ->nullable();
-
-            $table->text('highest_degree')
-                ->nullable();
-
-            $table->string('degree_institution')
-                ->nullable();
-
-            $table->year('year_of_highest_degree')
-                ->nullable();
-
-            $table->text('specialization')
+            $table->string('organization_type')
                 ->nullable();
 
             $table->text('professional_experience')
                 ->nullable();
 
-            $table->unsignedTinyInteger('years_of_experience')
+            $table->unsignedSmallInteger('years_of_experience')
                 ->nullable();
 
             $table->string('professional_registration_no')
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ACADEMIC / PROFESSIONAL QUALIFICATIONS
+            |--------------------------------------------------------------------------
+            |
+            | These fields can hold summary information.
+            | A separate reviewer_qualifications table can be introduced later
+            | if multiple structured qualifications are required.
+            |
+            */
+
+            $table->text('academic_qualifications')
+                ->nullable();
+
+            $table->text('professional_qualifications')
+                ->nullable();
+
+            $table->string('highest_degree')
+                ->nullable();
+
+            $table->string('highest_degree_institution')
+                ->nullable();
+
+            $table->year('year_of_highest_degree')
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SPECIALITY
+            |--------------------------------------------------------------------------
+            |
+            | Used during reviewer searching and selection.
+            |
+            */
+
+            $table->string('speciality')
+                ->nullable()
+                ->index();
+
+            $table->string('sub_speciality')
+                ->nullable()
+                ->index();
+
+            $table->text('specialization')
                 ->nullable();
 
 
@@ -164,7 +219,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
 
-            $table->text('research_interest')
+            $table->text('research_interests')
                 ->nullable();
 
             $table->unsignedInteger('publication_count')
@@ -174,6 +229,9 @@ return new class extends Migration
                 ->nullable();
 
             $table->unsignedInteger('corresponding_author_publications')
+                ->nullable();
+
+            $table->text('research_experience')
                 ->nullable();
 
 
@@ -204,13 +262,20 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | REVIEWER EXPERTISE
             |--------------------------------------------------------------------------
+            |
+            | These fields support initial reviewer searching.
+            |
+            | For advanced filtering, separate relational tables can later
+            | be used for expertise and keywords.
+            |
             */
 
-            $table->text('reviewer_expertise')
+            $table->text('areas_of_expertise')
                 ->nullable();
 
-            $table->text('primary_expertise')
-                ->nullable();
+            $table->string('primary_expertise')
+                ->nullable()
+                ->index();
 
             $table->text('secondary_expertise')
                 ->nullable();
@@ -218,7 +283,7 @@ return new class extends Migration
             $table->text('methodological_expertise')
                 ->nullable();
 
-            $table->text('keywords')
+            $table->text('expertise_keywords')
                 ->nullable();
 
 
@@ -226,15 +291,30 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | REVIEWING EXPERIENCE
             |--------------------------------------------------------------------------
+            |
+            | Do not use this section as the authoritative source for BMRC
+            | manuscript review statistics. Those should later come from
+            | reviewer assignment/review tables.
+            |
             */
 
             $table->text('reviewing_experience')
                 ->nullable();
 
-            $table->unsignedInteger('number_of_reviews_completed')
+            $table->text('previous_journal_experience')
                 ->nullable();
 
-            $table->text('previous_journal_experience')
+            $table->unsignedInteger('external_reviews_completed')
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PROFESSIONAL MEMBERSHIPS
+            |--------------------------------------------------------------------------
+            */
+
+            $table->text('professional_memberships')
                 ->nullable();
 
 
@@ -250,25 +330,63 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | REVIEWER APPLICATION STATUS
+            | PROFILE COMPLETION
             |--------------------------------------------------------------------------
+            |
+            | false = reviewer has not completed all required information
+            | true  = profile has been completed
+            |
             */
 
-            $table->enum('status', [
-                'pending',
-                'approved',
-                'rejected',
-                'suspended'
-            ])->default('pending');
+            $table->boolean('profile_completed')
+                ->default(false);
+
+            $table->unsignedTinyInteger('profile_completion_percentage')
+                ->default(0);
+
+            $table->timestamp('profile_completed_at')
+                ->nullable();
 
 
             /*
             |--------------------------------------------------------------------------
-            | APPLICATION DATES
+            | REVIEWER APPROVAL STATUS
+            |--------------------------------------------------------------------------
+            |
+            | draft
+            |     Reviewer has not submitted the profile.
+            |
+            | pending_approval
+            |     Reviewer completed and submitted the profile.
+            |
+            | update_requested
+            |     EIC / authorized authority requested corrections.
+            |
+            | approved
+            |     Reviewer is approved and available for reviewer pool,
+            |     subject to availability.
+            |
+            | rejected
+            |     Reviewer application was rejected.
+            |
+            */
+
+            $table->enum('approval_status', [
+                'draft',
+                'pending_approval',
+                'update_requested',
+                'approved',
+                'rejected',
+            ])->default('draft')->index();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | APPLICATION / APPROVAL DATES
             |--------------------------------------------------------------------------
             */
 
-            $table->timestamp('applied_at')
+            $table->timestamp('submitted_for_approval_at')
                 ->nullable();
 
             $table->timestamp('approved_at')
@@ -277,14 +395,17 @@ return new class extends Migration
             $table->timestamp('rejected_at')
                 ->nullable();
 
+            $table->timestamp('update_requested_at')
+                ->nullable();
+
 
             /*
             |--------------------------------------------------------------------------
             | APPROVAL INFORMATION
             |--------------------------------------------------------------------------
             |
-            | approved_by refers to users table because the BMRC
-            | Editorial/Admin user approves the reviewer.
+            | approved_by refers to the users table because Editor-in-Chief
+            | or another authorized editorial authority approves reviewers.
             |
             */
 
@@ -299,67 +420,51 @@ return new class extends Migration
             $table->text('rejection_reason')
                 ->nullable();
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | PROFILE COMPLETION
-            |--------------------------------------------------------------------------
-            */
-
-            $table->boolean('profile_completed')
-                ->default(false);
+            $table->text('profile_update_request')
+                ->nullable();
 
 
             /*
             |--------------------------------------------------------------------------
             | REVIEWER AVAILABILITY
             |--------------------------------------------------------------------------
+            |
+            | Reviewer may temporarily make themselves unavailable without
+            | losing approved reviewer status.
+            |
             */
 
             $table->boolean('available_for_review')
-                ->default(false);
+                ->default(false)
+                ->index();
+
+            $table->date('unavailable_from')
+                ->nullable();
+
+            $table->date('unavailable_until')
+                ->nullable();
+
+            $table->unsignedTinyInteger('maximum_active_reviews')
+                ->default(3);
 
 
             /*
             |--------------------------------------------------------------------------
-            | COMMUNICATION PREFERENCE
+            | COMMUNICATION PREFERENCES
             |--------------------------------------------------------------------------
             */
 
-            $table->string('preferred_communication_method')
-                ->nullable();
+            $table->enum('preferred_communication_method', [
+                'email',
+                'mobile',
+                'both',
+            ])->default('email');
 
+            $table->boolean('receive_review_invitations')
+                ->default(true);
 
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT INFORMATION
-            |--------------------------------------------------------------------------
-            */
-
-            $table->string('payment_method')
-                ->nullable();
-
-            $table->string('payment_account')
-                ->nullable();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | TAX INFORMATION
-            |--------------------------------------------------------------------------
-            */
-
-            $table->string('taxpayer_type')
-                ->nullable();
-
-            $table->string('tin_number')
-                ->nullable();
-
-            $table->string('nid_number')
-                ->nullable();
-
-            $table->string('bin_number')
-                ->nullable();
+            $table->boolean('receive_reminders')
+                ->default(true);
 
 
             /*
@@ -371,8 +476,50 @@ return new class extends Migration
             $table->boolean('conflict_of_interest_declaration')
                 ->default(false);
 
+            $table->timestamp('conflict_of_interest_declared_at')
+                ->nullable();
+
             $table->boolean('reviewer_ethics_declaration')
                 ->default(false);
+
+            $table->timestamp('reviewer_ethics_declared_at')
+                ->nullable();
+
+            $table->boolean('confidentiality_declaration')
+                ->default(false);
+
+            $table->timestamp('confidentiality_declared_at')
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PROFILE UPDATE / AUDIT SUPPORT
+            |--------------------------------------------------------------------------
+            |
+            | Full field-by-field history should eventually be maintained
+            | in reviewer_profile_audits.
+            |
+            */
+
+            $table->timestamp('last_profile_updated_at')
+                ->nullable();
+
+            $table->boolean('requires_reverification')
+                ->default(false);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ADMINISTRATIVE NOTES
+            |--------------------------------------------------------------------------
+            |
+            | This should only be visible to authorized editorial staff.
+            |
+            */
+
+            $table->text('internal_note')
+                ->nullable();
 
 
             /*
@@ -382,6 +529,23 @@ return new class extends Migration
             */
 
             $table->timestamps();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | INDEXES FOR REVIEWER SEARCH
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index([
+                'approval_status',
+                'available_for_review',
+            ], 'reviewer_pool_status_index');
+
+            $table->index([
+                'speciality',
+                'approval_status',
+            ], 'reviewer_speciality_status_index');
         });
     }
 

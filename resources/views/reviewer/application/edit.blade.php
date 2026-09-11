@@ -1,704 +1,596 @@
-@extends('layouts.app')
+@extends('reviewer.layouts.app')
 
-@section('title', 'Reviewer Application - BMRC Journal')
+@section('title', 'Reviewer Profile | BMRC Journal')
 
-@section('content')
+
+@push('styles')
 
 <style>
-    /* ============================================================
-       BMRC JOURNAL — PROFESSIONAL REVIEWER APPLICATION
-    ============================================================ */
 
-    :root {
-        --bmrc-navy: #12395b;
-        --bmrc-blue: #1d5f91;
-        --bmrc-light-blue: #edf5fb;
-        --bmrc-border: #d9e2ec;
-        --bmrc-text: #243447;
-        --bmrc-muted: #667085;
-        --bmrc-bg: #f4f6f8;
-    }
-
-    body {
-        background: var(--bmrc-bg);
-    }
-
-    /* ============================================================
-       PAGE
-    ============================================================ */
-
-    .reviewer-page {
-        min-height: 100vh;
-        padding-bottom: 60px;
-        background:
-            linear-gradient(
-                to bottom,
-                #ffffff 0,
-                #ffffff 245px,
-                #f4f6f8 245px,
-                #f4f6f8 100%
-            );
-    }
-
-    /* ============================================================
-       MAIN HEADER CONTAINER
-    ============================================================ */
-
-    .reviewer-container {
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-
-    /* ============================================================
-       APPLICATION CONTENT — NARROWER / CENTERED
-    ============================================================ */
-
-    .reviewer-content {
-        max-width: 1000px;
+    .reviewer-profile-page {
+        max-width: 1200px;
         margin: 0 auto;
     }
 
-    /*
-     * Application status is slightly narrower
-     * to create more professional whitespace.
-     */
-    .application-status-wrapper {
-        max-width: 900px;
-        margin: 0 auto 24px;
+    .profile-header {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
     }
 
-    /* ============================================================
-       JOURNAL MASTHEAD
-    ============================================================ */
-
-    .journal-masthead {
-        background: #ffffff;
-        border-bottom: 1px solid #dfe5eb;
-        margin-bottom: 28px;
+    .profile-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #12395b;
+        margin-bottom: 5px;
     }
 
-    .masthead-inner {
-        min-height: 128px;
+    .profile-header p {
+        color: #667085;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .profile-summary {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .summary-label {
+        color: #98a2b3;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    .summary-value {
+        font-weight: 700;
+        color: #12395b;
+        margin-top: 4px;
+    }
+
+    .profile-section {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+
+    .profile-section-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e8edf2;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 30px;
-        padding: 22px 0;
+        gap: 12px;
     }
 
-    .masthead-brand {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        min-width: 0;
+    .profile-section-header.highlight {
+        background: #f4f9fd;
     }
 
-    .bmrc-logo-wrap {
-        width: 78px;
-        height: 78px;
-        flex: 0 0 78px;
+    .profile-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #edf5fb;
+        color: #1d5f91;
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-
-    .bmrc-logo {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
-    .masthead-divider {
-        width: 1px;
-        height: 62px;
-        background: #d8e0e8;
-    }
-
-    .institution-name {
-        color: #27364a;
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: .02em;
-        margin-bottom: 4px;
-    }
-
-    .journal-name {
-        color: var(--bmrc-navy);
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 30px;
-        font-weight: 700;
-        line-height: 1.15;
-        margin: 0;
-    }
-
-    .journal-type {
-        color: #667085;
-        font-size: 13px;
-        margin-top: 5px;
-        letter-spacing: .02em;
-    }
-
-    .masthead-right {
-        text-align: right;
-        flex-shrink: 0;
-    }
-
-    .peer-review-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 13px;
-        border: 1px solid #c9d9e8;
-        background: #f5f9fc;
-        color: var(--bmrc-blue);
-        border-radius: 4px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-    }
-
-    .peer-review-label i {
-        font-size: 14px;
-    }
-
-    .portal-text {
-        margin-top: 8px;
-        color: #7a8695;
-        font-size: 12px;
-    }
-
-    /* ============================================================
-       PAGE INTRO
-    ============================================================ */
-
-    .page-intro {
-        margin-bottom: 24px;
-    }
-
-    .breadcrumb-line {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 7px;
-        color: #7b8794;
-        font-size: 12px;
-        margin-bottom: 12px;
-    }
-
-    .breadcrumb-line a {
-        color: var(--bmrc-blue);
-        text-decoration: none;
-    }
-
-    .breadcrumb-line a:hover {
-        text-decoration: underline;
-    }
-
-    .breadcrumb-line i {
-        font-size: 10px;
-        color: #98a2b3;
-    }
-
-    .page-title {
-        font-family: Georgia, "Times New Roman", serif;
-        color: var(--bmrc-navy);
-        font-size: 27px;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .page-subtitle {
-        color: #667085;
-        font-size: 14px;
-        margin-top: 5px;
-        margin-bottom: 0;
-    }
-
-    /* ============================================================
-       APPLICATION STATUS
-    ============================================================ */
-
-    .application-info {
-        background: #ffffff;
-        border: 1px solid var(--bmrc-border);
-        border-radius: 6px;
-        padding: 18px 22px;
-        box-shadow: 0 2px 7px rgba(16, 24, 40, .04);
-    }
-
-    .application-id-label {
-        color: #7a8695;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: .06em;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }
-
-    .application-id {
-        color: var(--bmrc-navy);
-        font-family: "Courier New", monospace;
+        flex: 0 0 38px;
         font-size: 17px;
-        font-weight: 700;
     }
 
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
+    .profile-section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #12395b;
+    }
+
+    .profile-section-description {
+        color: #7b8794;
         font-size: 11px;
-        font-weight: 700;
-        padding: 6px 12px;
-        border-radius: 4px;
-        letter-spacing: .02em;
     }
 
-    /* ============================================================
-       ALERT
-    ============================================================ */
-
-    .journal-alert {
-        background: #f8fbfd;
-        border: 1px solid #d8e7f2;
-        border-left: 4px solid var(--bmrc-blue);
-        border-radius: 5px;
-        padding: 15px 18px;
-        margin-bottom: 24px;
-    }
-
-    .journal-alert-icon {
-        color: var(--bmrc-blue);
-        font-size: 20px;
-        margin-right: 12px;
-    }
-
-    .journal-alert h6 {
-        color: var(--bmrc-navy);
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 3px;
-    }
-
-    .journal-alert p {
-        color: #667085;
-        font-size: 12px;
-        line-height: 1.6;
-        margin: 0;
-    }
-
-    /* ============================================================
-       CARDS
-    ============================================================ */
-
-    .application-card {
-        background: #ffffff;
-        border: 1px solid var(--bmrc-border);
-        border-radius: 6px;
-        overflow: hidden;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 7px rgba(16, 24, 40, .035);
-    }
-
-    .application-card .card-header {
-        background: #ffffff;
-        border-bottom: 1px solid #e3e8ee;
-        padding: 17px 21px;
-    }
-
-    .application-card .card-body {
+    .profile-section-body {
         padding: 22px;
     }
 
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-    }
-
-    .section-icon {
-        width: 38px;
-        height: 38px;
-        flex: 0 0 38px;
-        border: 1px solid #d7e4ee;
-        border-radius: 5px;
-        background: #f5f9fc;
-        color: var(--bmrc-blue);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 17px;
-    }
-
-    .section-title {
-        color: var(--bmrc-navy);
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 17px;
-        font-weight: 700;
-        line-height: 1.25;
-        margin-bottom: 2px;
-    }
-
-    .section-description {
-        color: #7a8695;
-        font-size: 11px;
-        line-height: 1.4;
-    }
-
-    .important-section {
-        border-color: #bdd5e8;
-    }
-
-    .important-section .card-header {
-        background: #f6fafd;
-        border-bottom-color: #d7e6f1;
-    }
-
-    .important-section .section-icon {
-        background: #eaf4fb;
-        border-color: #c8dfef;
-    }
-
-    /* ============================================================
-       FORM
-    ============================================================ */
-
     .form-label {
-        color: #344054;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
-        margin-bottom: 6px;
+        color: #344054;
     }
 
     .form-control,
     .form-select {
+        border-radius: 6px;
         min-height: 43px;
-        border: 1px solid #cfd8e3;
-        border-radius: 4px;
-        color: #344054;
-        background-color: #ffffff;
         font-size: 13px;
-        box-shadow: none;
+        border-color: #cfd8e3;
     }
 
     textarea.form-control {
         min-height: auto;
-        line-height: 1.6;
-    }
-
-    .form-control::placeholder {
-        color: #98a2b3;
     }
 
     .form-control:focus,
     .form-select:focus {
-        border-color: #4b83ad;
-        box-shadow: 0 0 0 3px rgba(75, 131, 173, .10);
+        border-color: #1d5f91;
+        box-shadow: 0 0 0 3px rgba(29,95,145,.09);
     }
 
-    .form-control.bg-light {
-        background: #f7f8fa !important;
+    .required {
+        color: #dc3545;
     }
 
-    .form-text {
-        color: #7a8695;
-        font-size: 11px;
-        line-height: 1.5;
+    .field-help {
+        color: #8491a1;
+        font-size: 10px;
+        margin-top: 5px;
     }
 
-    .invalid-feedback {
-        font-size: 11px;
+    .completion {
+        height: 8px;
+        border-radius: 10px;
     }
-
-    /* ============================================================
-       EXISTING FILE
-    ============================================================ */
-
-    .existing-file {
-        background: #f5fbf7;
-        border: 1px solid #cce8d5;
-        border-radius: 5px;
-        padding: 14px;
-    }
-
-    /* ============================================================
-       DECLARATION
-    ============================================================ */
 
     .declaration-box {
-        background: #f8f9fb;
-        border: 1px solid #e1e6eb;
-        border-radius: 5px;
-        padding: 17px 18px;
-        margin-bottom: 18px;
+        border: 1px solid #e4e8ed;
+        background: #fafbfc;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 12px;
     }
 
-    .declaration-box p {
-        color: #475467;
-        font-size: 12px;
-        line-height: 1.75;
+    .sticky-actions {
+        position: sticky;
+        bottom: 10px;
+        z-index: 20;
+        background: rgba(255,255,255,.97);
+        border: 1px solid #dce3ea;
+        border-radius: 10px;
+        padding: 14px 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,.08);
     }
 
-    .form-check-label {
-        color: #344054;
-        font-size: 13px;
-        line-height: 1.5;
+    .existing-cv {
+        border: 1px solid #cce8d5;
+        background: #f4fbf7;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
     }
 
-    .form-check-input {
-        border-color: #b7c3cf;
+    .cv-preview {
+        width: 100%;
+        height: 550px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-top: 15px;
     }
 
-    .form-check-input:checked {
-        background-color: var(--bmrc-blue);
-        border-color: var(--bmrc-blue);
-    }
-
-    /* ============================================================
-       SUBMIT
-    ============================================================ */
-
-    .submit-card {
-        background: #ffffff;
-        border: 1px solid var(--bmrc-border);
-        border-radius: 6px;
-        box-shadow: 0 2px 7px rgba(16, 24, 40, .035);
-        margin-bottom: 20px;
-    }
-
-    .btn {
-        min-height: 43px;
-        border-radius: 4px;
-        font-size: 13px;
-        font-weight: 600;
-        padding-left: 18px;
-        padding-right: 18px;
-    }
-
-    .btn-primary {
-        background: var(--bmrc-blue);
-        border-color: var(--bmrc-blue);
-    }
-
-    .btn-primary:hover,
-    .btn-primary:focus {
-        background: #174e78;
-        border-color: #174e78;
-    }
-
-    .btn-outline-secondary {
-        color: #475467;
-        border-color: #cbd5df;
-    }
-
-    .btn-outline-secondary:hover {
-        color: #344054;
-        background: #f5f7f9;
-        border-color: #aebbc8;
-    }
-
-    /* ============================================================
-       FOOTER
-    ============================================================ */
-
-    .journal-footer {
-        margin-top: 38px;
-        padding-top: 22px;
-        border-top: 1px solid #dce2e8;
-        text-align: center;
-    }
-
-    .footer-journal-name {
-        color: var(--bmrc-navy);
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 3px;
-    }
-
-    .footer-institution {
-        color: #667085;
-        font-size: 11px;
-        margin-bottom: 3px;
-    }
-
-    .footer-copy {
-        color: #98a2b3;
-        font-size: 10px;
-        margin: 0;
-    }
-
-    /* ============================================================
-       MOBILE
-    ============================================================ */
-
-    @media (max-width: 767px) {
-
-        .reviewer-page {
-            background:
-                linear-gradient(
-                    to bottom,
-                    #ffffff 0,
-                    #ffffff 205px,
-                    #f4f6f8 205px,
-                    #f4f6f8 100%
-                );
-        }
-
-        .reviewer-container {
-            padding: 0 13px;
-        }
-
-        .reviewer-content {
-            max-width: 100%;
-        }
-
-        .application-status-wrapper {
-            max-width: 100%;
-        }
-
-        .masthead-inner {
-            min-height: auto;
-            padding: 16px 0;
-            gap: 15px;
-        }
-
-        .masthead-brand {
-            gap: 12px;
-        }
-
-        .bmrc-logo-wrap {
-            width: 55px;
-            height: 55px;
-            flex-basis: 55px;
-        }
-
-        .masthead-divider {
-            height: 48px;
-        }
-
-        .institution-name {
-            font-size: 10px;
-        }
-
-        .journal-name {
-            font-size: 21px;
-        }
-
-        .journal-type {
-            font-size: 10px;
-        }
-
-        .masthead-right {
-            display: none;
-        }
-
-        .page-intro {
-            margin-top: 22px;
-        }
-
-        .page-title {
-            font-size: 23px;
-        }
-
-        .page-subtitle {
-            font-size: 12px;
-        }
-
-        .application-info {
-            padding: 15px;
-        }
-
-        .application-card .card-header {
-            padding: 14px 15px;
-        }
-
-        .application-card .card-body {
-            padding: 16px 15px;
-        }
-
-        .section-icon {
-            width: 34px;
-            height: 34px;
-            flex-basis: 34px;
-            font-size: 15px;
-        }
-
-        .section-title {
-            font-size: 15px;
-        }
-
-        .section-description {
-            font-size: 10px;
-        }
-
-        .journal-alert {
-            padding: 13px;
-        }
-
-        .submit-card .card-body {
-            padding: 14px !important;
-        }
-    }
 </style>
 
+@endpush
 
-<div class="reviewer-page">
 
-    {{-- ============================================================
-         PROFESSIONAL JOURNAL MASTHEAD
-    ============================================================= --}}
+@section('content')
 
-    <header class="journal-masthead">
+@php
 
-        <div class="reviewer-container">
+    $statusLabel = match($profile->approval_status) {
 
-            <div class="masthead-inner">
+        'draft' =>
+            'Draft',
 
-                <div class="masthead-brand">
+        'pending_approval' =>
+            'Pending Approval',
 
-                    <div class="bmrc-logo-wrap">
+        'update_requested' =>
+            'Update Requested',
 
-                        <img
-                            src="{{ asset('favicon.png') }}"
-                            alt="Bangladesh Medical Research Council"
-                            class="bmrc-logo"
-                        >
+        'approved' =>
+            'Approved',
 
+        'rejected' =>
+            'Rejected',
+
+        default =>
+            ucfirst(
+                str_replace(
+                    '_',
+                    ' ',
+                    $profile->approval_status
+                )
+            )
+    };
+
+@endphp
+
+
+<div class="reviewer-profile-page">
+
+
+    {{-- Header --}}
+
+    <div class="profile-header">
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+            <div>
+
+                <h1>
+                    Reviewer Professional Profile
+                </h1>
+
+                <p>
+                    Complete your academic, professional,
+                    research and peer-review information.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{{ route('reviewer.profile.show') }}"
+                class="btn btn-outline-primary"
+            >
+
+                <i class="bi bi-eye me-1"></i>
+
+                View Profile
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    {{-- Summary --}}
+
+    <div class="profile-summary">
+
+        <div class="row g-4">
+
+            <div class="col-md-3">
+
+                <div class="summary-label">
+                    Application ID
+                </div>
+
+                <div class="summary-value">
+                    {{ $profile->application_id ?: '-' }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="summary-label">
+                    Reviewer Code
+                </div>
+
+                <div class="summary-value">
+                    {{ $profile->reviewer_code ?: 'Pending' }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="summary-label">
+                    Application Status
+                </div>
+
+                <div class="summary-value">
+                    {{ $statusLabel }}
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="summary-label">
+                    Completion
+                </div>
+
+                <div class="summary-value">
+                    {{ $profile->profile_completion_percentage }}%
+                </div>
+
+                <div class="progress completion mt-2">
+
+                    <div
+                        class="progress-bar"
+                        style="width: {{ $profile->profile_completion_percentage }}%"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    @if($profile->isUpdateRequested())
+
+        <div class="alert alert-warning">
+
+            <strong>
+                Editorial Update Requested
+            </strong>
+
+            @if($profile->profile_update_request)
+
+                <div class="mt-2">
+                    {{ $profile->profile_update_request }}
+                </div>
+
+            @endif
+
+        </div>
+
+    @endif
+
+
+
+    <form
+        method="POST"
+        action="{{ route('reviewer.application.update') }}"
+        enctype="multipart/form-data"
+    >
+
+        @csrf
+
+        @method('PATCH')
+
+
+        {{-- ============================================================
+            1. PERSONAL
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header">
+
+                <div class="profile-icon">
+                    <i class="bi bi-person-vcard"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        1. Personal Information
                     </div>
 
-                    <div class="masthead-divider"></div>
-
-                    <div>
-
-                        <div class="institution-name">
-                            BANGLADESH MEDICAL RESEARCH COUNCIL
-                        </div>
-
-                        <h1 class="journal-name">
-                            BMRC Journal
-                        </h1>
-
-                        <div class="journal-type">
-                            Medical &amp; Health Sciences Research Journal
-                        </div>
-
+                    <div class="profile-section-description">
+                        Personal identification and correspondence details
                     </div>
 
                 </div>
 
-                <div class="masthead-right">
+            </div>
 
-                    <div class="peer-review-label">
 
-                        <i class="bi bi-shield-check"></i>
+            <div class="profile-section-body">
 
-                        ONLINE PEER REVIEW
+                <div class="row g-3">
+
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+                            Title
+                        </label>
+
+                        <select
+                            name="title"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            @foreach([
+                                'Prof.',
+                                'Dr.',
+                                'Mr.',
+                                'Ms.',
+                                'Mrs.'
+                            ] as $item)
+
+                                <option
+                                    value="{{ $item }}"
+                                    @selected(
+                                        old(
+                                            'title',
+                                            $profile->title
+                                        ) === $item
+                                    )
+                                >
+                                    {{ $item }}
+                                </option>
+
+                            @endforeach
+
+                        </select>
 
                     </div>
 
-                    <div class="portal-text">
-                        Reviewer Management Portal
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            First Name
+                            <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="first_name"
+                            value="{{ old('first_name', $profile->first_name) }}"
+                            class="form-control @error('first_name') is-invalid @enderror"
+                            required
+                        >
+
+                        @error('first_name')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Middle Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="middle_name"
+                            value="{{ old('middle_name', $profile->middle_name) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Last Name
+                            <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="last_name"
+                            value="{{ old('last_name', $profile->last_name) }}"
+                            class="form-control @error('last_name') is-invalid @enderror"
+                            required
+                        >
+
+                        @error('last_name')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Display Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="display_name"
+                            value="{{ old('display_name', $profile->display_name) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+                            Gender
+                        </label>
+
+                        <select
+                            name="gender"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            @foreach([
+                                'Male',
+                                'Female',
+                                'Other',
+                                'Prefer not to say'
+                            ] as $item)
+
+                                <option
+                                    value="{{ $item }}"
+                                    @selected(
+                                        old(
+                                            'gender',
+                                            $profile->gender
+                                        ) === $item
+                                    )
+                                >
+
+                                    {{ $item }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+                            Date of Birth
+                        </label>
+
+                        <input
+                            type="date"
+                            name="date_of_birth"
+                            value="{{
+                                old(
+                                    'date_of_birth',
+                                    optional($profile->date_of_birth)->format('Y-m-d')
+                                )
+                            }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+                            Nationality
+                        </label>
+
+                        <input
+                            type="text"
+                            name="nationality"
+                            value="{{ old('nationality', $profile->nationality ?: 'Bangladeshi') }}"
+                            class="form-control"
+                        >
+
                     </div>
 
                 </div>
@@ -707,117 +599,28 @@
 
         </div>
 
-    </header>
 
 
-    {{-- ============================================================
-         CENTERED APPLICATION CONTENT
-    ============================================================= --}}
+        {{-- ============================================================
+            2. CONTACT
+        ============================================================ --}}
 
-    <main class="reviewer-container">
+        <div class="profile-section">
 
-        <div class="reviewer-content">
+            <div class="profile-section-header">
 
-
-            {{-- ======================================================
-                 PAGE INTRO
-            ======================================================= --}}
-
-            <div class="page-intro">
-
-                <div class="breadcrumb-line">
-
-                    <a href="{{ route('reviewer.login') }}">
-                        Reviewer Portal
-                    </a>
-
-                    <i class="bi bi-chevron-right"></i>
-
-                    <span>
-                        Reviewer Application
-                    </span>
-
+                <div class="profile-icon">
+                    <i class="bi bi-envelope"></i>
                 </div>
 
-                <h2 class="page-title">
-                    Reviewer Application
-                </h2>
+                <div>
 
-                <p class="page-subtitle">
-                    Register your academic and professional expertise for consideration
-                    by the BMRC Journal Editorial Office.
-                </p>
+                    <div class="profile-section-title">
+                        2. Contact Information
+                    </div>
 
-            </div>
-
-
-            {{-- ======================================================
-                 APPLICATION ID / STATUS
-            ======================================================= --}}
-
-            <div class="application-status-wrapper">
-
-                <div class="application-info">
-
-                    <div class="row align-items-center">
-
-                        <div class="col-md-6">
-
-                            <div class="application-id-label">
-                                Reviewer Application ID
-                            </div>
-
-                            <div class="application-id">
-                                {{ $profile->application_id ?? 'Not Generated' }}
-                            </div>
-
-                        </div>
-
-
-                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
-
-                            <div class="application-id-label mb-2">
-                                Application Status
-                            </div>
-
-                            @php
-
-                                $status = strtolower(
-                                    $profile->status ?? 'pending'
-                                );
-
-                                $statusClass = match($status) {
-
-                                    'approved' =>
-                                        'bg-success',
-
-                                    'rejected' =>
-                                        'bg-danger',
-
-                                    'submitted' =>
-                                        'bg-primary',
-
-                                    'under review' =>
-                                        'bg-info text-dark',
-
-                                    'pending' =>
-                                        'bg-warning text-dark',
-
-                                    default =>
-                                        'bg-secondary',
-
-                                };
-
-                            @endphp
-
-                            <span class="badge status-badge {{ $statusClass }}">
-
-                                {{ ucfirst($profile->status ?? 'Pending') }}
-
-                            </span>
-
-                        </div>
-
+                    <div class="profile-section-description">
+                        Contact information for editorial communication
                     </div>
 
                 </div>
@@ -825,1376 +628,1216 @@
             </div>
 
 
-            {{-- ======================================================
-                 INFORMATION ALERT
-            ======================================================= --}}
+            <div class="profile-section-body">
 
-            <div class="journal-alert">
+                <div class="row g-3">
 
-                <div class="d-flex align-items-start">
+                    <div class="col-md-6">
 
-                    <i class="bi bi-info-circle journal-alert-icon"></i>
-
-                    <div>
-
-                        <h6>
-                            About the Reviewer Application
-                        </h6>
-
-                        <p>
-                            Please provide complete and accurate academic,
-                            professional and research information. Submitted
-                            applications are reviewed by the BMRC Journal
-                            Editorial Office before reviewer approval.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {{-- ======================================================
-                 VALIDATION ERRORS
-            ======================================================= --}}
-
-            @if ($errors->any())
-
-                <div class="alert alert-danger border shadow-sm mb-4">
-
-                    <div class="fw-bold mb-2">
-
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-
-                        Please correct the following errors:
-
-                    </div>
-
-                    <ul class="mb-0 small">
-
-                        @foreach ($errors->all() as $error)
-
-                            <li>
-                                {{ $error }}
-                            </li>
-
-                        @endforeach
-
-                    </ul>
-
-                </div>
-
-            @endif
-
-
-            {{-- ======================================================
-                 SUCCESS MESSAGE
-            ======================================================= --}}
-
-            @if(session('success'))
-
-                <div class="alert alert-success border shadow-sm mb-4">
-
-                    <i class="bi bi-check-circle-fill me-2"></i>
-
-                    {{ session('success') }}
-
-                </div>
-
-            @endif
-
-
-            {{-- ======================================================
-                 APPLICATION FORM
-            ======================================================= --}}
-
-            <form
-                method="POST"
-                action="{{ route('reviewer.application.update') }}"
-                enctype="multipart/form-data"
-            >
-
-                @csrf
-
-                @method('PATCH')
-
-
-                {{-- ==================================================
-                     PERSONAL INFORMATION
-                =================================================== --}}
-
-                <div class="card application-card">
-
-                    <div class="card-header">
-
-                        <div class="section-header">
-
-                            <span class="section-icon">
-                                <i class="bi bi-person-vcard"></i>
-                            </span>
-
-                            <div>
-
-                                <div class="section-title">
-                                    Personal Information
-                                </div>
-
-                                <div class="section-description">
-                                    Personal identification and demographic information
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="card-body">
-
-                        <div class="row g-3">
-
-                            <div class="col-md-3">
-
-                                <label for="title" class="form-label">
-                                    Title
-                                </label>
-
-                                <select
-                                    name="title"
-                                    id="title"
-                                    class="form-select @error('title') is-invalid @enderror"
-                                >
-
-                                    <option value="">
-                                        Select
-                                    </option>
-
-                                    @foreach([
-                                        'Dr.',
-                                        'Prof.',
-                                        'Mr.',
-                                        'Ms.',
-                                        'Mrs.',
-                                        'Miss'
-                                    ] as $title)
-
-                                        <option
-                                            value="{{ $title }}"
-                                            {{ old('title', $profile->title ?? '') == $title ? 'selected' : '' }}
-                                        >
-                                            {{ $title }}
-                                        </option>
-
-                                    @endforeach
-
-                                </select>
-
-                                @error('title')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-3">
-
-                                <label for="first_name" class="form-label">
-                                    First Name
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="first_name"
-                                    id="first_name"
-                                    value="{{ old('first_name', $profile->first_name ?? '') }}"
-                                    class="form-control @error('first_name') is-invalid @enderror"
-                                    placeholder="First name"
-                                    required
-                                >
-
-                                @error('first_name')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-3">
-
-                                <label for="middle_name" class="form-label">
-                                    Middle Name
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="middle_name"
-                                    id="middle_name"
-                                    value="{{ old('middle_name', $profile->middle_name ?? '') }}"
-                                    class="form-control"
-                                    placeholder="Middle name"
-                                >
-
-                            </div>
-
-
-                            <div class="col-md-3">
-
-                                <label for="last_name" class="form-label">
-                                    Last Name
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="last_name"
-                                    id="last_name"
-                                    value="{{ old('last_name', $profile->last_name ?? '') }}"
-                                    class="form-control @error('last_name') is-invalid @enderror"
-                                    placeholder="Last name"
-                                    required
-                                >
-
-                                @error('last_name')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-12">
-
-                                <label for="display_name" class="form-label">
-                                    Display Name
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="display_name"
-                                    id="display_name"
-                                    value="{{ old('display_name', $profile->display_name ?? '') }}"
-                                    class="form-control @error('display_name') is-invalid @enderror"
-                                    placeholder="Name to be used for journal correspondence"
-                                    required
-                                >
-
-                                @error('display_name')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-4">
-
-                                <label for="gender" class="form-label">
-                                    Gender
-                                </label>
-
-                                <select name="gender" id="gender" class="form-select">
-
-                                    <option value="">
-                                        Select Gender
-                                    </option>
-
-                                    @foreach([
-                                        'Male',
-                                        'Female',
-                                        'Other',
-                                        'Prefer not to say'
-                                    ] as $gender)
-
-                                        <option
-                                            value="{{ $gender }}"
-                                            {{ old('gender', $profile->gender ?? '') == $gender ? 'selected' : '' }}
-                                        >
-                                            {{ $gender }}
-                                        </option>
-
-                                    @endforeach
-
-                                </select>
-
-                            </div>
-
-
-                            <div class="col-md-4">
-
-                                <label for="date_of_birth" class="form-label">
-                                    Date of Birth
-                                </label>
-
-                                <input
-                                    type="date"
-                                    name="date_of_birth"
-                                    id="date_of_birth"
-                                    value="{{ old('date_of_birth', $profile->date_of_birth ?? '') }}"
-                                    class="form-control"
-                                >
-
-                            </div>
-
-
-                            <div class="col-md-4">
-
-                                <label for="nationality" class="form-label">
-                                    Nationality
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="nationality"
-                                    id="nationality"
-                                    value="{{ old('nationality', $profile->nationality ?? 'Bangladeshi') }}"
-                                    class="form-control"
-                                    placeholder="Nationality"
-                                >
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- ==================================================
-                     CONTACT INFORMATION
-                =================================================== --}}
-
-                <div class="card application-card">
-
-                    <div class="card-header">
-
-                        <div class="section-header">
-
-                            <span class="section-icon">
-                                <i class="bi bi-envelope"></i>
-                            </span>
-
-                            <div>
-
-                                <div class="section-title">
-                                    Contact Information
-                                </div>
-
-                                <div class="section-description">
-                                    Contact details for editorial correspondence
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="card-body">
-
-                        <div class="row g-3">
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="registered_email"
-                                    class="form-label"
-                                >
-                                    Registered Email Address
-                                </label>
-
-                                <input
-                                    type="email"
-                                    id="registered_email"
-                                    value="{{ auth()->user()->email }}"
-                                    class="form-control bg-light"
-                                    readonly
-                                >
-
-                                <div class="form-text mt-1">
-
-                                    <i class="bi bi-lock-fill me-1"></i>
-
-                                    Registered account email. This cannot be changed here.
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="alternative_email"
-                                    class="form-label"
-                                >
-                                    Alternative Email
-                                </label>
-
-                                <input
-                                    type="email"
-                                    name="alternative_email"
-                                    id="alternative_email"
-                                    value="{{ old('alternative_email', $profile->alternative_email ?? '') }}"
-                                    class="form-control @error('alternative_email') is-invalid @enderror"
-                                    placeholder="Optional alternative email"
-                                >
-
-                                @error('alternative_email')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="mobile" class="form-label">
-                                    Mobile Number
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="mobile"
-                                    id="mobile"
-                                    value="{{ old('mobile', $profile->mobile ?? '') }}"
-                                    class="form-control @error('mobile') is-invalid @enderror"
-                                    placeholder="01XXXXXXXXX"
-                                    required
-                                >
-
-                                @error('mobile')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="preferred_communication_method"
-                                    class="form-label"
-                                >
-                                    Preferred Communication Method
-                                </label>
-
-                                <select
-                                    name="preferred_communication_method"
-                                    id="preferred_communication_method"
-                                    class="form-select"
-                                >
-
-                                    <option value="">
-                                        Select
-                                    </option>
-
-                                    @foreach([
-                                        'Email',
-                                        'Phone',
-                                        'Email and Phone'
-                                    ] as $method)
-
-                                        <option
-                                            value="{{ $method }}"
-                                            {{ old('preferred_communication_method', $profile->preferred_communication_method ?? '') == $method ? 'selected' : '' }}
-                                        >
-                                            {{ $method }}
-                                        </option>
-
-                                    @endforeach
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- ==================================================
-                     LOCATION
-                =================================================== --}}
-
-                <div class="card application-card">
-
-                    <div class="card-header">
-
-                        <div class="section-header">
-
-                            <span class="section-icon">
-                                <i class="bi bi-geo-alt"></i>
-                            </span>
-
-                            <div>
-
-                                <div class="section-title">
-                                    Location &amp; Address
-                                </div>
-
-                                <div class="section-description">
-                                    Current country, location and institutional address
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="card-body">
-
-                        <div class="row g-3">
-
-                            <div class="col-md-6">
-
-                                <label for="country" class="form-label">
-                                    Country
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <select
-                                    name="country"
-                                    id="country"
-                                    class="form-select @error('country') is-invalid @enderror"
-                                    required
-                                >
-
-                                    <option value="">
-                                        Loading countries...
-                                    </option>
-
-                                </select>
-
-                                @error('country')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="division_state" class="form-label">
-                                    Division / State
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="division_state"
-                                    id="division_state"
-                                    value="{{ old('division_state', $profile->division_state ?? '') }}"
-                                    class="form-control"
-                                    placeholder="Division / State"
-                                >
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="city_district" class="form-label">
-                                    City / District
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="city_district"
-                                    id="city_district"
-                                    value="{{ old('city_district', $profile->city_district ?? '') }}"
-                                    class="form-control"
-                                    placeholder="City / District"
-                                >
-
-                            </div>
-
-
-                            <div class="col-12">
-
-                                <label for="postal_address" class="form-label">
-                                    Postal Address
-                                </label>
-
-                                <textarea
-                                    name="postal_address"
-                                    id="postal_address"
-                                    rows="3"
-                                    class="form-control"
-                                    placeholder="Full postal address"
-                                >{{ old('postal_address', $profile->postal_address ?? '') }}</textarea>
-
-                            </div>
-
-
-                            <div class="col-12">
-
-                                <label for="office_address" class="form-label">
-                                    Office / Institutional Address
-                                </label>
-
-                                <textarea
-                                    name="office_address"
-                                    id="office_address"
-                                    rows="3"
-                                    class="form-control"
-                                    placeholder="Institution / office address"
-                                >{{ old('office_address', $profile->office_address ?? '') }}</textarea>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- ==================================================
-                     COUNTRY JSON
-                =================================================== --}}
-
-                <script>
-
-                    document.addEventListener('DOMContentLoaded', function () {
-
-                        const countrySelect =
-                            document.getElementById('country');
-
-                        const selectedCountry =
-                            @json(old('country', $profile->country ?? 'Bangladesh'));
-
-                        fetch('{{ asset('data/countries.json') }}', {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        })
-
-                        .then(response => {
-
-                            if (!response.ok) {
-                                throw new Error(
-                                    'HTTP error: ' + response.status
-                                );
-                            }
-
-                            return response.json();
-
-                        })
-
-                        .then(countries => {
-
-                            countrySelect.innerHTML =
-                                '<option value="">Select Country</option>';
-
-                            countries.forEach(country => {
-
-                                const option =
-                                    document.createElement('option');
-
-                                const countryName =
-                                    country.name ??
-                                    country.country ??
-                                    '';
-
-                                const countryCode =
-                                    country.code ??
-                                    country.iso2 ??
-                                    '';
-
-                                option.value =
-                                    countryName;
-
-                                option.textContent =
-                                    countryCode
-                                        ? countryName +
-                                          ' (' +
-                                          countryCode +
-                                          ')'
-                                        : countryName;
-
-                                if (
-                                    countryName ===
-                                    selectedCountry
-                                ) {
-                                    option.selected = true;
-                                }
-
-                                countrySelect.appendChild(option);
-
-                            });
-
-                        })
-
-                        .catch(error => {
-
-                            console.error(
-                                'Country JSON Error:',
-                                error
-                            );
-
-                            countrySelect.innerHTML =
-                                '<option value="">Unable to load country list</option>';
-
-                        });
-
-                    });
-
-                </script>
-
-
-                {{-- ==================================================
-                     PROFESSIONAL INFORMATION
-                =================================================== --}}
-
-                <div class="card application-card">
-
-                    <div class="card-header">
-
-                        <div class="section-header">
-
-                            <span class="section-icon">
-                                <i class="bi bi-building"></i>
-                            </span>
-
-                            <div>
-
-                                <div class="section-title">
-                                    Professional Information
-                                </div>
-
-                                <div class="section-description">
-                                    Academic and professional background
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="card-body">
-
-                        <div class="row g-3">
-
-                            <div class="col-12">
-
-                                <label for="institution" class="form-label">
-                                    Institution / Organization
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="institution"
-                                    id="institution"
-                                    value="{{ old('institution', $profile->institution ?? '') }}"
-                                    class="form-control @error('institution') is-invalid @enderror"
-                                    placeholder="Current institution / organization"
-                                    required
-                                >
-
-                                @error('institution')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="department" class="form-label">
-                                    Department
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="department"
-                                    id="department"
-                                    value="{{ old('department', $profile->department ?? '') }}"
-                                    class="form-control @error('department') is-invalid @enderror"
-                                    placeholder="Department / Unit"
-                                    required
-                                >
-
-                                @error('department')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="designation" class="form-label">
-                                    Current Designation
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="designation"
-                                    id="designation"
-                                    value="{{ old('designation', $profile->designation ?? '') }}"
-                                    class="form-control @error('designation') is-invalid @enderror"
-                                    placeholder="e.g. Professor, Scientist, Researcher"
-                                    required
-                                >
-
-                                @error('designation')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="academic_degree" class="form-label">
-                                    Highest Academic Degree
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="academic_degree"
-                                    id="academic_degree"
-                                    value="{{ old('academic_degree', $profile->academic_degree ?? '') }}"
-                                    class="form-control @error('academic_degree') is-invalid @enderror"
-                                    placeholder="e.g. MBBS, MPH, MSc, MD, PhD"
-                                    required
-                                >
-
-                                @error('academic_degree')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="specialization" class="form-label">
-                                    Specialization
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="specialization"
-                                    id="specialization"
-                                    value="{{ old('specialization', $profile->specialization ?? '') }}"
-                                    class="form-control @error('specialization') is-invalid @enderror"
-                                    placeholder="Area of specialization"
-                                    required
-                                >
-
-                                @error('specialization')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="professional_registration_no"
-                                    class="form-label"
-                                >
-                                    Professional Registration No.
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="professional_registration_no"
-                                    id="professional_registration_no"
-                                    value="{{ old('professional_registration_no', $profile->professional_registration_no ?? '') }}"
-                                    class="form-control"
-                                    placeholder="BMDC / professional registration number"
-                                >
-
-                            </div>
-
-
-                            <div class="col-12">
-
-                                <label for="research_interest" class="form-label">
-                                    Research Interest
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <textarea
-                                    name="research_interest"
-                                    id="research_interest"
-                                    rows="4"
-                                    class="form-control @error('research_interest') is-invalid @enderror"
-                                    placeholder="Describe your major research interests..."
-                                    required
-                                >{{ old('research_interest', $profile->research_interest ?? '') }}</textarea>
-
-                                @error('research_interest')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- ==================================================
-                     REVIEWER EXPERTISE
-                =================================================== --}}
-
-                <div class="card application-card important-section">
-
-                    <div class="card-header">
-
-                        <div class="section-header">
-
-                            <span class="section-icon">
-                                <i class="bi bi-clipboard2-pulse"></i>
-                            </span>
-
-                            <div>
-
-                                <div class="section-title">
-                                    Reviewer Expertise
-                                </div>
-
-                                <div class="section-description">
-                                    Information used for manuscript reviewer selection
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="card-body">
-
-                        <div class="row g-3">
-
-                            <div class="col-12">
-
-                                <label for="reviewer_expertise" class="form-label">
-                                    Reviewer Expertise
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <textarea
-                                    name="reviewer_expertise"
-                                    id="reviewer_expertise"
-                                    rows="6"
-                                    class="form-control @error('reviewer_expertise') is-invalid @enderror"
-                                    placeholder="Describe the specific subjects, clinical areas, research methodologies, or disciplines in which you are qualified to review manuscripts..."
-                                    required
-                                >{{ old('reviewer_expertise', $profile->reviewer_expertise ?? '') }}</textarea>
-
-                                <div class="form-text mt-2">
-
-                                    <strong>Examples:</strong>
-                                    Epidemiology, Public Health, Clinical Research,
-                                    Maternal and Child Health, Nutrition,
-                                    Biostatistics, Infectious Diseases.
-
-                                </div>
-
-                                @error('reviewer_expertise')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-
-                            <div class="col-12">
-
-                                <label for="keywords" class="form-label">
-                                    Research / Review Keywords
-                                    <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="keywords"
-                                    id="keywords"
-                                    value="{{ old('keywords', $profile->keywords ?? '') }}"
-                                    class="form-control @error('keywords') is-invalid @enderror"
-                                    placeholder="Epidemiology, Public Health, RCT, Nutrition, Maternal Health"
-                                    required
-                                >
-
-                                <div class="form-text">
-                                    Separate multiple keywords with commas.
-                                </div>
-
-                                @error('keywords')
-
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-
-                                @enderror
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- ==================================================
-                     RESEARCH IDENTIFIERS
-                =================================================== --}}
-
-                <div class="card application-card">
-
-                    <div class="card-header">
-
-                        <div class="section-header">
-
-                            <span class="section-icon">
-                                <i class="bi bi-person-badge"></i>
-                            </span>
-
-                            <div>
-
-                                <div class="section-title">
-                                    Research Identifiers
-                                </div>
-
-                                <div class="section-description">
-                                    Researcher identifiers and academic profiles
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="card-body">
-
-                        <div class="row g-3">
-
-                            <div class="col-md-6">
-
-                                <label for="orcid" class="form-label">
-                                    ORCID iD
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="orcid"
-                                    id="orcid"
-                                    value="{{ old('orcid', $profile->orcid ?? '') }}"
-                                    class="form-control"
-                                    placeholder="0000-0000-0000-0000"
-                                >
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="researcher_id" class="form-label">
-                                    Researcher ID
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="researcher_id"
-                                    id="researcher_id"
-                                    value="{{ old('researcher_id', $profile->researcher_id ?? '') }}"
-                                    class="form-control"
-                                    placeholder="Researcher ID"
-                                >
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="scopus_author_id" class="form-label">
-                                    Scopus Author ID
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="scopus_author_id"
-                                    id="scopus_author_id"
-                                    value="{{ old('scopus_author_id', $profile->scopus_author_id ?? '') }}"
-                                    class="form-control"
-                                    placeholder="Scopus Author ID"
-                                >
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <label for="web_of_science_id" class="form-label">
-                                    Web of Science Researcher ID
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="web_of_science_id"
-                                    id="web_of_science_id"
-                                    value="{{ old('web_of_science_id', $profile->web_of_science_id ?? '') }}"
-                                    class="form-control"
-                                    placeholder="Web of Science Researcher ID"
-                                >
-
-                            </div>
-
-
-                            <div class="col-12">
-
-                                <label for="google_scholar_profile" class="form-label">
-                                    Google Scholar Profile URL
-                                </label>
-
-                                <input
-                                    type="url"
-                                    name="google_scholar_profile"
-                                    id="google_scholar_profile"
-                                    value="{{ old('google_scholar_profile', $profile->google_scholar_profile ?? '') }}"
-                                    class="form-control"
-                                    placeholder="https://scholar.google.com/..."
-                                >
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- ==================================================
-                     CV
-                =================================================== --}}
-
-                <div class="card application-card">
-
-                    <div class="card-header">
-
-                        <div class="section-header">
-
-                            <span class="section-icon">
-                                <i class="bi bi-file-earmark-person"></i>
-                            </span>
-
-                            <div>
-
-                                <div class="section-title">
-                                    Curriculum Vitae (CV)
-                                </div>
-
-                                <div class="section-description">
-                                    Upload your latest academic or professional CV
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="card-body">
-
-                        <label for="cv_file" class="form-label">
-
-                            Upload CV
-
-                            @if(empty($profile->cv_file))
-                                <span class="text-danger">*</span>
-                            @endif
-
+                        <label class="form-label">
+                            Registered Email
                         </label>
 
-
                         <input
-                            type="file"
-                            name="cv_file"
-                            id="cv_file"
-                            class="form-control @error('cv_file') is-invalid @enderror"
-                            accept=".pdf,.doc,.docx"
-                            @if(empty($profile->cv_file)) required @endif
+                            type="email"
+                            value="{{ $reviewer->email }}"
+                            class="form-control bg-light"
+                            readonly
                         >
 
-
-                        <div class="form-text mt-2">
-
-                            <i class="bi bi-info-circle me-1"></i>
-
-                            Accepted formats: PDF, DOC, DOCX.
-                            Maximum file size: 5 MB.
-
-                        </div>
+                    </div>
 
 
-                        @if(!empty($profile->cv_file))
+                    <div class="col-md-6">
 
-                            <div class="existing-file mt-3">
+                        <label class="form-label">
+                            Alternative Email
+                        </label>
 
-                                <div class="d-flex align-items-start">
+                        <input
+                            type="email"
+                            name="alternative_email"
+                            value="{{ old('alternative_email', $profile->alternative_email) }}"
+                            class="form-control"
+                        >
 
-                                    <i class="bi bi-file-earmark-check text-success fs-4 me-2"></i>
-
-                                    <div>
-
-                                        <strong class="text-success">
-                                            CV already uploaded
-                                        </strong>
-
-                                        <div class="small text-muted mt-1">
-                                            You may upload a new CV to replace the current file.
-                                        </div>
-
-                                        <a
-                                            href="{{ asset('storage/' . $profile->cv_file) }}"
-                                            target="_blank"
-                                            class="btn btn-sm btn-outline-success mt-2"
-                                        >
-
-                                            <i class="bi bi-eye me-1"></i>
-
-                                            View Current CV
-
-                                        </a>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        @endif
+                    </div>
 
 
-                        @error('cv_file')
+                    <div class="col-md-6">
 
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
+                        <label class="form-label">
+                            Mobile
+                        </label>
 
-                        @enderror
+                        <input
+                            type="text"
+                            name="mobile"
+                            value="{{ old('mobile', $profile->mobile) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Alternative Mobile
+                        </label>
+
+                        <input
+                            type="text"
+                            name="alternative_mobile"
+                            value="{{ old('alternative_mobile', $profile->alternative_mobile) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Preferred Communication
+                        </label>
+
+                        <select
+                            name="preferred_communication_method"
+                            class="form-select"
+                        >
+
+                            <option
+                                value="email"
+                                @selected(
+                                    old(
+                                        'preferred_communication_method',
+                                        $profile->preferred_communication_method
+                                    ) === 'email'
+                                )
+                            >
+                                Email
+                            </option>
+
+                            <option
+                                value="mobile"
+                                @selected(
+                                    old(
+                                        'preferred_communication_method',
+                                        $profile->preferred_communication_method
+                                    ) === 'mobile'
+                                )
+                            >
+                                Mobile
+                            </option>
+
+                            <option
+                                value="both"
+                                @selected(
+                                    old(
+                                        'preferred_communication_method',
+                                        $profile->preferred_communication_method
+                                    ) === 'both'
+                                )
+                            >
+                                Email and Mobile
+                            </option>
+
+                        </select>
 
                     </div>
 
                 </div>
 
+            </div>
 
-                {{-- ==================================================
-                     AVAILABILITY
-                =================================================== --}}
+        </div>
 
-                <div class="card application-card">
 
-                    <div class="card-header">
 
-                        <div class="section-header">
+        {{-- ============================================================
+            3. LOCATION
+        ============================================================ --}}
 
-                            <span class="section-icon">
-                                <i class="bi bi-calendar-check"></i>
-                            </span>
+        <div class="profile-section">
 
-                            <div>
+            <div class="profile-section-header">
 
-                                <div class="section-title">
-                                    Reviewer Availability
-                                </div>
+                <div class="profile-icon">
+                    <i class="bi bi-geo-alt"></i>
+                </div>
 
-                                <div class="section-description">
-                                    Indicate whether you are currently available for peer review
-                                </div>
+                <div>
 
-                            </div>
+                    <div class="profile-section-title">
+                        3. Location & Address
+                    </div>
 
+                    <div class="profile-section-description">
+                        Current location and institutional address
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Country
+                        </label>
+
+                        <input
+                            type="text"
+                            name="country"
+                            value="{{ old('country', $profile->country ?: 'Bangladesh') }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Division / State
+                        </label>
+
+                        <input
+                            type="text"
+                            name="division_state"
+                            value="{{ old('division_state', $profile->division_state) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            City / District
+                        </label>
+
+                        <input
+                            type="text"
+                            name="city_district"
+                            value="{{ old('city_district', $profile->city_district) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Postal Code
+                        </label>
+
+                        <input
+                            type="text"
+                            name="postal_code"
+                            value="{{ old('postal_code', $profile->postal_code) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Postal Address
+                        </label>
+
+                        <textarea
+                            name="postal_address"
+                            rows="3"
+                            class="form-control"
+                        >{{ old('postal_address', $profile->postal_address) }}</textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Office / Institutional Address
+                        </label>
+
+                        <textarea
+                            name="office_address"
+                            rows="3"
+                            class="form-control"
+                        >{{ old('office_address', $profile->office_address) }}</textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            4. PROFESSIONAL
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header">
+
+                <div class="profile-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        4. Professional Information
+                    </div>
+
+                    <div class="profile-section-description">
+                        Current appointment and professional background
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Institution / Organization
+                        </label>
+
+                        <input
+                            type="text"
+                            name="institution"
+                            value="{{ old('institution', $profile->institution) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Department
+                        </label>
+
+                        <input
+                            type="text"
+                            name="department"
+                            value="{{ old('department', $profile->department) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Current Designation
+                        </label>
+
+                        <input
+                            type="text"
+                            name="designation"
+                            value="{{ old('designation', $profile->designation) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Organization Type
+                        </label>
+
+                        <input
+                            type="text"
+                            name="organization_type"
+                            value="{{ old('organization_type', $profile->organization_type) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Years of Experience
+                        </label>
+
+                        <input
+                            type="number"
+                            name="years_of_experience"
+                            value="{{ old('years_of_experience', $profile->years_of_experience) }}"
+                            class="form-control"
+                            min="0"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Professional Registration No.
+                        </label>
+
+                        <input
+                            type="text"
+                            name="professional_registration_no"
+                            value="{{ old('professional_registration_no', $profile->professional_registration_no) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Professional Experience
+                        </label>
+
+                        <textarea
+                            name="professional_experience"
+                            rows="4"
+                            class="form-control"
+                        >{{ old('professional_experience', $profile->professional_experience) }}</textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            5. QUALIFICATIONS
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header">
+
+                <div class="profile-icon">
+                    <i class="bi bi-mortarboard"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        5. Academic & Professional Qualifications
+                    </div>
+
+                    <div class="profile-section-description">
+                        Educational and professional qualifications
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Highest Degree
+                        </label>
+
+                        <input
+                            type="text"
+                            name="highest_degree"
+                            value="{{ old('highest_degree', $profile->highest_degree) }}"
+                            class="form-control"
+                            placeholder="MBBS, MPH, MD, MSc, PhD"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-5">
+
+                        <label class="form-label">
+                            Highest Degree Institution
+                        </label>
+
+                        <input
+                            type="text"
+                            name="highest_degree_institution"
+                            value="{{ old('highest_degree_institution', $profile->highest_degree_institution) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Year
+                        </label>
+
+                        <input
+                            type="number"
+                            name="year_of_highest_degree"
+                            value="{{ old('year_of_highest_degree', $profile->year_of_highest_degree) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Academic Qualifications
+                        </label>
+
+                        <textarea
+                            name="academic_qualifications"
+                            rows="4"
+                            class="form-control"
+                        >{{ old('academic_qualifications', $profile->academic_qualifications) }}</textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Professional Qualifications
+                        </label>
+
+                        <textarea
+                            name="professional_qualifications"
+                            rows="4"
+                            class="form-control"
+                        >{{ old('professional_qualifications', $profile->professional_qualifications) }}</textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            6. EXPERTISE
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header highlight">
+
+                <div class="profile-icon">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        6. Reviewer Expertise & Manuscript Matching
+                    </div>
+
+                    <div class="profile-section-description">
+                        Critical information used for selecting suitable reviewers
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Speciality
+                        </label>
+
+                        <input
+                            type="text"
+                            name="speciality"
+                            value="{{ old('speciality', $profile->speciality) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Sub-speciality
+                        </label>
+
+                        <input
+                            type="text"
+                            name="sub_speciality"
+                            value="{{ old('sub_speciality', $profile->sub_speciality) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Primary Expertise
+                        </label>
+
+                        <input
+                            type="text"
+                            name="primary_expertise"
+                            value="{{ old('primary_expertise', $profile->primary_expertise) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Specialization
+                        </label>
+
+                        <textarea
+                            name="specialization"
+                            rows="3"
+                            class="form-control"
+                        >{{ old('specialization', $profile->specialization) }}</textarea>
+
+                        <div class="field-help">
+                            Separate multiple values with commas.
                         </div>
 
                     </div>
 
 
-                    <div class="card-body">
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Research Interests
+                        </label>
+
+                        <textarea
+                            name="research_interests"
+                            rows="3"
+                            class="form-control"
+                        >{{ old('research_interests', $profile->research_interests) }}</textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Areas of Expertise
+                        </label>
+
+                        <textarea
+                            name="areas_of_expertise"
+                            rows="4"
+                            class="form-control"
+                        >{{ old('areas_of_expertise', $profile->areas_of_expertise) }}</textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Secondary Expertise
+                        </label>
+
+                        <textarea
+                            name="secondary_expertise"
+                            rows="4"
+                            class="form-control"
+                        >{{ old('secondary_expertise', $profile->secondary_expertise) }}</textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Methodological Expertise
+                        </label>
+
+                        <textarea
+                            name="methodological_expertise"
+                            rows="3"
+                            class="form-control"
+                        >{{ old('methodological_expertise', $profile->methodological_expertise) }}</textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Research / Review Keywords
+                        </label>
+
+                        <textarea
+                            name="expertise_keywords"
+                            rows="3"
+                            class="form-control"
+                        >{{ old('expertise_keywords', $profile->expertise_keywords) }}</textarea>
+
+                        <div class="field-help">
+                            Example: Epidemiology, RCT, Nutrition, Maternal Health
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            7. RESEARCH
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header">
+
+                <div class="profile-icon">
+                    <i class="bi bi-journal-richtext"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        7. Research & Publication Experience
+                    </div>
+
+                    <div class="profile-section-description">
+                        Research background and publication experience
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Total Publications
+                        </label>
+
+                        <input
+                            type="number"
+                            name="publication_count"
+                            value="{{ old('publication_count', $profile->publication_count) }}"
+                            class="form-control"
+                            min="0"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            First-author Publications
+                        </label>
+
+                        <input
+                            type="number"
+                            name="first_author_publications"
+                            value="{{ old('first_author_publications', $profile->first_author_publications) }}"
+                            class="form-control"
+                            min="0"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Corresponding-author Publications
+                        </label>
+
+                        <input
+                            type="number"
+                            name="corresponding_author_publications"
+                            value="{{ old('corresponding_author_publications', $profile->corresponding_author_publications) }}"
+                            class="form-control"
+                            min="0"
+                        >
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Research Experience
+                        </label>
+
+                        <textarea
+                            name="research_experience"
+                            rows="4"
+                            class="form-control"
+                        >{{ old('research_experience', $profile->research_experience) }}</textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            8. REVIEWING EXPERIENCE
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header">
+
+                <div class="profile-icon">
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        8. Peer-review Experience
+                    </div>
+
+                    <div class="profile-section-description">
+                        Previous journal and manuscript review experience
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Reviewing Experience
+                        </label>
+
+                        <textarea
+                            name="reviewing_experience"
+                            rows="4"
+                            class="form-control"
+                        >{{ old('reviewing_experience', $profile->reviewing_experience) }}</textarea>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Previous Journal Experience
+                        </label>
+
+                        <textarea
+                            name="previous_journal_experience"
+                            rows="4"
+                            class="form-control"
+                        >{{ old('previous_journal_experience', $profile->previous_journal_experience) }}</textarea>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            External Reviews Completed
+                        </label>
+
+                        <input
+                            type="number"
+                            name="external_reviews_completed"
+                            value="{{ old('external_reviews_completed', $profile->external_reviews_completed) }}"
+                            class="form-control"
+                            min="0"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-8">
+
+                        <label class="form-label">
+                            Professional Memberships
+                        </label>
+
+                        <input
+                            type="text"
+                            name="professional_memberships"
+                            value="{{ old('professional_memberships', $profile->professional_memberships) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            9. IDENTIFIERS
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header">
+
+                <div class="profile-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        9. Research Identifiers
+                    </div>
+
+                    <div class="profile-section-description">
+                        Researcher IDs and academic profiles
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            ORCID
+                        </label>
+
+                        <input
+                            type="text"
+                            name="orcid"
+                            value="{{ old('orcid', $profile->orcid) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Researcher ID
+                        </label>
+
+                        <input
+                            type="text"
+                            name="researcher_id"
+                            value="{{ old('researcher_id', $profile->researcher_id) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Scopus Author ID
+                        </label>
+
+                        <input
+                            type="text"
+                            name="scopus_author_id"
+                            value="{{ old('scopus_author_id', $profile->scopus_author_id) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Web of Science ID
+                        </label>
+
+                        <input
+                            type="text"
+                            name="web_of_science_id"
+                            value="{{ old('web_of_science_id', $profile->web_of_science_id) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Google Scholar Profile
+                        </label>
+
+                        <input
+                            type="url"
+                            name="google_scholar_profile"
+                            value="{{ old('google_scholar_profile', $profile->google_scholar_profile) }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            10. CV
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header">
+
+                <div class="profile-icon">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        10. Curriculum Vitae
+                    </div>
+
+                    <div class="profile-section-description">
+                        Latest reviewer CV — PDF only
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <input
+                    type="file"
+                    name="cv_file"
+                    id="cv_file"
+                    accept="application/pdf,.pdf"
+                    class="form-control"
+                >
+
+                <div class="field-help">
+                    Maximum file size: 5 MB.
+                </div>
+
+
+                @if($profile->cv_file)
+
+                    <div class="existing-cv">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+
+                                <strong class="text-success">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    CV uploaded
+                                </strong>
+
+                            </div>
+
+
+                            <a
+                                href="{{ Storage::url($profile->cv_file) }}"
+                                target="_blank"
+                                class="btn btn-sm btn-outline-primary"
+                            >
+                                Open CV
+                            </a>
+
+                        </div>
+
+
+                    </div>
+
+                @endif
+
+
+                <iframe
+                    id="newCvPreview"
+                    class="cv-preview d-none"
+                ></iframe>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            11. AVAILABILITY
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header">
+
+                <div class="profile-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        11. Reviewer Availability
+                    </div>
+
+                    <div class="profile-section-description">
+                        Current availability and review workload preference
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Maximum Active Reviews
+                        </label>
+
+                        <input
+                            type="number"
+                            name="maximum_active_reviews"
+                            value="{{ old('maximum_active_reviews', $profile->maximum_active_reviews ?: 3) }}"
+                            class="form-control"
+                            min="1"
+                            max="20"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Unavailable From
+                        </label>
+
+                        <input
+                            type="date"
+                            name="unavailable_from"
+                            value="{{
+                                old(
+                                    'unavailable_from',
+                                    optional($profile->unavailable_from)->format('Y-m-d')
+                                )
+                            }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Unavailable Until
+                        </label>
+
+                        <input
+                            type="date"
+                            name="unavailable_until"
+                            value="{{
+                                old(
+                                    'unavailable_until',
+                                    optional($profile->unavailable_until)->format('Y-m-d')
+                                )
+                            }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4">
 
                         <input
                             type="hidden"
@@ -2205,135 +1848,97 @@
                         <div class="form-check form-switch">
 
                             <input
-                                class="form-check-input"
                                 type="checkbox"
+                                class="form-check-input"
                                 name="available_for_review"
                                 value="1"
                                 id="available_for_review"
-                                {{ old(
-                                    'available_for_review',
-                                    $profile->available_for_review ?? true
-                                ) ? 'checked' : '' }}
+                                @checked(
+                                    old(
+                                        'available_for_review',
+                                        $profile->available_for_review
+                                    )
+                                )
                             >
 
                             <label
-                                class="form-check-label fw-semibold"
+                                class="form-check-label"
                                 for="available_for_review"
                             >
-                                I am currently available to review manuscripts
+                                Available for peer review
                             </label>
 
                         </div>
 
-                        <div class="form-text mt-2">
-
-                            You may change your availability later from your reviewer dashboard.
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- ==================================================
-                     DECLARATION
-                =================================================== --}}
-
-                <div class="card application-card">
-
-                    <div class="card-header">
-
-                        <div class="section-header">
-
-                            <span class="section-icon">
-                                <i class="bi bi-shield-check"></i>
-                            </span>
-
-                            <div>
-
-                                <div class="section-title">
-                                    Reviewer Declaration
-                                </div>
-
-                                <div class="section-description">
-                                    Declaration of accuracy, confidentiality and professional conduct
-                                </div>
-
-                            </div>
-
-                        </div>
-
                     </div>
 
 
-                    <div class="card-body">
+                    <div class="col-md-4">
 
-                        <div class="declaration-box">
+                        <input
+                            type="hidden"
+                            name="receive_review_invitations"
+                            value="0"
+                        >
 
-                            <p class="mb-3">
-
-                                By submitting this application, I confirm that
-                                the information provided is accurate and complete
-                                to the best of my knowledge.
-
-                            </p>
-
-                            <p class="mb-3">
-
-                                I understand that reviewer applications are
-                                subject to evaluation and approval by the
-                                BMRC Journal Editorial Office.
-
-                            </p>
-
-                            <p class="mb-0">
-
-                                I agree to maintain strict confidentiality
-                                regarding manuscripts, reviewer identities,
-                                editorial decisions and peer-review materials
-                                assigned to me.
-
-                            </p>
-
-                        </div>
-
-
-                        <div class="form-check">
+                        <div class="form-check form-switch">
 
                             <input
-                                class="form-check-input @error('declaration') is-invalid @enderror"
                                 type="checkbox"
-                                name="declaration"
+                                class="form-check-input"
+                                name="receive_review_invitations"
                                 value="1"
-                                id="declaration"
-                                {{ old(
-                                    'declaration',
-                                    $profile->declaration ?? false
-                                ) ? 'checked' : '' }}
-                                required
+                                id="receive_review_invitations"
+                                @checked(
+                                    old(
+                                        'receive_review_invitations',
+                                        $profile->receive_review_invitations
+                                    )
+                                )
                             >
 
                             <label
-                                class="form-check-label fw-semibold"
-                                for="declaration"
+                                class="form-check-label"
+                                for="receive_review_invitations"
                             >
-
-                                I agree to the reviewer declaration and
-                                confidentiality requirements.
-
-                                <span class="text-danger">*</span>
-
+                                Receive review invitations
                             </label>
 
+                        </div>
 
-                            @error('declaration')
+                    </div>
 
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
 
-                            @enderror
+                    <div class="col-md-4">
+
+                        <input
+                            type="hidden"
+                            name="receive_reminders"
+                            value="0"
+                        >
+
+                        <div class="form-check form-switch">
+
+                            <input
+                                type="checkbox"
+                                class="form-check-input"
+                                name="receive_reminders"
+                                value="1"
+                                id="receive_reminders"
+                                @checked(
+                                    old(
+                                        'receive_reminders',
+                                        $profile->receive_reminders
+                                    )
+                                )
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="receive_reminders"
+                            >
+                                Receive reminders
+                            </label>
 
                         </div>
 
@@ -2341,75 +1946,393 @@
 
                 </div>
 
-
-                {{-- ==================================================
-                     ACTION BUTTONS
-                =================================================== --}}
-
-                <div class="submit-card">
-
-                    <div class="card-body p-3 p-md-4">
-
-                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-3">
-
-                            <a
-                                href="{{ route('reviewer.login') }}"
-                                class="btn btn-outline-secondary"
-                            >
-
-                                <i class="bi bi-arrow-left me-1"></i>
-
-                                Back to Reviewer Portal
-
-                            </a>
-
-
-                            <button
-                                type="submit"
-                                class="btn btn-primary px-4"
-                            >
-
-                                <i class="bi bi-send-check me-1"></i>
-
-                                Submit Reviewer Application
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </form>
-
-
-            {{-- ======================================================
-                 FOOTER
-            ======================================================= --}}
-
-            <footer class="journal-footer">
-
-                <div class="footer-journal-name">
-                    BMRC Journal
-                </div>
-
-                <div class="footer-institution">
-                    Bangladesh Medical Research Council (BMRC)
-                </div>
-
-                <p class="footer-copy">
-                    BMRC Journal Online Peer Review and Editorial Management System
-                    &nbsp;|&nbsp;
-                    © {{ date('Y') }} BMRC. All rights reserved.
-                </p>
-
-            </footer>
+            </div>
 
         </div>
 
-    </main>
+
+
+        {{-- ============================================================
+            12. DECLARATIONS
+        ============================================================ --}}
+
+        <div class="profile-section">
+
+            <div class="profile-section-header highlight">
+
+                <div class="profile-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+
+                <div>
+
+                    <div class="profile-section-title">
+                        12. Reviewer Declarations
+                    </div>
+
+                    <div class="profile-section-description">
+                        Ethical, conflict-of-interest and confidentiality declarations
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-section-body">
+
+
+                <div class="declaration-box">
+
+                    <input
+                        type="hidden"
+                        name="conflict_of_interest_declaration"
+                        value="0"
+                    >
+
+                    <div class="form-check">
+
+                        <input
+                            type="checkbox"
+                            name="conflict_of_interest_declaration"
+                            value="1"
+                            id="conflict_of_interest_declaration"
+                            class="form-check-input"
+                            @checked(
+                                old(
+                                    'conflict_of_interest_declaration',
+                                    $profile->conflict_of_interest_declaration
+                                )
+                            )
+                        >
+
+                        <label
+                            class="form-check-label"
+                            for="conflict_of_interest_declaration"
+                        >
+
+                            <strong>
+                                Conflict of Interest Declaration
+                            </strong>
+
+                            <div class="small text-muted mt-1">
+                                I will disclose any relevant conflict before accepting a manuscript.
+                            </div>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <div class="declaration-box">
+
+                    <input
+                        type="hidden"
+                        name="reviewer_ethics_declaration"
+                        value="0"
+                    >
+
+                    <div class="form-check">
+
+                        <input
+                            type="checkbox"
+                            name="reviewer_ethics_declaration"
+                            value="1"
+                            id="reviewer_ethics_declaration"
+                            class="form-check-input"
+                            @checked(
+                                old(
+                                    'reviewer_ethics_declaration',
+                                    $profile->reviewer_ethics_declaration
+                                )
+                            )
+                        >
+
+                        <label
+                            class="form-check-label"
+                            for="reviewer_ethics_declaration"
+                        >
+
+                            <strong>
+                                Reviewer Ethics Declaration
+                            </strong>
+
+                            <div class="small text-muted mt-1">
+                                I will provide objective, professional and evidence-based peer review.
+                            </div>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <div class="declaration-box mb-0">
+
+                    <input
+                        type="hidden"
+                        name="confidentiality_declaration"
+                        value="0"
+                    >
+
+                    <div class="form-check">
+
+                        <input
+                            type="checkbox"
+                            name="confidentiality_declaration"
+                            value="1"
+                            id="confidentiality_declaration"
+                            class="form-check-input"
+                            @checked(
+                                old(
+                                    'confidentiality_declaration',
+                                    $profile->confidentiality_declaration
+                                )
+                            )
+                        >
+
+                        <label
+                            class="form-check-label"
+                            for="confidentiality_declaration"
+                        >
+
+                            <strong>
+                                Confidentiality Declaration
+                            </strong>
+
+                            <div class="small text-muted mt-1">
+                                I will keep manuscripts and editorial information confidential.
+                            </div>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+            SAVE
+        ============================================================ --}}
+
+        <div class="sticky-actions">
+
+            <div class="d-flex justify-content-between flex-column flex-md-row gap-2">
+
+                <a
+                    href="{{ route('reviewer.dashboard') }}"
+                    class="btn btn-outline-secondary"
+                >
+
+                    <i class="bi bi-arrow-left me-1"></i>
+
+                    Dashboard
+
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary px-4"
+                >
+
+                    <i class="bi bi-save me-1"></i>
+
+                    Save Profile Information
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+
+
+    {{-- ================================================================
+        SUBMIT FOR APPROVAL
+    ================================================================= --}}
+
+    @if(
+        $profile->isDraft()
+        ||
+        $profile->isUpdateRequested()
+        ||
+        $profile->isRejected()
+    )
+
+        <div class="profile-section mt-4">
+
+            <div class="profile-section-body">
+
+                <div class="d-flex justify-content-between flex-column flex-lg-row align-items-lg-center gap-3">
+
+                    <div>
+
+                        <strong>
+                            Submit Reviewer Application
+                        </strong>
+
+                        <div class="small text-muted mt-1">
+
+                            Save all profile information first.
+                            Then submit it for BMRC Editorial Office approval.
+
+                        </div>
+
+                    </div>
+
+
+                    <form
+                        method="POST"
+                        action="{{ route('reviewer.application.submit') }}"
+                    >
+
+                        @csrf
+
+                        <button
+                            type="submit"
+                            class="btn btn-success px-4"
+                            onclick="
+                                return confirm(
+                                    'Are you sure you want to submit your reviewer application for editorial approval?'
+                                );
+                            "
+                        >
+
+                            <i class="bi bi-send-check me-1"></i>
+
+                            @if($profile->isUpdateRequested())
+
+                                Resubmit for Approval
+
+                            @else
+
+                                Submit for Approval
+
+                            @endif
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    @endif
+
 
 </div>
 
 @endsection
+
+
+
+@push('scripts')
+
+<script>
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        const cvInput =
+            document.getElementById(
+                'cv_file'
+            );
+
+        const preview =
+            document.getElementById(
+                'newCvPreview'
+            );
+
+
+        if (!cvInput || !preview) {
+            return;
+        }
+
+
+        cvInput.addEventListener(
+            'change',
+            function () {
+
+                const file =
+                    this.files[0];
+
+
+                if (!file) {
+
+                    preview.classList.add(
+                        'd-none'
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    file.type !==
+                    'application/pdf'
+                ) {
+
+                    alert(
+                        'Please select a PDF file only.'
+                    );
+
+                    this.value = '';
+
+                    preview.classList.add(
+                        'd-none'
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    file.size >
+                    5 * 1024 * 1024
+                ) {
+
+                    alert(
+                        'Maximum CV size is 5 MB.'
+                    );
+
+                    this.value = '';
+
+                    preview.classList.add(
+                        'd-none'
+                    );
+
+                    return;
+                }
+
+
+                preview.src =
+                    URL.createObjectURL(
+                        file
+                    );
+
+                preview.classList.remove(
+                    'd-none'
+                );
+            }
+        );
+    }
+);
+
+</script>
+
+@endpush

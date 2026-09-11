@@ -1,206 +1,281 @@
-@extends('layouts.app')
+@extends('reviewer.layouts.app')
 
-@section('title', 'Reviewer Application Status')
+@section('title', 'Reviewer Application Status | BMRC Journal')
 
 @section('content')
 
-<div class="container py-5">
+<div class="page-header">
 
-    <div class="row justify-content-center">
+    <h1>
+        Reviewer Application Status
+    </h1>
 
-        <div class="col-12 col-md-9 col-lg-7">
+    <p>
+        Track the current status of your reviewer application.
+    </p>
 
-            <div class="card border-0 shadow-sm">
+</div>
 
-                <div class="card-body p-4 p-md-5 text-center">
 
-                    <div class="mb-4">
+<div class="reviewer-card mb-4">
 
-                        @if($reviewerProfile->status === 'pending')
+    <div class="card-body">
 
-                            <i class="bi bi-hourglass-split text-warning"
-                               style="font-size: 60px;"></i>
+        <div class="row g-4">
 
-                        @elseif($reviewerProfile->status === 'approved')
+            <div class="col-md-4">
 
-                            <i class="bi bi-check-circle-fill text-success"
-                               style="font-size: 60px;"></i>
+                <small class="text-muted d-block">
+                    Application ID
+                </small>
 
-                        @elseif($reviewerProfile->status === 'rejected')
+                <strong>
+                    {{ $profile->application_id ?: '-' }}
+                </strong>
 
-                            <i class="bi bi-x-circle-fill text-danger"
-                               style="font-size: 60px;"></i>
+            </div>
 
-                        @endif
 
-                    </div>
+            <div class="col-md-4">
 
+                <small class="text-muted d-block">
+                    Reviewer Code
+                </small>
 
-                    <h3 class="fw-bold mb-3">
+                <strong>
+                    {{ $profile->reviewer_code ?: 'Pending' }}
+                </strong>
 
-                        Reviewer Application
+            </div>
 
-                    </h3>
 
+            <div class="col-md-4">
 
-                    @if($reviewerProfile->status === 'pending')
+                <small class="text-muted d-block">
+                    Account Status
+                </small>
 
-                        <div class="alert alert-warning">
-
-                            <h5 class="fw-bold">
-                                Application Under Review
-                            </h5>
-
-                            <p class="mb-0">
-
-                                Your reviewer application has been
-                                submitted successfully and is currently
-                                awaiting approval by the BMRC Journal
-                                Editorial Office.
-
-                            </p>
-
-                        </div>
-
-                    @elseif($reviewerProfile->status === 'approved')
-
-                        <div class="alert alert-success">
-
-                            <h5 class="fw-bold">
-                                Application Approved
-                            </h5>
-
-                            <p class="mb-0">
-
-                                Congratulations. Your reviewer
-                                application has been approved.
-
-                            </p>
-
-                        </div>
-
-                        <a href="{{ route('reviewer.dashboard') }}"
-                           class="btn btn-primary">
-
-                            Go to Reviewer Dashboard
-
-                        </a>
-
-                    @elseif($reviewerProfile->status === 'rejected')
-
-                        <div class="alert alert-danger">
-
-                            <h5 class="fw-bold">
-                                Application Not Approved
-                            </h5>
-
-                            @if($reviewerProfile->rejection_reason)
-
-                                <p class="mb-0">
-
-                                    {{ $reviewerProfile->rejection_reason }}
-
-                                </p>
-
-                            @endif
-
-                        </div>
-
-                    @endif
-
-
-                    <hr class="my-4">
-
-
-                    <div class="row text-start g-3">
-
-                        <div class="col-md-6">
-
-                            <strong>
-                                Application ID
-                            </strong>
-
-                            <div class="text-muted">
-
-                                {{ $reviewerProfile->application_id }}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="col-md-6">
-
-                            <strong>
-                                Reviewer ID
-                            </strong>
-
-                            <div class="text-muted">
-
-                                {{ $reviewerProfile->reviewer_id }}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="col-md-6">
-
-                            <strong>
-                                Applicant
-                            </strong>
-
-                            <div class="text-muted">
-
-                                {{ $reviewerProfile->display_name }}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="col-md-6">
-
-                            <strong>
-                                Application Date
-                            </strong>
-
-                            <div class="text-muted">
-
-                                {{ optional($reviewerProfile->applied_at)->format('d M Y') }}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="mt-4">
-
-                        <form method="POST"
-                              action="{{ route('reviewer.logout') }}">
-
-                            @csrf
-
-                            <button type="submit"
-                                    class="btn btn-outline-secondary">
-
-                                Sign Out
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                </div>
+                <strong>
+                    {{ ucfirst($reviewer->status) }}
+                </strong>
 
             </div>
 
         </div>
 
     </div>
+
+</div>
+
+
+<div class="reviewer-card">
+
+    <div class="card-header fw-bold">
+
+        <i class="bi bi-clipboard-check me-2"></i>
+
+        Application Review Status
+
+    </div>
+
+
+    <div class="card-body">
+
+
+        @if($profile->isDraft())
+
+            <div class="alert alert-secondary">
+
+                <h5 class="alert-heading">
+                    Draft
+                </h5>
+
+                <p class="mb-3">
+                    Your reviewer application has not yet been submitted for editorial approval.
+                </p>
+
+                <a
+                    href="{{ route('reviewer.application.edit') }}"
+                    class="btn btn-primary"
+                >
+                    Complete Application
+                </a>
+
+            </div>
+
+
+        @elseif($profile->isPendingApproval())
+
+            <div class="alert alert-info">
+
+                <h5 class="alert-heading">
+                    Application Submitted
+                </h5>
+
+                <p class="mb-2">
+                    Your reviewer application has been submitted to the BMRC Journal Editorial Office.
+                </p>
+
+                @if($profile->submitted_for_approval_at)
+
+                    <small>
+                        Submitted:
+                        {{ $profile->submitted_for_approval_at->format('d M Y, h:i A') }}
+                    </small>
+
+                @endif
+
+            </div>
+
+
+        @elseif($profile->isUpdateRequested())
+
+            <div class="alert alert-warning">
+
+                <h5 class="alert-heading">
+                    Profile Update Requested
+                </h5>
+
+                <p>
+                    The BMRC Editorial Office has requested changes to your reviewer profile.
+                </p>
+
+                @if($profile->profile_update_request)
+
+                    <div class="border rounded p-3 bg-white mb-3">
+
+                        <strong>
+                            Editorial Comment:
+                        </strong>
+
+                        <div class="mt-2">
+                            {{ $profile->profile_update_request }}
+                        </div>
+
+                    </div>
+
+                @endif
+
+
+                @if($profile->update_requested_at)
+
+                    <small class="d-block mb-3">
+                        Requested:
+                        {{ $profile->update_requested_at->format('d M Y, h:i A') }}
+                    </small>
+
+                @endif
+
+
+                <a
+                    href="{{ route('reviewer.application.edit') }}"
+                    class="btn btn-warning"
+                >
+                    Update Profile
+                </a>
+
+            </div>
+
+
+        @elseif($profile->isApproved())
+
+            <div class="alert alert-success">
+
+                <h5 class="alert-heading">
+                    Reviewer Application Approved
+                </h5>
+
+                <p>
+                    Your reviewer application has been approved by the BMRC Journal Editorial Office.
+                </p>
+
+                @if($profile->approved_at)
+
+                    <small class="d-block mb-3">
+                        Approved:
+                        {{ $profile->approved_at->format('d M Y, h:i A') }}
+                    </small>
+
+                @endif
+
+
+                <a
+                    href="{{ route('reviewer.profile.show') }}"
+                    class="btn btn-success"
+                >
+                    View Reviewer Profile
+                </a>
+
+            </div>
+
+
+        @elseif($profile->isRejected())
+
+            <div class="alert alert-danger">
+
+                <h5 class="alert-heading">
+                    Reviewer Application Not Approved
+                </h5>
+
+                <p>
+                    Your reviewer application was not approved.
+                </p>
+
+
+                @if($profile->rejection_reason)
+
+                    <div class="border rounded p-3 bg-white mb-3">
+
+                        <strong>
+                            Reason:
+                        </strong>
+
+                        <div class="mt-2">
+                            {{ $profile->rejection_reason }}
+                        </div>
+
+                    </div>
+
+                @endif
+
+
+                @if($profile->rejected_at)
+
+                    <small>
+                        Decision Date:
+                        {{ $profile->rejected_at->format('d M Y, h:i A') }}
+                    </small>
+
+                @endif
+
+            </div>
+
+        @endif
+
+
+    </div>
+
+</div>
+
+
+<div class="mt-4 d-flex gap-2">
+
+    <a
+        href="{{ route('reviewer.dashboard') }}"
+        class="btn btn-outline-secondary"
+    >
+        <i class="bi bi-arrow-left me-1"></i>
+        Dashboard
+    </a>
+
+
+    <a
+        href="{{ route('reviewer.profile.show') }}"
+        class="btn btn-outline-primary"
+    >
+        <i class="bi bi-person me-1"></i>
+        View Profile
+    </a>
 
 </div>
 

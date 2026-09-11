@@ -319,65 +319,81 @@
 <div class="admin-wrapper">
 
 
-    <!-- =========================================================
-         SIDEBAR
-    ========================================================== -->
 
-    <aside id="adminSidebar"
-           class="admin-sidebar">
+{{-- =========================================================
+     SIDEBAR
+========================================================= --}}
 
+<aside id="adminSidebar"
+       class="admin-sidebar">
 
-        <!-- Brand -->
+    {{-- =====================================================
+         BRAND
+    ====================================================== --}}
 
-        <div class="sidebar-brand">
+    <div class="sidebar-brand">
 
-            <div>
+        <div>
 
-                <h5>
-                    BMRC Journal
-                </h5>
+            <h5>
+                BMRC Journal
+            </h5>
 
-                <small class="text-secondary">
-                    Administration
-                </small>
-
-            </div>
+            <small class="text-secondary">
+                Administration
+            </small>
 
         </div>
 
-
-        <!-- Menu -->
-
-        <div class="sidebar-menu">
+    </div>
 
 
-            <!-- Dashboard -->
+    {{-- =====================================================
+         SIDEBAR MENU
+    ====================================================== --}}
+
+    <div class="sidebar-menu">
+
+
+        {{-- =====================================================
+             MAIN / DASHBOARD
+        ====================================================== --}}
+
+        <div class="sidebar-menu-title">
+            Main
+        </div>
+
+
+        <a href="{{ route('admin.dashboard') }}"
+           class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+
+            <i class="bi bi-speedometer2"></i>
+
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+
+        {{-- =====================================================
+             USER MANAGEMENT
+        ====================================================== --}}
+
+        @canany([
+            'user.view',
+            'role.view'
+        ])
 
             <div class="sidebar-menu-title">
-                Main
+                User Management
             </div>
 
 
-            <a href="{{ route('admin.dashboard') }}"
-               class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            {{-- Users --}}
 
-                <i class="bi bi-speedometer2"></i>
-
-                <span>
-                    Dashboard
-                </span>
-
-            </a>
-
-
-            <!-- User Management -->
-
-            @if(auth()->user()->can('user.view'))
-
-                <div class="sidebar-menu-title">
-                    User Management
-                </div>
-
+            @can('user.view')
 
                 <a href="{{ route('admin.users.index') }}"
                    class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
@@ -390,12 +406,12 @@
 
                 </a>
 
-            @endif
+            @endcan
 
 
-            <!-- Role Management -->
+            {{-- Roles & Permissions --}}
 
-            @if(auth()->user()->can('role.view'))
+            @can('role.view')
 
                 <a href="{{ route('admin.roles.index') }}"
                    class="{{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
@@ -408,210 +424,37 @@
 
                 </a>
 
-            @endif
+            @endcan
 
+        @endcanany
 
-            <!-- Editorial -->
 
-            @if(
-                auth()->user()->can('manuscript.view') ||
-                auth()->user()->can('editor.assign') ||
-                auth()->user()->can('reviewer.view')
-            )
 
-                <div class="sidebar-menu-title">
-                    Editorial
-                </div>
+        {{-- =====================================================
+             EDITORIAL
+        ====================================================== --}}
 
+        @canany([
+            'manuscript.view',
+            'editor.assign'
+        ])
 
-                @can('manuscript.view')
+            <div class="sidebar-menu-title">
+                Editorial
+            </div>
 
-                    <a href="{{ route('admin.manuscripts.index') }}"
-                    class="{{ request()->routeIs('admin.manuscripts.*') ? 'active' : '' }}">
 
-                        <i class="bi bi-file-earmark-text"></i>
+            {{-- Manuscripts --}}
 
-                        <span>
-                            Manuscripts
-                        </span>
+            @can('manuscript.view')
 
-                    </a>
+                <a href="{{ route('admin.manuscripts.index') }}"
+                   class="{{ request()->routeIs('admin.manuscripts.*') ? 'active' : '' }}">
 
-                @endcan
-
-
-                @can('reviewer.view')
-
-                    <a href="#">
-
-                        <i class="bi bi-person-check"></i>
-
-                        <span>
-                            Reviewers
-                        </span>
-
-                    </a>
-
-                @endcan
-
-
-                @can('editor.assign')
-
-                    <a href="#">
-
-                        <i class="bi bi-person-workspace"></i>
-
-                        <span>
-                            Editors
-                        </span>
-
-                    </a>
-
-                @endcan
-
-            @endif
-
-
-          {{-- =====================================================
-                PAYMENT
-            ====================================================== --}}
-
-            @canany(['payment.verify', 'payment.view'])
-
-                <div class="sidebar-menu-title">
-                    Finance
-                </div>
-
-
-                {{-- PAYMENT VERIFICATION --}}
-
-                @can('payment.verify')
-
-                    <a
-                        href="{{ route('admin.payments.verification.index') }}"
-                        class="{{ request()->routeIs('admin.payments.verification.*') ? 'active' : '' }}"
-                    >
-
-                        <i class="bi bi-credit-card-2-front"></i>
-
-                        <span class="flex-grow-1">
-                            Payment Verification
-                        </span>
-
-
-                        @if(($pendingPaymentVerificationCount ?? 0) > 0)
-
-                            <span
-                                class="badge bg-danger rounded-pill"
-                                title="Pending payment verification"
-                            >
-                                {{ $pendingPaymentVerificationCount }}
-                            </span>
-
-                        @endif
-
-                    </a>
-
-                @endcan
-
-
-                {{-- VERIFIED PAYMENTS / PAYMENT HISTORY --}}
-
-                @can('payment.view')
-
-                    <a
-                        href="{{ route('admin.payments.verified') }}"
-                        class="{{ request()->routeIs('admin.payments.verified') ? 'active' : '' }}"
-                    >
-
-                        <i class="bi bi-check-circle"></i>
-
-                        <span>
-                            Verified Payments
-                        </span>
-
-                    </a>
-
-                @endcan
-
-            @endcanany
-            
-
-            <!-- Publication -->
-
-            @if(
-                auth()->user()->can('copyediting.view') ||
-                auth()->user()->can('proofreading.view') ||
-                auth()->user()->can('production.view')
-            )
-
-                <div class="sidebar-menu-title">
-                    Publication
-                </div>
-
-
-                @can('copyediting.view')
-
-                    <a href="#">
-
-                        <i class="bi bi-pencil-square"></i>
-
-                        <span>
-                            Copy Editing
-                        </span>
-
-                    </a>
-
-                @endcan
-
-
-                @can('proofreading.view')
-
-                    <a href="#">
-
-                        <i class="bi bi-check2-square"></i>
-
-                        <span>
-                            Proofreading
-                        </span>
-
-                    </a>
-
-                @endcan
-
-
-                @can('production.view')
-
-                    <a href="#">
-
-                        <i class="bi bi-printer"></i>
-
-                        <span>
-                            Production
-                        </span>
-
-                    </a>
-
-                @endcan
-
-            @endif
-
-
-            <!-- Reports -->
-
-            @can('report.view')
-
-                <div class="sidebar-menu-title">
-                    Reports
-                </div>
-
-
-                <a href="#">
-
-                    <i class="bi bi-bar-chart"></i>
+                    <i class="bi bi-file-earmark-text"></i>
 
                     <span>
-                        Reports
+                        Manuscripts
                     </span>
 
                 </a>
@@ -619,16 +462,403 @@
             @endcan
 
 
-            <!-- Audit -->
+            {{-- Editors --}}
 
-            @can('audit.view')
+            @can('editor.assign')
 
                 <a href="#">
+
+                    <i class="bi bi-person-workspace"></i>
+
+                    <span>
+                        Editors
+                    </span>
+
+                </a>
+
+            @endcan
+
+        @endcanany
+
+
+
+        {{-- =====================================================
+             REVIEWER MANAGEMENT
+        ====================================================== --}}
+
+        @canany([
+            'reviewer.view',
+            'reviewer.search',
+            'reviewer.request',
+            'reviewer.create',
+            'reviewer.edit',
+            'reviewer.approve',
+            'reviewer.reject',
+            'reviewer.suspend',
+            'reviewer.invite',
+            'reviewer.assign',
+            'reviewer.performance.view'
+        ])
+
+            <div class="sidebar-menu-title">
+                Reviewer Management
+            </div>
+
+
+
+            {{-- =================================================
+                 ALL / APPROVED REVIEWER POOL
+            ================================================== --}}
+
+            @can('reviewer.view')
+
+                <a href="{{ route('admin.reviewers.index') }}"
+                   class="{{ request()->routeIs('admin.reviewers.index') ||
+                             request()->routeIs('admin.reviewers.show')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-people"></i>
+
+                    <span>
+                        Reviewer Pool
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 SEARCH REVIEWER
+                 Handling / Associate Editor
+            ================================================== --}}
+
+            @can('reviewer.search')
+
+                <a href="{{ route('admin.reviewers.search') }}"
+                   class="{{ request()->routeIs('admin.reviewers.search')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-search"></i>
+
+                    <span>
+                        Search Reviewer
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 REQUEST NEW REVIEWER
+                 Handling / Associate Editor
+            ================================================== --}}
+
+            @can('reviewer.request')
+
+                <a href="{{ route('admin.reviewers.requests.create') }}"
+                   class="{{ request()->routeIs('admin.reviewers.requests.*')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-person-plus"></i>
+
+                    <span>
+                        Request New Reviewer
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 ADD REVIEWER
+                 Editorial Officer / Journal Officer
+            ================================================== --}}
+
+            @can('reviewer.create')
+
+                <a href="{{ route('admin.reviewers.create') }}"
+                   class="{{ request()->routeIs('admin.reviewers.create')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-person-plus-fill"></i>
+
+                    <span>
+                        Add Reviewer
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 PROFILE INCOMPLETE
+            ================================================== --}}
+
+            @can('reviewer.view')
+
+                <a href="{{ route('admin.reviewers.profile-incomplete') }}"
+                   class="{{ request()->routeIs('admin.reviewers.profile-incomplete')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-person-exclamation"></i>
+
+                    <span class="flex-grow-1">
+                        Profile Incomplete
+                    </span>
+
+
+                    @if(($incompleteReviewerCount ?? 0) > 0)
+
+                        <span class="badge bg-warning text-dark rounded-pill">
+
+                            {{ $incompleteReviewerCount }}
+
+                        </span>
+
+                    @endif
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 PENDING APPROVAL
+                 Editor-in-Chief
+            ================================================== --}}
+
+            @can('reviewer.approve')
+
+                <a href="{{ route('admin.reviewers.pending') }}"
+                   class="{{ request()->routeIs('admin.reviewers.pending')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-hourglass-split"></i>
+
+                    <span class="flex-grow-1">
+                        Pending Approval
+                    </span>
+
+
+                    @if(($pendingReviewerApprovalCount ?? 0) > 0)
+
+                        <span class="badge bg-danger rounded-pill">
+
+                            {{ $pendingReviewerApprovalCount }}
+
+                        </span>
+
+                    @endif
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 UPDATE REQUESTED
+            ================================================== --}}
+
+            @can('reviewer.approve')
+
+                <a href="{{ route('admin.reviewers.update-requested') }}"
+                   class="{{ request()->routeIs('admin.reviewers.update-requested')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-arrow-repeat"></i>
+
+                    <span>
+                        Update Requested
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 APPROVED REVIEWERS
+            ================================================== --}}
+
+            @can('reviewer.view')
+
+                <a href="{{ route('admin.reviewers.approved') }}"
+                   class="{{ request()->routeIs('admin.reviewers.approved')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-person-check-fill"></i>
+
+                    <span>
+                        Approved Reviewers
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 REJECTED REVIEWERS
+            ================================================== --}}
+
+            @can('reviewer.approve')
+
+                <a href="{{ route('admin.reviewers.rejected') }}"
+                   class="{{ request()->routeIs('admin.reviewers.rejected')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-person-x"></i>
+
+                    <span>
+                        Rejected Reviewers
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 SUSPENDED REVIEWERS
+            ================================================== --}}
+
+            @can('reviewer.suspend')
+
+                <a href="{{ route('admin.reviewers.suspended') }}"
+                   class="{{ request()->routeIs('admin.reviewers.suspended')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-person-dash"></i>
+
+                    <span>
+                        Suspended Reviewers
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 REVIEWER INVITATIONS
+            ================================================== --}}
+
+            @can('reviewer.invite')
+
+                <a href="{{ route('admin.reviewer-invitations.index') }}"
+                   class="{{ request()->routeIs('admin.reviewer-invitations.*')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-envelope"></i>
+
+                    <span class="flex-grow-1">
+                        Reviewer Invitations
+                    </span>
+
+
+                    @if(($pendingReviewerInvitationCount ?? 0) > 0)
+
+                        <span class="badge bg-primary rounded-pill">
+
+                            {{ $pendingReviewerInvitationCount }}
+
+                        </span>
+
+                    @endif
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 ASSIGNED REVIEWERS
+                 Handling / Associate Editor
+            ================================================== --}}
+
+            @can('reviewer.assign')
+
+                <a href="{{ route('admin.reviewer-assignments.index') }}"
+                   class="{{ request()->routeIs('admin.reviewer-assignments.*')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-person-check"></i>
+
+                    <span>
+                        Assigned Reviewers
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 REVIEWER WORKLOAD
+            ================================================== --}}
+
+            @can('reviewer.performance.view')
+
+                <a href="{{ route('admin.reviewers.workload') }}"
+                   class="{{ request()->routeIs('admin.reviewers.workload')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-clipboard-data"></i>
+
+                    <span>
+                        Reviewer Workload
+                    </span>
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- =================================================
+                 REVIEW HISTORY
+            ================================================== --}}
+
+            @can('reviewer.performance.view')
+
+                <a href="{{ route('admin.reviewers.review-history') }}"
+                   class="{{ request()->routeIs('admin.reviewers.review-history')
+                                ? 'active'
+                                : '' }}">
 
                     <i class="bi bi-clock-history"></i>
 
                     <span>
-                        Audit Logs
+                        Review History
                     </span>
 
                 </a>
@@ -636,21 +866,125 @@
             @endcan
 
 
-            <!-- Settings -->
 
-            @can('settings.view')
+            {{-- =================================================
+                 REVIEWER PERFORMANCE
+            ================================================== --}}
 
-                <div class="sidebar-menu-title">
-                    System
-                </div>
+            @can('reviewer.performance.view')
 
+                <a href="{{ route('admin.reviewers.performance') }}"
+                   class="{{ request()->routeIs('admin.reviewers.performance')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-bar-chart-line"></i>
+
+                    <span>
+                        Reviewer Performance
+                    </span>
+
+                </a>
+
+            @endcan
+
+        @endcanany
+
+
+
+        {{-- =====================================================
+             FINANCE
+        ====================================================== --}}
+
+        @canany([
+            'payment.verify',
+            'payment.view'
+        ])
+
+            <div class="sidebar-menu-title">
+                Finance
+            </div>
+
+
+            {{-- Payment Verification --}}
+
+            @can('payment.verify')
+
+                <a href="{{ route('admin.payments.verification.index') }}"
+                   class="{{ request()->routeIs('admin.payments.verification.*')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-credit-card-2-front"></i>
+
+                    <span class="flex-grow-1">
+                        Payment Verification
+                    </span>
+
+
+                    @if(($pendingPaymentVerificationCount ?? 0) > 0)
+
+                        <span class="badge bg-danger rounded-pill"
+                              title="Pending payment verification">
+
+                            {{ $pendingPaymentVerificationCount }}
+
+                        </span>
+
+                    @endif
+
+                </a>
+
+            @endcan
+
+
+
+            {{-- Verified Payments --}}
+
+            @can('payment.view')
+
+                <a href="{{ route('admin.payments.verified') }}"
+                   class="{{ request()->routeIs('admin.payments.verified')
+                                ? 'active'
+                                : '' }}">
+
+                    <i class="bi bi-check-circle"></i>
+
+                    <span>
+                        Verified Payments
+                    </span>
+
+                </a>
+
+            @endcan
+
+        @endcanany
+
+
+
+        {{-- =====================================================
+             PUBLICATION
+        ====================================================== --}}
+
+        @canany([
+            'copyediting.view',
+            'proofreading.view',
+            'production.view'
+        ])
+
+            <div class="sidebar-menu-title">
+                Publication
+            </div>
+
+
+            @can('copyediting.view')
 
                 <a href="#">
 
-                    <i class="bi bi-gear"></i>
+                    <i class="bi bi-pencil-square"></i>
 
                     <span>
-                        Settings
+                        Copy Editing
                     </span>
 
                 </a>
@@ -658,12 +992,159 @@
             @endcan
 
 
-        </div>
+            @can('proofreading.view')
 
-    </aside>
+                <a href="#">
+
+                    <i class="bi bi-check2-square"></i>
+
+                    <span>
+                        Proofreading
+                    </span>
+
+                </a>
+
+            @endcan
 
 
-    <!-- Overlay -->
+            @can('production.view')
+
+                <a href="#">
+
+                    <i class="bi bi-printer"></i>
+
+                    <span>
+                        Production
+                    </span>
+
+                </a>
+
+            @endcan
+
+        @endcanany
+
+
+
+        {{-- =====================================================
+             REPORTS
+        ====================================================== --}}
+
+        @can('report.view')
+
+            <div class="sidebar-menu-title">
+                Reports
+            </div>
+
+
+            <a href="#">
+
+                <i class="bi bi-bar-chart"></i>
+
+                <span>
+                    Reports
+                </span>
+
+            </a>
+
+        @endcan
+
+
+
+        {{-- =====================================================
+             AUDIT LOGS
+        ====================================================== --}}
+
+        @can('audit.view')
+
+            <a href="#">
+
+                <i class="bi bi-clock-history"></i>
+
+                <span>
+                    Audit Logs
+                </span>
+
+            </a>
+
+        @endcan
+
+
+
+        {{-- =====================================================
+             SYSTEM SETTINGS
+        ====================================================== --}}
+
+        @can('settings.view')
+
+            <div class="sidebar-menu-title">
+                System
+            </div>
+
+
+            <a href="#">
+
+                <i class="bi bi-gear"></i>
+
+                <span>
+                    Settings
+                </span>
+
+            </a>
+
+        @endcan
+
+
+    </div>
+
+</aside>
+
+
+{{-- =========================================================
+     SIDEBAR OVERLAY
+========================================================= --}}
+
+<div id="sidebarOverlay"
+     class="sidebar-overlay">
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <div id="sidebarOverlay"
          class="sidebar-overlay">
