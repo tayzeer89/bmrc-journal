@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Change Password | BMRC Journal')
+@section('title', 'Change Temporary Password | BMRC Journal')
 
 @section('content')
 
@@ -15,6 +15,7 @@
                 <div class="card-header bg-primary text-white">
 
                     <h5 class="mb-0">
+                        <i class="bi bi-shield-lock me-2"></i>
                         Change Temporary Password
                     </h5>
 
@@ -26,10 +27,12 @@
 
                         <i class="bi bi-exclamation-triangle me-2"></i>
 
-                        For security reasons, you must change your temporary password before continuing.
+                        <strong>Password change required.</strong>
+
+                        For security reasons, you must change your
+                        temporary password before accessing your reviewer account.
 
                     </div>
-
 
                     @if($errors->any())
 
@@ -65,17 +68,29 @@
                                 for="current_password"
                                 class="form-label"
                             >
-                                Current Password
+                                Current Temporary Password
                             </label>
 
                             <input
                                 type="password"
                                 name="current_password"
                                 id="current_password"
-                                class="form-control"
+                                class="form-control
+                                    @error('current_password')
+                                        is-invalid
+                                    @enderror"
                                 required
                                 autofocus
+                                autocomplete="current-password"
                             >
+
+                            @error('current_password')
+
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+
+                            @enderror
 
                         </div>
 
@@ -93,16 +108,26 @@
                                 type="password"
                                 name="password"
                                 id="password"
-                                class="form-control"
+                                class="form-control
+                                    @error('password')
+                                        is-invalid
+                                    @enderror"
                                 required
+                                autocomplete="new-password"
                             >
 
-                            <small class="text-muted">
+                            @error('password')
 
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+
+                            @enderror
+
+                            <div class="form-text">
                                 Minimum 8 characters with uppercase,
                                 lowercase and number.
-
-                            </small>
+                            </div>
 
                         </div>
 
@@ -122,6 +147,7 @@
                                 id="password_confirmation"
                                 class="form-control"
                                 required
+                                autocomplete="new-password"
                             >
 
                         </div>
@@ -131,11 +157,8 @@
                             type="submit"
                             class="btn btn-primary w-100"
                         >
-
                             <i class="bi bi-key me-2"></i>
-
-                            Change Password
-
+                            Set New Password
                         </button>
 
                     </form>

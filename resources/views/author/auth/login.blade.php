@@ -607,14 +607,11 @@
 
                         </div>
 
-
-                        <a
-                            href="#"
+                       <a
+                            href="{{ route('author.password.request') }}"
                             class="forgot-link"
                         >
-
                             Forgot password?
-
                         </a>
 
                     </div>

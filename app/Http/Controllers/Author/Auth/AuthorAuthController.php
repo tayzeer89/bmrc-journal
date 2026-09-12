@@ -186,15 +186,10 @@ class AuthorAuthController extends Controller
 
             Auth::login($user);
 
-            $request->session()->regenerate();
-
+            $request->session()->forget('url.intended');
 
             return redirect()
-                ->route('author.dashboard')
-                ->with(
-                    'success',
-                    'Author account created successfully. Please complete your profile.'
-                );
+                ->route('author.dashboard');
 
         } catch (\Throwable $e) {
 

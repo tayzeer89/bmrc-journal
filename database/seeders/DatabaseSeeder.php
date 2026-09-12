@@ -80,6 +80,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             ArticleTypeSeeder::class,
             JournalSeeder::class,
+            JournalPageSeeder::class,
                /*
             | Run existing reviewer data first,
             | because ReviewerLookupSeeder also

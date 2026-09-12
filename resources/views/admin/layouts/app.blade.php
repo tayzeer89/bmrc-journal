@@ -1025,6 +1025,39 @@
 
 
 
+         {{-- =====================================================
+             JOURNAL WEBSITE
+             System Administrator Only
+        ====================================================== --}}
+
+        @role('system_administrator')
+
+            <div class="sidebar-menu-title">
+                Journal Website
+            </div>
+
+
+            {{-- Website Content --}}
+
+            <a href="{{ route('admin.journal-pages.index') }}"
+               class="{{ request()->routeIs('admin.journal-pages.*')
+                            ? 'active'
+                            : '' }}">
+
+                <i class="bi bi-globe2"></i>
+
+                <span>
+                    Website Content
+                </span>
+
+            </a>
+
+        @endrole
+
+
+
+
+
         {{-- =====================================================
              REPORTS
         ====================================================== --}}
@@ -1106,43 +1139,6 @@
 <div id="sidebarOverlay"
      class="sidebar-overlay">
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

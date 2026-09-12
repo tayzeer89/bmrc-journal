@@ -1097,24 +1097,6 @@
 
                         </div>
 
-
-                        {{-- Development/debug information --}}
-                        <div class="mt-2 small text-muted">
-
-                            Account:
-                            <strong>
-                                {{ $sidebarReviewer?->status ?? '-' }}
-                            </strong>
-
-                            |
-
-                            Profile:
-                            <strong>
-                                {{ $sidebarProfile?->approval_status ?? '-' }}
-                            </strong>
-
-                        </div>
-
                     @endif
 
             </div>
@@ -1566,30 +1548,13 @@
                 Account
             </div>
 
-
-            @if(Route::has('reviewer.password.change'))
-
-                <a
-                    href="{{ route('reviewer.password.change') }}"
-                    class="
-                        nav-link
-                        {{
-                            request()->routeIs(
-                                'reviewer.password.*'
-                            )
-                                ? 'active'
-                                : ''
-                        }}
-                    "
-                >
-
-                    <i class="bi bi-key"></i>
-
-                    Change Password
-
-                </a>
-
-            @endif
+            <a
+                href="{{ route('reviewer.password.change') }}"
+                class="nav-link {{ request()->routeIs('reviewer.password.*') ? 'active' : '' }}"
+            >
+                <i class="bi bi-key"></i>
+                <span>Change Password</span>
+            </a>
 
 
 

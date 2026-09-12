@@ -2,15 +2,29 @@
 
 namespace App\Models;
 
+use App\Notifications\ReviewerResetPasswordNotification;
+
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Reviewer extends Authenticatable
+
+class Reviewer extends Authenticatable implements CanResetPasswordContract
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
+    use CanResetPassword;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mass Assignable Attributes
+    |--------------------------------------------------------------------------
+    */
 
     protected $fillable = [
         'name',
@@ -31,10 +45,24 @@ class Reviewer extends Authenticatable
         'last_login_at',
     ];
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hidden Attributes
+    |--------------------------------------------------------------------------
+    */
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attribute Casting
+    |--------------------------------------------------------------------------
+    */
 
     protected $casts = [
         'password' => 'hashed',
@@ -112,6 +140,33 @@ class Reviewer extends Authenticatable
     public function mustChangePassword(): bool
     {
         return (bool) $this->must_change_password;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Password Reset Notification
+    |--------------------------------------------------------------------------
+    |
+    | Laravel's default reset notification expects a route named:
+    |
+    | password.reset
+    |
+    | But the reviewer authentication system uses:
+    |
+    | reviewer.password.reset
+    |
+    | Therefore we send a reviewer-specific password reset notification.
+    |
+    */
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(
+            new ReviewerResetPasswordNotification(
+                $token
+            )
+        );
     }
 
 

@@ -33,6 +33,10 @@ use App\Http\Controllers\Admin\ReviewerInvitationController;
 use App\Http\Controllers\Admin\ReviewerAssignmentController;
 
 use App\Http\Controllers\ArticleTypeController;
+use App\Http\Controllers\Admin\JournalPageController;
+
+use App\Http\Controllers\Website\JournalPageController
+    as PublicJournalPageController;
 
 
 /*
@@ -40,6 +44,9 @@ use App\Http\Controllers\ArticleTypeController;
 | AUTHOR CONTROLLERS
 |--------------------------------------------------------------------------
 */
+
+use App\Http\Controllers\Author\Auth\AuthorForgotPasswordController;
+use App\Http\Controllers\Author\Auth\AuthorResetPasswordController;
 
 use App\Http\Controllers\Author\Auth\AuthorAuthController;
 use App\Http\Controllers\Author\DashboardController as AuthorDashboardController;
@@ -56,6 +63,8 @@ use App\Http\Controllers\Author\TechnicalCorrectionController;
 | REVIEWER CONTROLLERS
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\Reviewer\Auth\ReviewerForgotPasswordController;
+use App\Http\Controllers\Reviewer\Auth\ReviewerResetPasswordController;
 
 use App\Http\Controllers\Reviewer\Auth\ReviewerAuthController;
 use App\Http\Controllers\Reviewer\ReviewerDashboardController;
@@ -82,12 +91,83 @@ Route::get('/', function () {
 })->name('home');
 
 
+
+/*
+|--------------------------------------------------------------------------
+| PUBLIC JOURNAL WEBSITE PAGES
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/page/{slug}',
+    [PublicJournalPageController::class, 'show']
+)->name('journal.page');
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Public CMS Page
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/page/{slug}',
+    [
+        PublicJournalPageController::class,
+        'show',
+    ]
+)->name('journal.page');
+
+
+/*
+|--------------------------------------------------------------------------
+| Journal Current Issue
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/current-issue',
+    function () {
+
+        return view(
+            'website.journal.current-issue'
+        );
+
+    }
+)->name('journal.current-issue');
+
+
+/*
+|--------------------------------------------------------------------------
+| Journal Archive
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/journal-archive',
+    function () {
+
+        return view(
+            'website.journal.archive'
+        );
+
+    }
+)->name('journal.archive');
+
+
+
+
+
+
+
+
+
 /*
 |--------------------------------------------------------------------------
 | AUTHOR PORTAL
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('author')
     ->name('author.')
     ->group(function () {
@@ -124,6 +204,40 @@ Route::prefix('author')
             '/login',
             [AuthorAuthController::class, 'login']
         )->name('login.submit');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Author Forgot Password
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/forgot-password',
+            [AuthorForgotPasswordController::class, 'create']
+        )->name('password.request');
+
+        Route::post(
+            '/forgot-password',
+            [AuthorForgotPasswordController::class, 'store']
+        )->name('password.email');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Author Reset Password
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/reset-password/{token}',
+            [AuthorResetPasswordController::class, 'create']
+        )->name('password.reset');
+
+        Route::post(
+            '/reset-password',
+            [AuthorResetPasswordController::class, 'store']
+        )->name('password.store');
 
 
         /*
@@ -227,7 +341,6 @@ Route::prefix('author')
                 )->name('profile.update');
             });
     });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -656,6 +769,7 @@ Route::middleware('auth')
 |
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('reviewer')
     ->name('reviewer.')
     ->group(function () {
@@ -666,25 +780,77 @@ Route::prefix('reviewer')
         |--------------------------------------------------------------------------
         */
 
-        Route::get(
-            '/register',
-            [ReviewerAuthController::class, 'showRegister']
-        )->name('register');
+        Route::middleware('guest:reviewer')
+            ->group(function () {
 
-        Route::post(
-            '/register',
-            [ReviewerAuthController::class, 'register']
-        )->name('register.submit');
+                /*
+                |--------------------------------------------------------------------------
+                | REGISTRATION
+                |--------------------------------------------------------------------------
+                */
 
-        Route::get(
-            '/login',
-            [ReviewerAuthController::class, 'showLogin']
-        )->name('login');
+                Route::get(
+                    '/register',
+                    [ReviewerAuthController::class, 'showRegister']
+                )->name('register');
 
-        Route::post(
-            '/login',
-            [ReviewerAuthController::class, 'login']
-        )->name('login.submit');
+                Route::post(
+                    '/register',
+                    [ReviewerAuthController::class, 'register']
+                )->name('register.submit');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | LOGIN
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/login',
+                    [ReviewerAuthController::class, 'showLogin']
+                )->name('login');
+
+                Route::post(
+                    '/login',
+                    [ReviewerAuthController::class, 'login']
+                )->name('login.submit');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | FORGOT PASSWORD
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/forgot-password',
+                    [ReviewerForgotPasswordController::class, 'create']
+                )->name('password.request');
+
+                Route::post(
+                    '/forgot-password',
+                    [ReviewerForgotPasswordController::class, 'store']
+                )->name('password.email');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESET PASSWORD
+                |--------------------------------------------------------------------------
+                */
+
+                Route::get(
+                    '/reset-password/{token}',
+                    [ReviewerResetPasswordController::class, 'create']
+                )->name('password.reset');
+
+                Route::post(
+                    '/reset-password',
+                    [ReviewerResetPasswordController::class, 'store']
+                )->name('password.store');
+
+            });
 
 
         /*
@@ -713,8 +879,15 @@ Route::prefix('reviewer')
                 | PASSWORD CHANGE
                 |--------------------------------------------------------------------------
                 |
-                | Must remain outside reviewer.approved middleware.
-                | A pending reviewer may need to change a temporary password.
+                | This is different from Forgot Password.
+                |
+                | Forgot Password:
+                | guest reviewer -> email reset link
+                |
+                | Password Change:
+                | authenticated reviewer -> change current password
+                |
+                | Keep this outside reviewer.approved middleware.
                 |
                 */
 
@@ -1176,6 +1349,25 @@ Route::middleware([
             ->middleware(
                 'permission:settings.manage'
             );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Journal Website Content Management
+        |--------------------------------------------------------------------------
+        |
+        | Only System Administrator can access these routes because this
+        | resource is inside the role:system_administrator route group.
+        |
+        */
+
+        Route::resource(
+            'journal-pages',
+            JournalPageController::class
+        );
+
+
+
     });
 
 

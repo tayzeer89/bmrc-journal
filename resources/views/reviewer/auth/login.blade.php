@@ -616,12 +616,10 @@
 
 
                         <a
-                            href="#"
+                            href="{{ route('reviewer.password.request') }}"
                             class="forgot-link"
                         >
-
                             Forgot password?
-
                         </a>
 
                     </div>

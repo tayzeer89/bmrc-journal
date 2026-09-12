@@ -1,57 +1,80 @@
 <!DOCTYPE html>
+
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-    <meta name="csrf-token"
-          content="{{ csrf_token() }}">
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+
 
     <title>
         BMRC Journal Online System
     </title>
 
 
-    {{-- Bootstrap 5 --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    {{-- =========================================================
+         BOOTSTRAP 5
+    ========================================================== --}}
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
 
-    {{-- Bootstrap Icons --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-          rel="stylesheet">
+    {{-- =========================================================
+         BOOTSTRAP ICONS
+    ========================================================== --}}
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+        rel="stylesheet"
+    >
 
 
-    {{-- Google Font --}}
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
+    {{-- =========================================================
+         GOOGLE FONT
+    ========================================================== --}}
 
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet">
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 
 
     <style>
 
         /* =====================================================
-           GLOBAL
+           ROOT
         ====================================================== */
 
         :root {
 
             --bmrc-navy: #123B5D;
-
             --bmrc-navy-dark: #0B2D46;
 
             --bmrc-teal: #008C95;
-
             --bmrc-teal-dark: #006F77;
 
             --bmrc-gold: #C99A2E;
@@ -70,12 +93,16 @@
 
 
         * {
+
             box-sizing: border-box;
+
         }
 
 
         html {
+
             scroll-behavior: smooth;
+
         }
 
 
@@ -92,304 +119,386 @@
         }
 
 
-/* =====================================================
-PROFESSIONAL JOURNAL NAVBAR
-===================================================== */
 
-.main-navbar {
+        /* =====================================================
+           NAVBAR
+        ====================================================== */
 
+        .main-navbar {
 
-background: #073b4c;
+            background: #073b4c;
 
-padding: 10px 0;
+            padding: 9px 0;
 
-box-shadow:
-    0 4px 18px rgba(0, 0, 0, .10);
+            box-shadow:
+                0 4px 18px
+                rgba(0, 0, 0, .12);
 
-position: relative;
+            position: relative;
 
-z-index: 1000;
+            z-index: 1050;
 
+        }
 
-}
 
-/* Brand */
+        .main-navbar .navbar-brand {
 
-.brand-logo {
+            padding-top: 0;
 
+            padding-bottom: 0;
 
-width: 48px;
+            margin-right: 20px;
 
-height: 48px;
+            text-decoration: none;
 
-border-radius: 10px;
+        }
 
-background: #ffffff;
 
-display: flex;
+        .brand-logo {
 
-align-items: center;
+            width: 46px;
 
-justify-content: center;
+            height: 46px;
 
-margin-right: 12px;
+            min-width: 46px;
 
-box-shadow:
-    0 3px 10px rgba(0, 0, 0, .12);
+            border-radius: 10px;
 
+            background: #ffffff;
 
-}
+            display: flex;
 
-.brand-logo i {
+            align-items: center;
 
+            justify-content: center;
 
-font-size: 25px;
+            margin-right: 11px;
 
-color: #073b4c;
+            box-shadow:
+                0 3px 10px
+                rgba(0, 0, 0, .12);
 
+        }
 
-}
 
-.brand-name {
+        .brand-logo i {
 
+            font-size: 24px;
 
-color: #ffffff;
+            color: #073b4c;
 
-font-weight: 800;
+        }
 
-font-size: 18px;
 
-line-height: 1.2;
+        .brand-name {
 
+            color: #ffffff;
 
-}
+            font-weight: 800;
 
-.brand-subtitle {
+            font-size: 17px;
 
+            line-height: 1.2;
 
-color: rgba(255, 255, 255, .70);
+            display: block;
 
-font-size: 10px;
+        }
 
-display: block;
 
+        .brand-subtitle {
 
-}
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .68
+                );
 
-/* Navigation */
+            font-size: 9px;
 
-.navbar-nav .nav-link {
+            display: block;
 
+            line-height: 1.4;
 
-color: rgba(255, 255, 255, .88);
+            margin-top: 2px;
 
-font-size: 13px;
+        }
 
-font-weight: 500;
 
-padding: 10px 9px !important;
 
-margin: 0 1px;
+        /* =====================================================
+           NAV LINKS
+        ====================================================== */
 
-transition: .2s ease;
+        .main-navbar .navbar-nav {
 
+            gap: 1px;
 
-}
+        }
 
-.navbar-nav .nav-link:hover,
 
-.navbar-nav .nav-link:focus {
+        .main-navbar .nav-link {
 
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .90
+                );
 
-color: #ffffff;
+            font-size: 13px;
 
+            font-weight: 500;
 
-}
+            padding:
+                10px 8px !important;
 
-/* Dropdown */
+            border-radius: 6px;
 
-.dropdown-menu {
+            white-space: nowrap;
 
+            transition:
+                all .2s ease;
 
-border: none;
+        }
 
-border-radius: 10px;
 
-padding: 8px;
+        .main-navbar .nav-link:hover,
+        .main-navbar .nav-link:focus,
+        .main-navbar .nav-link.show {
 
-margin-top: 8px;
+            color: #ffffff;
 
-min-width: 230px;
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .08
+                );
 
-box-shadow:
-    0 12px 35px rgba(0, 0, 0, .15);
+        }
 
 
-}
+        /*
+        |--------------------------------------------------------------------------
+        | Dropdown button
+        |--------------------------------------------------------------------------
+        */
 
-.dropdown-item {
+        .main-navbar button.nav-link {
 
+            font-family: inherit;
 
-padding: 10px 13px;
+            cursor: pointer;
 
-border-radius: 7px;
+            outline: none;
 
-font-size: 13px;
+            appearance: none;
 
-font-weight: 500;
+        }
 
-color: #343a40;
 
+        .main-navbar button.nav-link:focus {
 
-}
+            outline: none;
 
-.dropdown-item:hover {
+            box-shadow: none;
 
+        }
 
-background: #e8f4f7;
 
-color: #073b4c;
 
+        /* =====================================================
+           DROPDOWN
+        ====================================================== */
 
-}
+        .main-navbar .nav-item.dropdown {
 
-.dropdown-item i {
+            position: relative;
 
+        }
 
-width: 18px;
 
-color: #0b7285;
+        .main-navbar .dropdown-menu {
 
+            border:
+                1px solid
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .05
+                );
 
-}
+            border-radius: 10px;
 
-/* Submit Article */
+            padding: 8px;
 
-.btn-submit {
+            margin-top: 8px;
 
+            min-width: 245px;
 
-background: #f4a261;
+            background: #ffffff;
 
-color: #ffffff !important;
+            box-shadow:
+                0 14px 35px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .16
+                );
 
-border: none;
+            z-index: 2000;
 
-border-radius: 7px;
+        }
 
-padding: 9px 15px !important;
 
-font-size: 13px;
+        .main-navbar .dropdown-item {
 
-font-weight: 600;
+            padding:
+                10px 12px;
 
-transition: .2s ease;
+            border-radius: 7px;
 
+            font-size: 13px;
 
-}
+            font-weight: 500;
 
-.btn-submit:hover {
+            color: #343a40;
 
+            display: flex;
 
-background: #e76f51;
+            align-items: center;
 
-color: #ffffff !important;
+            white-space: normal;
 
-transform: translateY(-1px);
+        }
 
 
-}
+        .main-navbar .dropdown-item:hover,
+        .main-navbar .dropdown-item:focus {
 
-/* Login */
+            background: #e8f4f7;
 
-.btn-login {
+            color: #073b4c;
 
+        }
 
-background: transparent;
 
-color: #ffffff !important;
+        .main-navbar .dropdown-item i {
 
-border: 1px solid rgba(255,255,255,.55);
+            width: 19px;
 
-border-radius: 7px;
+            min-width: 19px;
 
-padding: 8px 14px !important;
+            color: #0b7285;
 
-font-size: 13px;
+        }
 
-font-weight: 600;
 
-transition: .2s ease;
+        .main-navbar .dropdown-divider {
 
+            margin:
+                7px 4px;
 
-}
+        }
 
-.btn-login:hover {
 
-background: #ffffff;
 
-color: #073b4c !important;
+        /* =====================================================
+           LOGIN BUTTON
+        ====================================================== */
 
-}
+        .btn-login {
 
-/* Mobile */
+            background: transparent;
 
-.navbar-toggler {
+            color:
+                #ffffff !important;
 
+            border:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .55
+                );
 
-border: 1px solid rgba(255,255,255,.4);
+            border-radius: 7px;
 
-padding: 7px 10px;
+            padding:
+                8px 14px !important;
 
+            font-size: 13px;
 
-}
+            font-weight: 600;
 
-.navbar-toggler:focus {
+            transition:
+                all .2s ease;
 
+            white-space: nowrap;
 
-box-shadow: none;
+        }
 
 
-}
+        .btn-login:hover {
 
-@media (max-width: 991px) {
+            background: #ffffff;
 
+            color:
+                #073b4c !important;
 
-.navbar-collapse {
+            border-color:
+                #ffffff;
 
-    background: #073b4c;
+        }
 
-    padding: 15px 0 10px;
 
-}
 
+        /* =====================================================
+           MOBILE TOGGLER
+        ====================================================== */
 
-.navbar-nav .nav-link {
+        .main-navbar .navbar-toggler {
 
-    padding: 11px 15px !important;
+            border:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .35
+                );
 
-}
+            border-radius: 7px;
 
+            padding:
+                4px 9px;
 
-.dropdown-menu {
+            box-shadow: none;
 
-    margin: 0 15px;
+        }
 
-    box-shadow: none;
 
-}
+        .main-navbar .navbar-toggler:focus {
 
+            box-shadow: none;
 
-.btn-submit,
+            border-color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .65
+                );
 
-.btn-login {
+        }
 
-    display: inline-block;
-
-    margin: 8px 15px;
-
-}
-
-}
 
 
         /* =====================================================
@@ -432,7 +541,13 @@ box-shadow: none;
 
             border-radius: 50%;
 
-            background: rgba(0,140,149,.06);
+            background:
+                rgba(
+                    0,
+                    140,
+                    149,
+                    .06
+                );
 
             right: -180px;
 
@@ -453,7 +568,13 @@ box-shadow: none;
 
             border-radius: 50%;
 
-            background: rgba(201,154,46,.07);
+            background:
+                rgba(
+                    201,
+                    154,
+                    46,
+                    .07
+                );
 
             left: -180px;
 
@@ -479,13 +600,23 @@ box-shadow: none;
 
             gap: 8px;
 
-            background: rgba(255,255,255,.85);
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .85
+                );
 
-            border: 1px solid var(--bmrc-border);
+            border:
+                1px solid
+                var(--bmrc-border);
 
-            color: var(--bmrc-teal-dark);
+            color:
+                var(--bmrc-teal-dark);
 
-            padding: 9px 16px;
+            padding:
+                9px 16px;
 
             border-radius: 30px;
 
@@ -495,21 +626,34 @@ box-shadow: none;
 
             margin-bottom: 22px;
 
-            box-shadow: 0 5px 20px rgba(18,59,93,.06);
+            box-shadow:
+                0 5px 20px
+                rgba(
+                    18,
+                    59,
+                    93,
+                    .06
+                );
 
         }
 
 
         .hero-badge i {
 
-            color: var(--bmrc-gold);
+            color:
+                var(--bmrc-gold);
 
         }
 
 
         .hero h1 {
 
-            font-size: clamp(38px, 5vw, 62px);
+            font-size:
+                clamp(
+                    38px,
+                    5vw,
+                    62px
+                );
 
             font-weight: 800;
 
@@ -519,7 +663,8 @@ box-shadow: none;
 
             margin-bottom: 22px;
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
         }
 
@@ -528,7 +673,8 @@ box-shadow: none;
 
             display: block;
 
-            color: var(--bmrc-teal);
+            color:
+                var(--bmrc-teal);
 
         }
 
@@ -541,7 +687,8 @@ box-shadow: none;
 
             line-height: 1.8;
 
-            color: var(--bmrc-muted);
+            color:
+                var(--bmrc-muted);
 
             margin-bottom: 32px;
 
@@ -561,13 +708,17 @@ box-shadow: none;
 
         .btn-hero-primary {
 
-            background: var(--bmrc-teal);
+            background:
+                var(--bmrc-teal);
 
-            border-color: var(--bmrc-teal);
+            border-color:
+                var(--bmrc-teal);
 
-            color: var(--white);
+            color:
+                var(--white);
 
-            padding: 13px 24px;
+            padding:
+                13px 24px;
 
             border-radius: 8px;
 
@@ -578,24 +729,31 @@ box-shadow: none;
 
         .btn-hero-primary:hover {
 
-            background: var(--bmrc-teal-dark);
+            background:
+                var(--bmrc-teal-dark);
 
-            border-color: var(--bmrc-teal-dark);
+            border-color:
+                var(--bmrc-teal-dark);
 
-            color: var(--white);
+            color:
+                var(--white);
 
         }
 
 
         .btn-hero-secondary {
 
-            background: var(--bmrc-navy);
+            background:
+                var(--bmrc-navy);
 
-            border-color: var(--bmrc-navy);
+            border-color:
+                var(--bmrc-navy);
 
-            color: var(--white);
+            color:
+                var(--white);
 
-            padding: 13px 24px;
+            padding:
+                13px 24px;
 
             border-radius: 8px;
 
@@ -606,13 +764,17 @@ box-shadow: none;
 
         .btn-hero-secondary:hover {
 
-            background: var(--bmrc-navy-dark);
+            background:
+                var(--bmrc-navy-dark);
 
-            border-color: var(--bmrc-navy-dark);
+            border-color:
+                var(--bmrc-navy-dark);
 
-            color: var(--white);
+            color:
+                var(--white);
 
         }
+
 
 
         /* =====================================================
@@ -625,17 +787,30 @@ box-shadow: none;
 
             z-index: 2;
 
-            background: rgba(255,255,255,.95);
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .95
+                );
 
             border-radius: 18px;
 
             padding: 32px;
 
-            border: 1px solid var(--bmrc-border);
+            border:
+                1px solid
+                var(--bmrc-border);
 
             box-shadow:
-
-                0 25px 60px rgba(18,59,93,.13);
+                0 25px 60px
+                rgba(
+                    18,
+                    59,
+                    93,
+                    .13
+                );
 
         }
 
@@ -663,9 +838,16 @@ box-shadow: none;
 
             border-radius: 14px;
 
-            background: rgba(0,140,149,.10);
+            background:
+                rgba(
+                    0,
+                    140,
+                    149,
+                    .10
+                );
 
-            color: var(--bmrc-teal);
+            color:
+                var(--bmrc-teal);
 
             display: flex;
 
@@ -680,7 +862,8 @@ box-shadow: none;
 
         .hero-card-label {
 
-            color: var(--bmrc-gold);
+            color:
+                var(--bmrc-gold);
 
             font-size: 11px;
 
@@ -697,7 +880,8 @@ box-shadow: none;
 
             font-weight: 700;
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
             margin-bottom: 12px;
 
@@ -706,7 +890,8 @@ box-shadow: none;
 
         .hero-card p {
 
-            color: var(--bmrc-muted);
+            color:
+                var(--bmrc-muted);
 
             line-height: 1.7;
 
@@ -717,7 +902,9 @@ box-shadow: none;
 
         .hero-stat {
 
-            border-top: 1px solid var(--bmrc-border);
+            border-top:
+                1px solid
+                var(--bmrc-border);
 
             padding-top: 18px;
 
@@ -730,25 +917,29 @@ box-shadow: none;
 
             font-size: 25px;
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
         }
 
 
         .hero-stat small {
 
-            color: var(--bmrc-muted);
+            color:
+                var(--bmrc-muted);
 
         }
 
 
+
         /* =====================================================
-           SECTION
+           GENERAL SECTION
         ====================================================== */
 
         .section {
 
-            padding: 90px 0;
+            padding:
+                90px 0;
 
         }
 
@@ -766,7 +957,8 @@ box-shadow: none;
 
             display: inline-block;
 
-            color: var(--bmrc-teal);
+            color:
+                var(--bmrc-teal);
 
             font-size: 12px;
 
@@ -787,7 +979,8 @@ box-shadow: none;
 
             font-weight: 800;
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
             margin-bottom: 14px;
 
@@ -796,7 +989,8 @@ box-shadow: none;
 
         .section-title p {
 
-            color: var(--bmrc-muted);
+            color:
+                var(--bmrc-muted);
 
             max-width: 680px;
 
@@ -807,6 +1001,7 @@ box-shadow: none;
         }
 
 
+
         /* =====================================================
            SERVICES
         ====================================================== */
@@ -815,15 +1010,19 @@ box-shadow: none;
 
             height: 100%;
 
-            background: var(--white);
+            background:
+                var(--white);
 
-            border: 1px solid var(--bmrc-border);
+            border:
+                1px solid
+                var(--bmrc-border);
 
             border-radius: 16px;
 
             padding: 32px;
 
-            transition: .25s ease;
+            transition:
+                .25s ease;
 
             position: relative;
 
@@ -846,31 +1045,42 @@ box-shadow: none;
 
             height: 100%;
 
-            background: var(--bmrc-teal);
+            background:
+                var(--bmrc-teal);
 
-            transform: scaleY(0);
+            transform:
+                scaleY(0);
 
-            transition: .25s ease;
+            transition:
+                .25s ease;
 
         }
 
 
         .service-card:hover {
 
-            transform: translateY(-6px);
+            transform:
+                translateY(-6px);
 
             box-shadow:
+                0 18px 40px
+                rgba(
+                    18,
+                    59,
+                    93,
+                    .10
+                );
 
-                0 18px 40px rgba(18,59,93,.10);
-
-            border-color: #C9DCE2;
+            border-color:
+                #C9DCE2;
 
         }
 
 
         .service-card:hover::before {
 
-            transform: scaleY(1);
+            transform:
+                scaleY(1);
 
         }
 
@@ -883,9 +1093,16 @@ box-shadow: none;
 
             border-radius: 14px;
 
-            background: rgba(0,140,149,.09);
+            background:
+                rgba(
+                    0,
+                    140,
+                    149,
+                    .09
+                );
 
-            color: var(--bmrc-teal);
+            color:
+                var(--bmrc-teal);
 
             display: flex;
 
@@ -902,7 +1119,8 @@ box-shadow: none;
 
         .service-card h5 {
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
             font-weight: 700;
 
@@ -915,7 +1133,8 @@ box-shadow: none;
 
         .service-card p {
 
-            color: var(--bmrc-muted);
+            color:
+                var(--bmrc-muted);
 
             line-height: 1.7;
 
@@ -944,22 +1163,27 @@ box-shadow: none;
 
         .service-list i {
 
-            color: var(--bmrc-teal);
+            color:
+                var(--bmrc-teal);
 
         }
 
 
         .btn-service {
 
-            background: var(--bmrc-navy);
+            background:
+                var(--bmrc-navy);
 
-            border-color: var(--bmrc-navy);
+            border-color:
+                var(--bmrc-navy);
 
-            color: var(--white);
+            color:
+                var(--white);
 
             border-radius: 7px;
 
-            padding: 10px 18px;
+            padding:
+                10px 18px;
 
             font-size: 13px;
 
@@ -970,13 +1194,17 @@ box-shadow: none;
 
         .btn-service:hover {
 
-            background: var(--bmrc-teal);
+            background:
+                var(--bmrc-teal);
 
-            border-color: var(--bmrc-teal);
+            border-color:
+                var(--bmrc-teal);
 
-            color: var(--white);
+            color:
+                var(--white);
 
         }
+
 
 
         /* =====================================================
@@ -985,30 +1213,40 @@ box-shadow: none;
 
         .workflow-section {
 
-            background: var(--bmrc-navy);
+            background:
+                var(--bmrc-navy);
 
-            color: var(--white);
+            color:
+                var(--white);
 
         }
 
 
         .workflow-section .section-label {
 
-            color: #DDB65A;
+            color:
+                #DDB65A;
 
         }
 
 
         .workflow-section .section-title h2 {
 
-            color: var(--white);
+            color:
+                var(--white);
 
         }
 
 
         .workflow-section .section-title p {
 
-            color: rgba(255,255,255,.68);
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .68
+                );
 
         }
 
@@ -1030,9 +1268,11 @@ box-shadow: none;
 
             border-radius: 50%;
 
-            background: var(--white);
+            background:
+                var(--white);
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
             display: flex;
 
@@ -1040,13 +1280,21 @@ box-shadow: none;
 
             justify-content: center;
 
-            margin: 0 auto 20px;
+            margin:
+                0 auto 20px;
 
             font-size: 17px;
 
             font-weight: 800;
 
-            border: 4px solid rgba(201,154,46,.45);
+            border:
+                4px solid
+                rgba(
+                    201,
+                    154,
+                    46,
+                    .45
+                );
 
         }
 
@@ -1055,7 +1303,8 @@ box-shadow: none;
 
             font-weight: 700;
 
-            color: var(--white);
+            color:
+                var(--white);
 
             margin-bottom: 10px;
 
@@ -1064,7 +1313,13 @@ box-shadow: none;
 
         .workflow-step p {
 
-            color: rgba(255,255,255,.62);
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .62
+                );
 
             font-size: 13px;
 
@@ -1077,28 +1332,40 @@ box-shadow: none;
         }
 
 
+
         /* =====================================================
            ABOUT
         ====================================================== */
 
         .about-card {
 
-            background: var(--white);
+            background:
+                var(--white);
 
             border-radius: 18px;
 
             padding: 36px;
 
-            border: 1px solid var(--bmrc-border);
+            border:
+                1px solid
+                var(--bmrc-border);
 
-            box-shadow: 0 12px 35px rgba(18,59,93,.06);
+            box-shadow:
+                0 12px 35px
+                rgba(
+                    18,
+                    59,
+                    93,
+                    .06
+                );
 
         }
 
 
         .about-card h2 {
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
         }
 
@@ -1109,7 +1376,8 @@ box-shadow: none;
 
             padding: 0;
 
-            margin: 25px 0 0;
+            margin:
+                25px 0 0;
 
         }
 
@@ -1131,7 +1399,8 @@ box-shadow: none;
 
         .about-list i {
 
-            color: var(--bmrc-teal);
+            color:
+                var(--bmrc-teal);
 
             font-size: 18px;
 
@@ -1140,9 +1409,12 @@ box-shadow: none;
 
         .about-feature {
 
-            background: var(--white);
+            background:
+                var(--white);
 
-            border: 1px solid var(--bmrc-border);
+            border:
+                1px solid
+                var(--bmrc-border);
 
             border-radius: 14px;
 
@@ -1150,14 +1422,22 @@ box-shadow: none;
 
             height: 100%;
 
-            transition: .2s ease;
+            transition:
+                .2s ease;
 
         }
 
 
         .about-feature:hover {
 
-            box-shadow: 0 10px 25px rgba(18,59,93,.07);
+            box-shadow:
+                0 10px 25px
+                rgba(
+                    18,
+                    59,
+                    93,
+                    .07
+                );
 
         }
 
@@ -1166,16 +1446,19 @@ box-shadow: none;
 
             font-size: 30px;
 
-            color: var(--bmrc-teal);
+            color:
+                var(--bmrc-teal);
 
         }
 
 
         .about-feature h5 {
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
         }
+
 
 
         /* =====================================================
@@ -1184,7 +1467,8 @@ box-shadow: none;
 
         .cta {
 
-            padding: 75px 0;
+            padding:
+                75px 0;
 
             background:
 
@@ -1194,7 +1478,8 @@ box-shadow: none;
                     var(--bmrc-teal-dark)
                 );
 
-            color: var(--white);
+            color:
+                var(--white);
 
             position: relative;
 
@@ -1215,7 +1500,14 @@ box-shadow: none;
 
             border-radius: 50%;
 
-            border: 60px solid rgba(255,255,255,.05);
+            border:
+                60px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .05
+                );
 
             right: -120px;
 
@@ -1235,28 +1527,38 @@ box-shadow: none;
 
         .cta p {
 
-            color: rgba(255,255,255,.82);
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .82
+                );
 
             max-width: 650px;
 
             line-height: 1.7;
 
-            margin: 15px auto 28px;
+            margin:
+                15px auto 28px;
 
         }
 
 
         .cta .btn {
 
-            color: var(--bmrc-navy);
+            color:
+                var(--bmrc-navy);
 
             font-weight: 700;
 
             border-radius: 8px;
 
-            padding: 12px 24px;
+            padding:
+                12px 24px;
 
         }
+
 
 
         /* =====================================================
@@ -1265,18 +1567,27 @@ box-shadow: none;
 
         footer {
 
-            background: var(--bmrc-navy-dark);
+            background:
+                var(--bmrc-navy-dark);
 
-            color: rgba(255,255,255,.65);
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .65
+                );
 
-            padding: 50px 0 20px;
+            padding:
+                50px 0 20px;
 
         }
 
 
         footer h5 {
 
-            color: var(--white);
+            color:
+                var(--white);
 
             font-weight: 700;
 
@@ -1292,18 +1603,26 @@ box-shadow: none;
 
         footer a {
 
-            color: rgba(255,255,255,.65);
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .65
+                );
 
             text-decoration: none;
 
-            transition: .2s ease;
+            transition:
+                .2s ease;
 
         }
 
 
         footer a:hover {
 
-            color: var(--white);
+            color:
+                var(--white);
 
         }
 
@@ -1327,9 +1646,11 @@ box-shadow: none;
 
             border-radius: 9px;
 
-            background: var(--white);
+            background:
+                var(--white);
 
-            color: var(--bmrc-teal);
+            color:
+                var(--bmrc-teal);
 
             display: flex;
 
@@ -1344,7 +1665,14 @@ box-shadow: none;
 
         .footer-bottom {
 
-            border-top: 1px solid rgba(255,255,255,.1);
+            border-top:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .1
+                );
 
             margin-top: 35px;
 
@@ -1357,15 +1685,196 @@ box-shadow: none;
         }
 
 
+        .developer-credit {
+
+            margin-top: 8px;
+
+        }
+
+
+        .developer-separator {
+
+            margin:
+                0 5px;
+
+        }
+
+
+
         /* =====================================================
-           MOBILE
+           TABLET / MOBILE NAVBAR
         ====================================================== */
 
-        @media (max-width: 991px) {
+        @media (
+            max-width: 991.98px
+        ) {
+
+            .main-navbar {
+
+                padding:
+                    8px 0;
+
+            }
+
+
+            .main-navbar .container {
+
+                max-width: 100%;
+
+            }
+
+
+            .main-navbar .navbar-collapse {
+
+                margin-top: 10px;
+
+                padding-top: 10px;
+
+                padding-bottom: 12px;
+
+                border-top:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .12
+                    );
+
+            }
+
+
+            .main-navbar .navbar-nav {
+
+                align-items:
+                    stretch !important;
+
+                gap: 2px;
+
+                max-height:
+                    calc(
+                        100vh - 95px
+                    );
+
+                overflow-y: auto;
+
+                padding-right: 4px;
+
+            }
+
+
+            .main-navbar .nav-item {
+
+                width: 100%;
+
+            }
+
+
+            .main-navbar .nav-link {
+
+                width: 100%;
+
+                padding:
+                    11px 12px !important;
+
+                margin: 0;
+
+                border-radius: 7px;
+
+                font-size: 14px;
+
+            }
+
+
+            .main-navbar button.nav-link {
+
+                text-align: left;
+
+            }
+
+
+            .main-navbar .dropdown-menu {
+
+                position:
+                    static !important;
+
+                transform:
+                    none !important;
+
+                float: none;
+
+                width: 100%;
+
+                min-width: 100%;
+
+                margin:
+                    3px 0 6px;
+
+                padding: 6px;
+
+                border: none;
+
+                border-radius: 8px;
+
+                box-shadow: none;
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .97
+                    );
+
+            }
+
+
+            .main-navbar
+            .dropdown-menu.show {
+
+                display: block;
+
+            }
+
+
+            .main-navbar .dropdown-item {
+
+                padding:
+                    10px 11px;
+
+                font-size: 13px;
+
+            }
+
+
+            .navbar-action-item {
+
+                margin-left:
+                    0 !important;
+
+                margin-top: 8px;
+
+            }
+
+
+            .btn-login {
+
+                display: block;
+
+                width: 100%;
+
+                text-align: center;
+
+                padding:
+                    10px 15px !important;
+
+            }
+
 
             .hero {
 
-                padding: 85px 0;
+                padding:
+                    85px 0;
 
             }
 
@@ -1376,30 +1885,98 @@ box-shadow: none;
 
             }
 
-
-            .navbar-nav {
-
-                padding-top: 15px;
-
-            }
-
-
-            .navbar-login {
-
-                display: inline-block;
-
-                margin-top: 8px;
-
-            }
-
         }
 
 
-        @media (max-width: 576px) {
+
+        /* =====================================================
+           MOBILE
+        ====================================================== */
+
+        @media (
+            max-width: 575.98px
+        ) {
+
+            .main-navbar {
+
+                padding:
+                    7px 0;
+
+            }
+
+
+            .brand-logo {
+
+                width: 40px;
+
+                height: 40px;
+
+                min-width: 40px;
+
+                border-radius: 8px;
+
+                margin-right: 9px;
+
+            }
+
+
+            .brand-logo i {
+
+                font-size: 21px;
+
+            }
+
+
+            .brand-name {
+
+                font-size: 15px;
+
+            }
+
+
+            .brand-subtitle {
+
+                font-size: 8px;
+
+                max-width: 175px;
+
+                white-space: normal;
+
+            }
+
+
+            .main-navbar .navbar-toggler {
+
+                padding:
+                    3px 8px;
+
+            }
+
+
+            .main-navbar .nav-link {
+
+                font-size: 13px;
+
+                padding:
+                    10px 11px !important;
+
+            }
+
+
+            .main-navbar .dropdown-item {
+
+                font-size: 12.5px;
+
+                padding:
+                    9px 10px;
+
+            }
+
 
             .section {
 
-                padding: 65px 0;
+                padding:
+                    65px 0;
 
             }
 
@@ -1422,7 +1999,8 @@ box-shadow: none;
 
                 min-height: auto;
 
-                padding: 65px 0;
+                padding:
+                    65px 0;
 
             }
 
@@ -1472,6 +2050,38 @@ box-shadow: none;
 
         }
 
+
+
+        @media (
+            max-width: 390px
+        ) {
+
+            .brand-subtitle {
+
+                display: none;
+
+            }
+
+
+            .brand-name {
+
+                font-size: 14px;
+
+            }
+
+
+            .brand-logo {
+
+                width: 38px;
+
+                height: 38px;
+
+                min-width: 38px;
+
+            }
+
+        }
+
     </style>
 
 </head>
@@ -1480,369 +2090,754 @@ box-shadow: none;
 <body>
 
 
-{{-- =====================================================
-PROFESSIONAL JOURNAL NAVBAR
-====================================================== --}}
+{{-- =============================================================
+     NAVIGATION DATA
+============================================================= --}}
 
-<nav class="navbar navbar-expand-lg main-navbar">
+@php
 
+    /*
+    |--------------------------------------------------------------------------
+    | Main CMS menu groups
+    |--------------------------------------------------------------------------
+    */
 
-<div class="container">
-
-    {{-- Brand --}}
-    <a class="navbar-brand d-flex align-items-center"
-       href="{{ url('/') }}">
-
-        <div class="brand-logo">
-
-            <i class="bi bi-journal-medical"></i>
-
-        </div>
-
-        <div>
-
-            <span class="brand-name">
-                BMRC Journal
-            </span>
-
-            <span class="brand-subtitle">
-                Bangladesh Medical Research Council
-            </span>
-
-        </div>
-
-    </a>
+    $menuCollection =
+        $journalMenus
+        ?? collect();
 
 
-    {{-- Mobile Menu Button --}}
-    <button class="navbar-toggler"
+    /*
+    |--------------------------------------------------------------------------
+    | About
+    |--------------------------------------------------------------------------
+    */
+
+    $aboutPage =
+        $menuCollection
+            ->get(
+                'about',
+                collect()
+            )
+            ->first();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Editorial Board
+    |--------------------------------------------------------------------------
+    */
+
+    $editorialBoardPage =
+        $menuCollection
+            ->get(
+                'editorial_board',
+                collect()
+            )
+            ->first();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Journal Pages
+    |--------------------------------------------------------------------------
+    */
+
+    $journalNavPages =
+        $menuCollection
+            ->get(
+                'journal',
+                collect()
+            );
+
+
+    $aboutJournalPage =
+        $journalNavPages
+            ->firstWhere(
+                'slug',
+                'about-the-journal'
+            );
+
+
+    $publicationEthicsPage =
+        $journalNavPages
+            ->firstWhere(
+                'slug',
+                'publication-ethics'
+            );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Author Pages
+    |--------------------------------------------------------------------------
+    */
+
+    $authorPages =
+        $menuCollection
+            ->get(
+                'authors',
+                collect()
+            );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reviewer Pages
+    |--------------------------------------------------------------------------
+    */
+
+    $reviewerPages =
+        $menuCollection
+            ->get(
+                'reviewers',
+                collect()
+            );
+
+@endphp
+
+
+
+{{-- =============================================================
+     PROFESSIONAL DYNAMIC JOURNAL NAVBAR
+============================================================= --}}
+
+<nav
+    class="navbar navbar-expand-lg main-navbar"
+    id="journalMainNavbar"
+>
+
+    <div class="container">
+
+
+        {{-- =====================================================
+             BRAND
+        ====================================================== --}}
+
+        <a
+            class="navbar-brand d-flex align-items-center"
+            href="{{ url('/') }}"
+        >
+
+            <div class="brand-logo">
+
+                <i class="bi bi-journal-medical"></i>
+
+            </div>
+
+
+            <div>
+
+                <span class="brand-name">
+
+                    BMRC Journal
+
+                </span>
+
+
+                <span class="brand-subtitle">
+
+                    Bangladesh Medical Research Council
+
+                </span>
+
+            </div>
+
+        </a>
+
+
+
+        {{-- =====================================================
+             MOBILE TOGGLE
+        ====================================================== --}}
+
+        <button
+            class="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#mainNavbar"
             aria-controls="mainNavbar"
             aria-expanded="false"
-            aria-label="Toggle navigation">
+            aria-label="Toggle navigation"
+        >
 
-        <span class="navbar-toggler-icon"></span>
+            <i class="bi bi-list text-white fs-3"></i>
 
-    </button>
-
-
-    {{-- Navigation --}}
-    <div class="collapse navbar-collapse"
-         id="mainNavbar">
-
-        <ul class="navbar-nav ms-auto align-items-lg-center">
+        </button>
 
 
-            {{-- Home --}}
-            <li class="nav-item">
 
-                <a class="nav-link"
-                   href="{{ url('/') }}">
+        {{-- =====================================================
+             NAVIGATION
+        ====================================================== --}}
 
-                    <i class="bi bi-house-door me-1"></i>
+        <div
+            class="collapse navbar-collapse"
+            id="mainNavbar"
+        >
 
-                    Home
-
-                </a>
-
-            </li>
-
-
-            {{-- About --}}
-            <li class="nav-item">
-
-                <a class="nav-link"
-                   href="#about">
-
-                    About
-
-                </a>
-
-            </li>
+            <ul
+                class="navbar-nav
+                       ms-auto
+                       align-items-lg-center"
+            >
 
 
-            {{-- Editorial Board --}}
-            <li class="nav-item">
+                {{-- =================================================
+                     HOME
+                ================================================== --}}
 
-                <a class="nav-link"
-                   href="{{ url('/editorial-board') }}">
+                <li class="nav-item">
 
-                    Editorial Board
+                    <a
+                        class="nav-link"
+                        href="{{ url('/') }}"
+                    >
 
-                </a>
+                        <i class="bi bi-house-door me-1"></i>
 
-            </li>
+                        Home
 
+                    </a>
 
-            {{-- Journal Dropdown --}}
-            <li class="nav-item dropdown">
-
-                <a class="nav-link dropdown-toggle"
-                   href="#"
-                   id="journalDropdown"
-                   role="button"
-                   data-bs-toggle="dropdown"
-                   aria-expanded="false">
-
-                    Journal
-
-                </a>
+                </li>
 
 
-                <ul class="dropdown-menu dropdown-menu-end"
-                    aria-labelledby="journalDropdown">
 
-                    <li>
+                {{-- =================================================
+                     ABOUT
+                ================================================== --}}
 
-                        <a class="dropdown-item"
-                           href="{{ url('/about-journal') }}">
+                @if($aboutPage)
 
-                            <i class="bi bi-journal-text me-2"></i>
+                    <li class="nav-item">
 
-                            About the Journal
+                        <a
+                            class="nav-link"
+                            href="{{ route(
+                                'journal.page',
+                                $aboutPage->slug
+                            ) }}"
+                        >
+
+                            About
 
                         </a>
 
                     </li>
 
-
-                    <li>
-
-                        <a class="dropdown-item"
-                           href="{{ url('/current-issue') }}">
-
-                            <i class="bi bi-file-earmark-text me-2"></i>
-
-                            Current Issue
-
-                        </a>
-
-                    </li>
+                @endif
 
 
-                    <li>
 
-                        <a class="dropdown-item"
-                           href="{{ url('/journal-archive') }}">
+                {{-- =================================================
+                     EDITORIAL BOARD
+                ================================================== --}}
 
-                            <i class="bi bi-archive me-2"></i>
+                @if($editorialBoardPage)
 
-                            Journal Archive
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ route(
+                                'journal.page',
+                                $editorialBoardPage->slug
+                            ) }}"
+                        >
+
+                            Editorial Board
 
                         </a>
 
                     </li>
 
+                @endif
 
-                    <li>
 
-                        <hr class="dropdown-divider">
+                {{-- =========================================================
+                    JOURNAL DROPDOWN
+                ========================================================= --}}
+
+                @php
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | All published journal menu pages
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $journalPages =
+                        ($journalMenus ?? collect())
+                            ->get(
+                                'journal',
+                                collect()
+                            );
+
+                @endphp
+
+
+                <li class="nav-item dropdown">
+
+                    <button
+                        class="nav-link
+                            dropdown-toggle
+                            border-0
+                            bg-transparent"
+                        type="button"
+                        id="journalDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+                        Journal
+                    </button>
+
+
+                    <ul
+                        class="dropdown-menu"
+                        aria-labelledby="journalDropdown"
+                    >
+
+
+                        {{-- =====================================================
+                            DYNAMIC JOURNAL CMS PAGES
+                        ====================================================== --}}
+
+                        @foreach($journalPages as $page)
+
+                            <li>
+
+                                <a
+                                    class="dropdown-item"
+                                    href="{{ route(
+                                        'journal.page',
+                                        $page->slug
+                                    ) }}"
+                                >
+
+                                    <i
+                                        class="bi
+                                            bi-journal-text
+                                            me-2"
+                                    ></i>
+
+                                    {{ $page->title }}
+
+                                </a>
+
+                            </li>
+
+                        @endforeach
+
+
+
+                        {{-- =====================================================
+                            SEPARATOR
+                        ====================================================== --}}
+
+                        @if($journalPages->isNotEmpty())
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                        @endif
+
+
+
+                        {{-- =====================================================
+                            CURRENT ISSUE
+                        ====================================================== --}}
+
+                        <li>
+
+                            <a
+                                class="dropdown-item"
+                                href="{{ route(
+                                    'journal.current-issue'
+                                ) }}"
+                            >
+
+                                <i
+                                    class="bi
+                                        bi-file-earmark-text
+                                        me-2"
+                                ></i>
+
+                                Current Issue
+
+                            </a>
+
+                        </li>
+
+
+
+                        {{-- =====================================================
+                            JOURNAL ARCHIVE
+                        ====================================================== --}}
+
+                        <li>
+
+                            <a
+                                class="dropdown-item"
+                                href="{{ route(
+                                    'journal.archive'
+                                ) }}"
+                            >
+
+                                <i
+                                    class="bi
+                                        bi-archive
+                                        me-2"
+                                ></i>
+
+                                Journal Archive
+
+                            </a>
+
+                        </li>
+
+
+                    </ul>
+
+                </li>
+
+
+
+                {{-- =================================================
+                     AUTHORS DROPDOWN
+                ================================================== --}}
+
+                @if(
+                    $authorPages
+                        ->isNotEmpty()
+                )
+
+                    <li class="nav-item dropdown">
+
+
+                        <button
+                            class="nav-link
+                                   dropdown-toggle
+                                   border-0
+                                   bg-transparent"
+                            type="button"
+                            id="authorDropdown"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="true"
+                            aria-expanded="false"
+                        >
+
+                            Authors
+
+                        </button>
+
+
+                        <ul
+                            class="dropdown-menu"
+                            aria-labelledby="authorDropdown"
+                        >
+
+
+                            @foreach(
+                                $authorPages
+                                as $page
+                            )
+
+                                <li>
+
+                                    <a
+                                        class="dropdown-item"
+                                        href="{{ route(
+                                            'journal.page',
+                                            $page->slug
+                                        ) }}"
+                                    >
+
+
+                                        @switch($page->slug)
+
+
+                                            @case(
+                                                'author-guidelines'
+                                            )
+
+                                                <i
+                                                    class="bi
+                                                           bi-person-lines-fill
+                                                           me-2"
+                                                ></i>
+
+                                                @break
+
+
+                                            @case(
+                                                'article-processing'
+                                            )
+
+                                                <i
+                                                    class="bi
+                                                           bi-cash-coin
+                                                           me-2"
+                                                ></i>
+
+                                                @break
+
+
+                                            @case(
+                                                'submission-guidelines'
+                                            )
+
+                                                <i
+                                                    class="bi
+                                                           bi-file-earmark-arrow-up
+                                                           me-2"
+                                                ></i>
+
+                                                @break
+
+
+                                            @default
+
+                                                <i
+                                                    class="bi
+                                                           bi-file-text
+                                                           me-2"
+                                                ></i>
+
+
+                                        @endswitch
+
+
+                                        {{ $page->title }}
+
+                                    </a>
+
+                                </li>
+
+                            @endforeach
+
+
+                        </ul>
 
                     </li>
 
+                @endif
 
-                    <li>
 
-                        <a class="dropdown-item"
-                           href="{{ url('/publication-ethics') }}">
 
-                            <i class="bi bi-shield-check me-2"></i>
+                {{-- =================================================
+                     REVIEWERS DROPDOWN
+                ================================================== --}}
 
-                            Publication Ethics
+                <li class="nav-item dropdown">
 
-                        </a>
 
-                    </li>
+                    <button
+                        class="nav-link
+                               dropdown-toggle
+                               border-0
+                               bg-transparent"
+                        type="button"
+                        id="reviewerDropdown"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="true"
+                        aria-expanded="false"
+                    >
 
-                </ul>
+                        Reviewers
 
-            </li>
+                    </button>
 
 
-            {{-- Author Information --}}
-            <li class="nav-item dropdown">
+                    <ul
+                        class="dropdown-menu
+                               dropdown-menu-end"
+                        aria-labelledby="reviewerDropdown"
+                    >
 
-                <a class="nav-link dropdown-toggle"
-                   href="#"
-                   id="authorDropdown"
-                   role="button"
-                   data-bs-toggle="dropdown"
-                   aria-expanded="false">
 
-                    Authors
+                        {{-- REVIEWER CMS PAGES --}}
 
-                </a>
+                        @foreach(
+                            $reviewerPages
+                            as $page
+                        )
 
+                            <li>
 
-                <ul class="dropdown-menu dropdown-menu-end"
-                    aria-labelledby="authorDropdown">
+                                <a
+                                    class="dropdown-item"
+                                    href="{{ route(
+                                        'journal.page',
+                                        $page->slug
+                                    ) }}"
+                                >
 
-                    <li>
+                                    <i
+                                        class="bi
+                                               bi-person-check
+                                               me-2"
+                                    ></i>
 
-                        <a class="dropdown-item"
-                           href="{{ url('/author-guidelines') }}">
+                                    {{ $page->title }}
 
-                            <i class="bi bi-person-lines-fill me-2"></i>
+                                </a>
 
-                            Author Guidelines
+                            </li>
 
-                        </a>
+                        @endforeach
 
-                    </li>
 
 
-                    <li>
+                        @if(
+                            $reviewerPages
+                                ->isNotEmpty()
+                        )
 
-                        <a class="dropdown-item"
-                           href="{{ url('/article-processing') }}">
+                            <li>
 
-                            <i class="bi bi-cash-coin me-2"></i>
+                                <hr class="dropdown-divider">
 
-                            Article Processing
+                            </li>
 
-                        </a>
+                        @endif
 
-                    </li>
 
 
-                    <li>
+                        {{-- REVIEWER LOGIN --}}
 
-                        <a class="dropdown-item"
-                           href="{{ url('/submission-guidelines') }}">
+                        <li>
 
-                            <i class="bi bi-file-earmark-arrow-up me-2"></i>
+                            <a
+                                class="dropdown-item"
+                                href="{{ route(
+                                    'reviewer.login'
+                                ) }}"
+                            >
 
-                            Submission Guidelines
+                                <i
+                                    class="bi
+                                           bi-box-arrow-in-right
+                                           me-2"
+                                ></i>
 
-                        </a>
+                                Reviewer Login
 
-                    </li>
+                            </a>
 
-                </ul>
+                        </li>
 
-            </li>
 
 
-            {{-- Reviewer --}}
-            <li class="nav-item dropdown">
+                        {{-- BECOME REVIEWER --}}
 
-                <a class="nav-link dropdown-toggle"
-                   href="#"
-                   id="reviewerDropdown"
-                   role="button"
-                   data-bs-toggle="dropdown"
-                   aria-expanded="false">
+                        <li>
 
-                    Reviewers
+                            <a
+                                class="dropdown-item"
+                                href="{{ route(
+                                    'reviewer.register'
+                                ) }}"
+                            >
 
-                </a>
+                                <i
+                                    class="bi
+                                           bi-person-plus
+                                           me-2"
+                                ></i>
 
+                                Become a Reviewer
 
-                <ul class="dropdown-menu dropdown-menu-end"
-                    aria-labelledby="reviewerDropdown">
+                            </a>
 
-                    <li>
+                        </li>
 
-                        <a class="dropdown-item"
-                           href="{{ url('/reviewer-guidelines') }}">
 
-                            <i class="bi bi-person-check me-2"></i>
+                    </ul>
 
-                            Reviewer Guidelines
+                </li>
 
-                        </a>
 
-                    </li>
 
+                {{-- =================================================
+                     SUBMISSION PROCESS
+                ================================================== --}}
 
-                    <li>
+                <li class="nav-item">
 
-                        <a class="dropdown-item"
-                           href="{{ route('reviewer.login') }}">
+                    <a
+                        class="nav-link"
+                        href="{{ url('/') }}#workflow"
+                    >
 
-                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Submission Process
 
-                            Reviewer Login
+                    </a>
 
-                        </a>
+                </li>
 
-                    </li>
 
 
-                    <li>
+                {{-- =================================================
+                     AUTHOR LOGIN
+                ================================================== --}}
 
-                        <a class="dropdown-item"
-                           href="{{ route('reviewer.login') }}">
+                <li
+                    class="nav-item
+                           ms-lg-2
+                           navbar-action-item"
+                >
 
-                            <i class="bi bi-person-plus me-2"></i>
+                    <a
+                        href="{{ route(
+                            'author.login'
+                        ) }}"
+                        class="btn btn-login"
+                    >
 
-                            Become a Reviewer
+                        <i
+                            class="bi
+                                   bi-box-arrow-in-right
+                                   me-1"
+                        ></i>
 
-                        </a>
+                        Login
 
-                    </li>
+                    </a>
 
-                </ul>
+                </li>
 
-            </li>
 
+            </ul>
 
-            {{-- Submission Process --}}
-            <li class="nav-item">
-
-                <a class="nav-link"
-                   href="#workflow">
-
-                    Submission Process
-
-                </a>
-
-            </li>
-
-
-            {{-- Login --}}
-            <li class="nav-item ms-lg-2">
-
-                <a href="{{ route('author.login') }}"
-                   class="btn btn-login">
-
-                    <i class="bi bi-box-arrow-in-right me-1"></i>
-
-                    Login
-
-                </a>
-
-            </li>
-
-        </ul>
+        </div>
 
     </div>
-
-</div>
-
 
 </nav>
 
 
 
-{{-- =====================================================
+{{-- =============================================================
      HERO
-====================================================== --}}
+============================================================= --}}
 
-<section class="hero"
-         id="home">
-
+<section
+    class="hero"
+    id="home"
+>
 
     <div class="container">
 
-
-        <div class="row align-items-center g-5">
+        <div
+            class="row
+                   align-items-center
+                   g-5"
+        >
 
 
             <div class="col-lg-7">
-
 
                 <div class="hero-content">
 
@@ -1856,47 +2851,65 @@ PROFESSIONAL JOURNAL NAVBAR
                     </div>
 
 
-
                     <h1>
 
                         Advancing Biomedical Research
 
-                        <span>Through Knowledge</span>
+                        <span>
+                            Through Knowledge
+                        </span>
 
                     </h1>
 
 
-
                     <p class="hero-description">
 
-                       The BMRC Journal Online System is a secure digital 
-                       platform for scholarly manuscript submission, peer review, 
-                       editorial processing, and publication. It enables researchers 
-                       to efficiently submit, track, and manage their manuscripts while 
-                       supporting a transparent and streamlined publication process.
+                        The BMRC Journal Online System is a secure
+                        digital platform for scholarly manuscript
+                        submission, peer review, editorial processing,
+                        and publication.
+
+                        It enables researchers to efficiently submit,
+                        track, and manage manuscripts while supporting
+                        a transparent and streamlined publication
+                        process.
 
                     </p>
-
 
 
                     <div class="hero-buttons">
 
 
-                        <a href="{{ route('author.login') }}"
-                           class="btn btn-hero-primary">
+                        <a
+                            href="{{ route(
+                                'author.login'
+                            ) }}"
+                            class="btn btn-hero-primary"
+                        >
 
-                            <i class="bi bi-file-earmark-plus me-2"></i>
+                            <i
+                                class="bi
+                                       bi-file-earmark-plus
+                                       me-2"
+                            ></i>
 
                             Submit Your Article
 
                         </a>
 
 
+                        <a
+                            href="{{ route(
+                                'reviewer.register'
+                            ) }}"
+                            class="btn btn-hero-secondary"
+                        >
 
-                        <a href="{{ route('reviewer.login') }}"
-                           class="btn btn-hero-secondary">
-
-                            <i class="bi bi-person-check me-2"></i>
+                            <i
+                                class="bi
+                                       bi-person-check
+                                       me-2"
+                            ></i>
 
                             Become a Reviewer
 
@@ -1912,7 +2925,6 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
             <div class="col-lg-5">
-
 
                 <div class="hero-card">
 
@@ -1930,38 +2942,42 @@ PROFESSIONAL JOURNAL NAVBAR
                         <div>
 
                             <div class="hero-card-label">
+
                                 Digital Journal Platform
+
                             </div>
 
+
                             <strong class="text-dark">
+
                                 BMRC Journal
+
                             </strong>
 
                         </div>
 
+
                     </div>
 
 
-
                     <h4>
-                        Online Article Submission
-                    </h4>
 
+                        Online Article Submission
+
+                    </h4>
 
 
                     <p>
 
                         Submit manuscripts electronically,
                         upload supporting documents and track
-                        your article through the submission
+                        your article throughout the submission
                         and peer-review process.
 
                     </p>
 
 
-
                     <div class="hero-stat">
-
 
                         <div class="row">
 
@@ -2009,33 +3025,37 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
 
-{{-- =====================================================
+{{-- =============================================================
      SERVICES
-====================================================== --}}
+============================================================= --}}
 
-<section class="section"
-         id="services">
-
+<section
+    class="section"
+    id="services"
+>
 
     <div class="container">
 
 
         <div class="section-title">
 
-
             <span class="section-label">
+
                 Online Services
+
             </span>
 
 
             <h2>
+
                 BMRC Journal Services
+
             </h2>
 
 
             <p>
 
-                Access the services available to authors
+                Access services available to authors
                 and reviewers through the BMRC Journal
                 Online System.
 
@@ -2045,13 +3065,21 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
 
-        <div class="row g-4 justify-content-center">
+        <div
+            class="row
+                   g-4
+                   justify-content-center"
+        >
 
 
-            {{-- Article Submission --}}
+            {{-- =================================================
+                 ARTICLE SUBMISSION
+            ================================================== --}}
 
-            <div class="col-md-6 col-lg-5">
-
+            <div
+                class="col-md-6
+                       col-lg-5"
+            >
 
                 <div class="service-card">
 
@@ -2072,19 +3100,27 @@ PROFESSIONAL JOURNAL NAVBAR
 
                         Submit your original research article
                         through the BMRC Journal Online System.
+
                         Upload your manuscript and supporting
-                        documents, monitor the status of your
-                        submission and receive updates online.
+                        documents, monitor submission status,
+                        and receive updates online.
 
                     </p>
 
 
-                    <ul class="service-list list-unstyled">
+                    <ul
+                        class="service-list
+                               list-unstyled"
+                    >
 
 
                         <li>
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <i
+                                class="bi
+                                       bi-check-circle-fill
+                                       me-2"
+                            ></i>
 
                             Online manuscript submission
 
@@ -2093,7 +3129,11 @@ PROFESSIONAL JOURNAL NAVBAR
 
                         <li>
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <i
+                                class="bi
+                                       bi-check-circle-fill
+                                       me-2"
+                            ></i>
 
                             Supporting document upload
 
@@ -2102,7 +3142,11 @@ PROFESSIONAL JOURNAL NAVBAR
 
                         <li>
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <i
+                                class="bi
+                                       bi-check-circle-fill
+                                       me-2"
+                            ></i>
 
                             Submission status tracking
 
@@ -2111,7 +3155,11 @@ PROFESSIONAL JOURNAL NAVBAR
 
                         <li>
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <i
+                                class="bi
+                                       bi-check-circle-fill
+                                       me-2"
+                            ></i>
 
                             Editorial communication
 
@@ -2123,18 +3171,25 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     <div class="mt-4">
 
+                        <a
+                            href="{{ route(
+                                'author.login'
+                            ) }}"
+                            class="btn btn-service"
+                        >
 
-                        <a href="{{ route('author.login') }}"
-                           class="btn btn-service">
-
-                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            <i
+                                class="bi
+                                       bi-box-arrow-in-right
+                                       me-2"
+                            ></i>
 
                             Login to Submit
 
                         </a>
 
-
                     </div>
+
 
                 </div>
 
@@ -2142,10 +3197,14 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
 
-            {{-- Reviewer --}}
+            {{-- =================================================
+                 REVIEWER
+            ================================================== --}}
 
-            <div class="col-md-6 col-lg-5">
-
+            <div
+                class="col-md-6
+                       col-lg-5"
+            >
 
                 <div class="service-card">
 
@@ -2158,7 +3217,9 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
                     <h5>
+
                         Become a Reviewer
+
                     </h5>
 
 
@@ -2172,12 +3233,19 @@ PROFESSIONAL JOURNAL NAVBAR
                     </p>
 
 
-                    <ul class="service-list list-unstyled">
+                    <ul
+                        class="service-list
+                               list-unstyled"
+                    >
 
 
                         <li>
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <i
+                                class="bi
+                                       bi-check-circle-fill
+                                       me-2"
+                            ></i>
 
                             Online reviewer application
 
@@ -2186,7 +3254,11 @@ PROFESSIONAL JOURNAL NAVBAR
 
                         <li>
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <i
+                                class="bi
+                                       bi-check-circle-fill
+                                       me-2"
+                            ></i>
 
                             Professional profile submission
 
@@ -2195,7 +3267,11 @@ PROFESSIONAL JOURNAL NAVBAR
 
                         <li>
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <i
+                                class="bi
+                                       bi-check-circle-fill
+                                       me-2"
+                            ></i>
 
                             Areas of expertise
 
@@ -2204,7 +3280,11 @@ PROFESSIONAL JOURNAL NAVBAR
 
                         <li>
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <i
+                                class="bi
+                                       bi-check-circle-fill
+                                       me-2"
+                            ></i>
 
                             Participate in peer review
 
@@ -2216,18 +3296,25 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     <div class="mt-4">
 
+                        <a
+                            href="{{ route(
+                                'reviewer.register'
+                            ) }}"
+                            class="btn btn-service"
+                        >
 
-                        <a href="{{ route('reviewer.login') }}"
-                           class="btn btn-service">
-
-                            <i class="bi bi-person-plus me-2"></i>
+                            <i
+                                class="bi
+                                       bi-person-plus
+                                       me-2"
+                            ></i>
 
                             Apply as Reviewer
 
                         </a>
 
-
                     </div>
+
 
                 </div>
 
@@ -2242,27 +3329,31 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
 
-{{-- =====================================================
+{{-- =============================================================
      WORKFLOW
-====================================================== --}}
+============================================================= --}}
 
-<section class="section workflow-section"
-         id="workflow">
-
+<section
+    class="section workflow-section"
+    id="workflow"
+>
 
     <div class="container">
 
 
         <div class="section-title">
 
-
             <span class="section-label">
+
                 Publication Journey
+
             </span>
 
 
             <h2>
+
                 How Article Submission Works
+
             </h2>
 
 
@@ -2283,12 +3374,13 @@ PROFESSIONAL JOURNAL NAVBAR
 
             <div class="col-md-3">
 
-
                 <div class="workflow-step">
 
 
                     <div class="workflow-number">
+
                         01
+
                     </div>
 
 
@@ -2304,6 +3396,7 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     </p>
 
+
                 </div>
 
             </div>
@@ -2312,12 +3405,13 @@ PROFESSIONAL JOURNAL NAVBAR
 
             <div class="col-md-3">
 
-
                 <div class="workflow-step">
 
 
                     <div class="workflow-number">
+
                         02
+
                     </div>
 
 
@@ -2333,6 +3427,7 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     </p>
 
+
                 </div>
 
             </div>
@@ -2341,12 +3436,13 @@ PROFESSIONAL JOURNAL NAVBAR
 
             <div class="col-md-3">
 
-
                 <div class="workflow-step">
 
 
                     <div class="workflow-number">
+
                         03
+
                     </div>
 
 
@@ -2362,6 +3458,7 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     </p>
 
+
                 </div>
 
             </div>
@@ -2370,12 +3467,13 @@ PROFESSIONAL JOURNAL NAVBAR
 
             <div class="col-md-3">
 
-
                 <div class="workflow-step">
 
 
                     <div class="workflow-number">
+
                         04
+
                     </div>
 
 
@@ -2391,6 +3489,7 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     </p>
 
+
                 </div>
 
             </div>
@@ -2404,28 +3503,33 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
 
-{{-- =====================================================
+{{-- =============================================================
      ABOUT
-====================================================== --}}
+============================================================= --}}
 
-<section class="section"
-         id="about">
-
+<section
+    class="section"
+    id="about"
+>
 
     <div class="container">
 
-
-        <div class="row align-items-center g-5">
+        <div
+            class="row
+                   align-items-center
+                   g-5"
+        >
 
 
             <div class="col-lg-6">
-
 
                 <div class="about-card">
 
 
                     <span class="section-label">
+
                         About the Platform
+
                     </span>
 
 
@@ -2436,9 +3540,10 @@ PROFESSIONAL JOURNAL NAVBAR
                     </h2>
 
 
-                    <p class="text-muted"
-                       style="line-height:1.8;">
-
+                    <p
+                        class="text-muted"
+                        style="line-height:1.8;"
+                    >
 
                         The BMRC Journal Online System is a
                         digital platform designed to support
@@ -2446,13 +3551,13 @@ PROFESSIONAL JOURNAL NAVBAR
                         peer-review process of the Bangladesh
                         Medical Research Council.
 
-
                     </p>
 
 
-                    <p class="text-muted"
-                       style="line-height:1.8;">
-
+                    <p
+                        class="text-muted"
+                        style="line-height:1.8;"
+                    >
 
                         The system provides researchers with
                         a convenient and secure way to submit
@@ -2460,9 +3565,7 @@ PROFESSIONAL JOURNAL NAVBAR
                         submission progress and communicate
                         during the publication process.
 
-
                     </p>
-
 
 
                     <ul class="about-list">
@@ -2506,6 +3609,7 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     </ul>
 
+
                 </div>
 
             </div>
@@ -2516,29 +3620,38 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
                 <span class="section-label">
+
                     Research & Publication
+
                 </span>
 
 
-                <h2 class="fw-bold mb-4"
-                    style="color:var(--bmrc-navy);">
+                <h2
+                    class="fw-bold mb-4"
+                    style="
+                        color:
+                            var(--bmrc-navy);
+                    "
+                >
 
                     Supporting Quality
+
                     <br>
+
                     Biomedical Research
 
                 </h2>
 
 
-                <p class="text-muted"
-                   style="line-height:1.8;">
-
+                <p
+                    class="text-muted"
+                    style="line-height:1.8;"
+                >
 
                     The platform is designed to provide a
                     professional environment for researchers
                     and reviewers while supporting an efficient
                     and transparent scholarly publication journey.
-
 
                 </p>
 
@@ -2548,7 +3661,6 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
                     <div class="col-6">
-
 
                         <div class="about-feature">
 
@@ -2579,7 +3691,6 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     <div class="col-6">
 
-
                         <div class="about-feature">
 
 
@@ -2608,7 +3719,6 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
                     <div class="col-6">
-
 
                         <div class="about-feature">
 
@@ -2639,7 +3749,6 @@ PROFESSIONAL JOURNAL NAVBAR
 
                     <div class="col-6">
 
-
                         <div class="about-feature">
 
 
@@ -2668,7 +3777,9 @@ PROFESSIONAL JOURNAL NAVBAR
 
                 </div>
 
+
             </div>
+
 
         </div>
 
@@ -2678,18 +3789,19 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
 
-{{-- =====================================================
+{{-- =============================================================
      CTA
-====================================================== --}}
+============================================================= --}}
 
 <section class="cta text-center">
-
 
     <div class="container">
 
 
         <h2>
+
             Ready to Submit Your Research?
+
         </h2>
 
 
@@ -2702,15 +3814,25 @@ PROFESSIONAL JOURNAL NAVBAR
         </p>
 
 
-        <a href="{{ route('author.login') }}"
-           class="btn btn-light btn-lg">
+        <a
+            href="{{ route(
+                'author.login'
+            ) }}"
+            class="btn
+                   btn-light
+                   btn-lg"
+        >
 
-
-            <i class="bi bi-file-earmark-plus me-2"></i>
+            <i
+                class="bi
+                       bi-file-earmark-plus
+                       me-2"
+            ></i>
 
             Start Article Submission
 
         </a>
+
 
     </div>
 
@@ -2718,197 +3840,463 @@ PROFESSIONAL JOURNAL NAVBAR
 
 
 
-{{-- =====================================================
-FOOTER
-====================================================== --}}
+{{-- =============================================================
+     FOOTER
+============================================================= --}}
 
 <footer>
 
-<div class="container">
+    <div class="container">
 
-    <div class="row g-4">
+        <div class="row g-4">
 
-        {{-- BMRC JOURNAL --}}
-        <div class="col-lg-6">
 
-            <div class="footer-brand">
+            {{-- =================================================
+                 BMRC JOURNAL
+            ================================================== --}}
 
-                <div class="footer-brand-icon">
+            <div class="col-lg-6">
 
-                    <i class="bi bi-journal-medical"></i>
+
+                <div class="footer-brand">
+
+
+                    <div class="footer-brand-icon">
+
+                        <i class="bi bi-journal-medical"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h5 class="mb-0">
+
+                            BMRC Journal
+
+                        </h5>
+
+
+                        <small>
+
+                            Online Journal System
+
+                        </small>
+
+                    </div>
+
 
                 </div>
 
-                <div>
 
-                    <h5 class="mb-0">
-                        BMRC Journal
-                    </h5>
+                <p class="mt-3 mb-0">
 
-                    <small>
-                        Online Journal System
-                    </small>
+                    Bangladesh Medical Research Council
 
-                </div>
+                    <br>
+
+                    BMRC Bhaban, Mohakhali, Dhaka
+
+                </p>
+
 
             </div>
 
-            <p class="mt-3 mb-0">
 
-                Bangladesh Medical Research Council
 
-                <br>
+            {{-- =================================================
+                 NAVIGATION
+            ================================================== --}}
 
-                BMRC Bhaban, Mohakhali, Dhaka
+            <div class="col-6 col-lg-3">
 
-            </p>
+
+                <h5>
+                    Navigation
+                </h5>
+
+
+                <ul class="list-unstyled mt-3">
+
+
+                    <li class="mb-2">
+
+                        <a href="{{ url('/') }}">
+
+                            Home
+
+                        </a>
+
+                    </li>
+
+
+                    @if($aboutPage)
+
+                        <li class="mb-2">
+
+                            <a
+                                href="{{ route(
+                                    'journal.page',
+                                    $aboutPage->slug
+                                ) }}"
+                            >
+
+                                About
+
+                            </a>
+
+                        </li>
+
+                    @endif
+
+
+                    <li class="mb-2">
+
+                        <a href="{{ url('/') }}#services">
+
+                            Services
+
+                        </a>
+
+                    </li>
+
+
+                    <li>
+
+                        <a href="{{ url('/') }}#workflow">
+
+                            Submission Process
+
+                        </a>
+
+                    </li>
+
+
+                </ul>
+
+
+            </div>
+
+
+
+            {{-- =================================================
+                 ACCESS
+            ================================================== --}}
+
+            <div class="col-6 col-lg-3">
+
+
+                <h5>
+                    Access
+                </h5>
+
+
+                <ul class="list-unstyled mt-3">
+
+
+                    <li class="mb-2">
+
+                        <a
+                            href="{{ route(
+                                'author.login'
+                            ) }}"
+                        >
+
+                            <i
+                                class="bi
+                                       bi-file-earmark-text
+                                       me-1"
+                            ></i>
+
+                            Author Login
+
+                        </a>
+
+                    </li>
+
+
+                    <li class="mb-2">
+
+                        <a
+                            href="{{ route(
+                                'reviewer.login'
+                            ) }}"
+                        >
+
+                            <i
+                                class="bi
+                                       bi-person-check
+                                       me-1"
+                            ></i>
+
+                            Reviewer Login
+
+                        </a>
+
+                    </li>
+
+
+                    <li>
+
+                        <a
+                            href="{{ route(
+                                'reviewer.register'
+                            ) }}"
+                        >
+
+                            <i
+                                class="bi
+                                       bi-person-plus
+                                       me-1"
+                            ></i>
+
+                            Become a Reviewer
+
+                        </a>
+
+                    </li>
+
+
+                </ul>
+
+
+            </div>
+
 
         </div>
 
 
-        {{-- NAVIGATION --}}
-        <div class="col-6 col-lg-3">
 
-            <h5>
-                Navigation
-            </h5>
+        {{-- =====================================================
+             FOOTER BOTTOM
+        ====================================================== --}}
 
-            <ul class="list-unstyled mt-3">
-
-                <li class="mb-2">
-
-                    <a href="#home">
-                        Home
-                    </a>
-
-                </li>
-
-                <li class="mb-2">
-
-                    <a href="#about">
-                        About
-                    </a>
-
-                </li>
-
-                <li class="mb-2">
-
-                    <a href="#services">
-                        Services
-                    </a>
-
-                </li>
-
-                <li>
-
-                    <a href="#workflow">
-                        Submission Process
-                    </a>
-
-                </li>
-
-            </ul>
-
-        </div>
+        <div class="footer-bottom text-center">
 
 
-        {{-- ACCESS --}}
-        <div class="col-6 col-lg-3">
+            <div class="footer-copyright">
 
-            <h5>
-                Access
-            </h5>
+                &copy;
 
-            <ul class="list-unstyled mt-3">
+                {{ date('Y') }}
 
-                <li class="mb-2">
+                <strong>
 
-                    <a href="{{ route('author.login') }}">
+                    Bangladesh Medical Research Council (BMRC)
 
-                        <i class="bi bi-file-earmark-text me-1"></i>
+                </strong>
 
-                        Author Login
+                . All Rights Reserved.
 
-                    </a>
+            </div>
 
-                </li>
 
-                <li class="mb-2">
+            <div class="footer-system-name">
 
-                    <a href="{{ route('reviewer.login') }}">
+                BMRC Journal Online System
 
-                        <i class="bi bi-person-check me-1"></i>
+            </div>
 
-                        Reviewer Login
 
-                    </a>
+            <div class="developer-credit">
 
-                </li>
+                Designed &amp; Developed by
 
-            </ul>
+                <a
+                    href="https://web.facebook.com/tayzeer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="S M Sayadat Amin on Facebook"
+                >
+
+                    <i class="bi bi-facebook me-1"></i>
+
+                    S M Sayadat Amin
+
+                </a>
+
+
+                <span class="developer-separator">
+
+                    |
+
+                </span>
+
+
+                Scientific Officer, BMRC
+
+            </div>
+
 
         </div>
+
 
     </div>
-
-
-    {{-- FOOTER BOTTOM --}}
-    <div class="footer-bottom text-center">
-
-        <div class="footer-copyright">
-
-            &copy; {{ date('Y') }}
-
-            <strong>
-                Bangladesh Medical Research Council (BMRC)
-            </strong>
-
-            . All Rights Reserved.
-
-        </div>
-
-
-        <div class="footer-system-name">
-
-            BMRC Journal Online System
-
-        </div>
-
-
-        {{-- DEVELOPER CREDIT --}}
-        <div class="developer-credit">
-
-            Designed &amp; Developed by
-
-            <a href="https://web.facebook.com/tayzeer"
-               target="_blank"
-               rel="noopener noreferrer"
-               title="S M Sayadat Amin on Facebook">
-
-                <i class="bi bi-facebook me-1"></i>
-
-                S M Sayadat Amin
-
-            </a>
-
-            <span class="developer-separator">|</span>
-
-            Scientific Officer, BMRC
-
-        </div>
-
-    </div>
-
-</div>
 
 </footer>
 
 
 
+{{-- =============================================================
+     BOOTSTRAP JAVASCRIPT
+============================================================= --}}
 
-{{-- Bootstrap JS --}}
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+
+
+{{-- =============================================================
+     NAVBAR JAVASCRIPT
+============================================================= --}}
+
+<script>
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bootstrap Dropdown Initialization
+        |--------------------------------------------------------------------------
+        */
+
+        const dropdownToggles =
+            document.querySelectorAll(
+                '.main-navbar [data-bs-toggle="dropdown"]'
+            );
+
+
+        dropdownToggles.forEach(
+            function (toggle) {
+
+                bootstrap.Dropdown
+                    .getOrCreateInstance(
+                        toggle
+                    );
+
+            }
+        );
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Mobile Navbar
+        |--------------------------------------------------------------------------
+        */
+
+        const navbarCollapse =
+            document.getElementById(
+                'mainNavbar'
+            );
+
+
+        if (!navbarCollapse) {
+
+            return;
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Close Mobile Navbar After User Selects Link
+        |--------------------------------------------------------------------------
+        */
+
+        const menuLinks =
+            navbarCollapse
+                .querySelectorAll(
+                    'a.dropdown-item, a.nav-link:not(.dropdown-toggle), .btn-login'
+                );
+
+
+        menuLinks.forEach(
+            function (link) {
+
+                link.addEventListener(
+                    'click',
+                    function () {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Desktop does not need collapse
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if (
+                            window.innerWidth
+                            >= 992
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const collapseInstance =
+                            bootstrap.Collapse
+                                .getOrCreateInstance(
+                                    navbarCollapse,
+                                    {
+                                        toggle:
+                                            false
+                                    }
+                                );
+
+
+                        collapseInstance
+                            .hide();
+
+                    }
+                );
+
+            }
+        );
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset Mobile Dropdowns When Main Menu Closes
+        |--------------------------------------------------------------------------
+        */
+
+        navbarCollapse
+            .addEventListener(
+                'hidden.bs.collapse',
+                function () {
+
+                    dropdownToggles
+                        .forEach(
+                            function (toggle) {
+
+                                const dropdown =
+                                    bootstrap.Dropdown
+                                        .getInstance(
+                                            toggle
+                                        );
+
+
+                                if (dropdown) {
+
+                                    dropdown.hide();
+
+                                }
+
+                            }
+                        );
+
+                }
+            );
+
+    }
+);
+
 </script>
 
 

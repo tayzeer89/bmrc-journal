@@ -19,19 +19,16 @@ class ReviewerPasswordController extends Controller
                 ->route('reviewer.login');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | If password change is not required, send reviewer to dashboard
-        |--------------------------------------------------------------------------
-        */
+        if ($reviewer->mustChangePassword()) {
 
-        if (!$reviewer->mustChangePassword()) {
-            return redirect()
-                ->route('reviewer.dashboard');
+            return view(
+                'reviewer.auth.change-temporary-password',
+                compact('reviewer')
+            );
         }
 
         return view(
-            'reviewer.auth.change-password',
+            'reviewer.password.change',
             compact('reviewer')
         );
     }
@@ -46,6 +43,7 @@ class ReviewerPasswordController extends Controller
                 ->route('reviewer.login');
         }
 
+
         $validated = $request->validate([
 
             'current_password' => [
@@ -55,6 +53,7 @@ class ReviewerPasswordController extends Controller
 
             'password' => [
                 'required',
+                'string',
                 'confirmed',
 
                 Password::min(8)
@@ -78,12 +77,12 @@ class ReviewerPasswordController extends Controller
                 $reviewer->password
             )
         ) {
-
             return back()
                 ->withErrors([
                     'current_password' =>
                         'The current password is incorrect.',
-                ]);
+                ])
+                ->withInput();
         }
 
 
@@ -99,7 +98,6 @@ class ReviewerPasswordController extends Controller
                 $reviewer->password
             )
         ) {
-
             return back()
                 ->withErrors([
                     'password' =>
@@ -113,12 +111,12 @@ class ReviewerPasswordController extends Controller
         | Update Password
         |--------------------------------------------------------------------------
         |
-        | Reviewer model already contains:
+        | Reviewer model uses:
         |
         | 'password' => 'hashed'
         |
-        | Therefore Hash::make() is not required here.
-        |--------------------------------------------------------------------------
+        | Therefore Hash::make() is NOT required.
+        |
         */
 
         $reviewer->update([
@@ -133,6 +131,15 @@ class ReviewerPasswordController extends Controller
                 now(),
 
         ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Regenerate Session
+        |--------------------------------------------------------------------------
+        */
+
+        $request->session()->regenerate();
 
 
         return redirect()
