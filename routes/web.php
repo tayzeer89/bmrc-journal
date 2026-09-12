@@ -37,7 +37,17 @@ use App\Http\Controllers\Admin\JournalPageController;
 
 use App\Http\Controllers\Website\JournalPageController
     as PublicJournalPageController;
+/*
+|--------------------------------------------------------------------------
+| Center Dashboard Controllers
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\DashboardRedirectController;
 
+use App\Http\Controllers\Editor\DashboardController
+    as EditorDashboardController;
+use App\Http\Controllers\Finance\DashboardController
+    as FinanceDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -154,10 +164,6 @@ Route::get(
 
     }
 )->name('journal.archive');
-
-
-
-
 
 
 
@@ -1173,16 +1179,7 @@ Route::middleware('auth')
         )->name('editorial.dashboard');
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Editor Dashboard
-        |--------------------------------------------------------------------------
-        */
 
-        Route::view(
-            '/editor/dashboard',
-            'editor.dashboard'
-        )->name('editor.dashboard');
 
 
         /*
@@ -2293,6 +2290,21 @@ Route::middleware('auth')
             ->name('show');
     });
 
+/*
+|--------------------------------------------------------------------------
+| Center dashboard redirect route
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::get(
+        '/dashboard',
+        [DashboardRedirectController::class, 'index']
+    )->name('dashboard');
+
+});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -2300,20 +2312,52 @@ Route::middleware('auth')
 |--------------------------------------------------------------------------
 */
 
-Route::middleware([
-    'auth',
-    'permission:finance.view',
-])
-    ->prefix('finance')
+Route::prefix('finance')
     ->name('finance.')
+    ->middleware([
+        'auth',
+    ])
     ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Finance Dashboard
+        |--------------------------------------------------------------------------
+        */
 
         Route::get(
             '/dashboard',
-            [DashboardController::class, 'index']
+            [FinanceDashboardController::class, 'index']
         )->name('dashboard');
+
     });
 
+
+/*
+|--------------------------------------------------------------------------
+| EDITOR
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('editor')
+    ->name('editor.')
+    ->middleware([
+        'auth',
+    ])
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Editor Dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/dashboard',
+            [EditorDashboardController::class, 'index']
+        )->name('dashboard');
+
+    });
 
 /*
 |--------------------------------------------------------------------------

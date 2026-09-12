@@ -354,26 +354,183 @@
 
     <div class="sidebar-menu">
 
+{{-- =====================================================
+     MAIN / DASHBOARD
+====================================================== --}}
 
-        {{-- =====================================================
-             MAIN / DASHBOARD
-        ====================================================== --}}
+<div class="sidebar-menu-title">
+    Main
+</div>
 
-        <div class="sidebar-menu-title">
-            Main
-        </div>
+@php
+
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE-BASED DASHBOARD URL
+    |--------------------------------------------------------------------------
+    |
+    | Normalize role names so these all work:
+    |
+    | Finance Officer
+    | finance_officer
+    | finance-officer
+    |
+    */
+
+    $currentUser = auth()->user();
+
+    $dashboardUrl = url('/dashboard');
+
+    $normalizedRoles = collect();
 
 
-        <a href="{{ route('admin.dashboard') }}"
-           class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+    if ($currentUser) {
 
-            <i class="bi bi-speedometer2"></i>
+        $normalizedRoles = $currentUser
+            ->getRoleNames()
+            ->map(function ($role) {
 
-            <span>
-                Dashboard
-            </span>
+                return strtolower(
+                    str_replace(
+                        [' ', '-'],
+                        '_',
+                        trim($role)
+                    )
+                );
 
-        </a>
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SYSTEM ADMINISTRATOR
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $normalizedRoles->contains('system_administrator')
+        ) {
+
+            $dashboardUrl = url('/admin/dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FINANCE OFFICER
+        |--------------------------------------------------------------------------
+        */
+
+        } elseif (
+            $normalizedRoles->contains('finance_officer')
+        ) {
+
+            $dashboardUrl = url('/finance/dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | EDITOR-IN-CHIEF
+        |--------------------------------------------------------------------------
+        */
+
+        } elseif (
+            $normalizedRoles->contains('editor_in_chief')
+        ) {
+
+            $dashboardUrl = url('/editor/dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HANDLING EDITOR
+        |--------------------------------------------------------------------------
+        */
+
+        } elseif (
+            $normalizedRoles->contains('handling_editor')
+        ) {
+
+            $dashboardUrl = url('/editor/dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ASSOCIATE EDITOR
+        |--------------------------------------------------------------------------
+        */
+
+        } elseif (
+            $normalizedRoles->contains('associate_editor')
+        ) {
+
+            $dashboardUrl = url('/editor/dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | EDITORIAL OFFICER
+        |--------------------------------------------------------------------------
+        */
+
+        } elseif (
+            $normalizedRoles->contains('editorial_officer')
+        ) {
+
+            $dashboardUrl = url('/editorial/dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | JOURNAL OFFICER
+        |--------------------------------------------------------------------------
+        */
+
+        } elseif (
+            $normalizedRoles->contains('journal_officer')
+        ) {
+
+            $dashboardUrl = url('/editorial/dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PRODUCTION STAFF
+        |--------------------------------------------------------------------------
+        */
+
+        } elseif (
+            $normalizedRoles->contains('production_staff')
+        ) {
+
+            $dashboardUrl = url('/production/dashboard');
+
+        }
+
+    }
+
+@endphp
+
+
+<a
+    href="{{ $dashboardUrl }}"
+    class="{{
+        request()->is('admin/dashboard')
+        || request()->is('finance/dashboard')
+        || request()->is('editor/dashboard')
+        || request()->is('editorial/dashboard')
+        || request()->is('production/dashboard')
+            ? 'active'
+            : ''
+    }}"
+>
+
+    <i class="bi bi-speedometer2"></i>
+
+    <span>
+        Dashboard
+    </span>
+
+</a>
 
 
 
@@ -1139,12 +1296,6 @@
 <div id="sidebarOverlay"
      class="sidebar-overlay">
 </div>
-
-
-
-    <div id="sidebarOverlay"
-         class="sidebar-overlay">
-    </div>
 
 
     <!-- =========================================================
