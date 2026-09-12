@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
+
 class ReviewerInvitationController extends Controller
 {
     /*
@@ -191,7 +192,7 @@ class ReviewerInvitationController extends Controller
             ->withQueryString();
 
         return view(
-            'admin.reviewer-invitations.index',
+            'admin.reviewers.invitations.index',
             compact(
                 'invitations',
                 'statistics'
@@ -257,7 +258,7 @@ class ReviewerInvitationController extends Controller
             ->get();
 
         return view(
-            'admin.reviewer-invitations.create',
+            'admin.reviewers.invitations.create',
             compact(
                 'manuscript',
                 'reviewers'
@@ -433,7 +434,7 @@ class ReviewerInvitationController extends Controller
 
         return redirect()
             ->route(
-                'admin.reviewer-invitations.index'
+                'admin.reviewers.invitations.index'
             )
             ->with(
                 'success',
@@ -458,7 +459,7 @@ class ReviewerInvitationController extends Controller
         ]);
 
         return view(
-            'admin.reviewer-invitations.show',
+            'admin.reviewers.invitations.show',
             compact(
                 'reviewerInvitation'
             )
