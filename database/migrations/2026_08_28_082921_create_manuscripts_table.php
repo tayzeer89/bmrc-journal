@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('manuscripts', function (Blueprint $table) {
@@ -30,6 +27,11 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | 2. Submission / Ownership
             |--------------------------------------------------------------------------
+            |
+            | IMPORTANT:
+            | Keep users if your author submission currently references users.
+            | If authors authenticate only through authors table, change to authors.
+            |
             */
 
             $table->foreignId('submitted_by')
@@ -39,7 +41,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 3. Journal & Article Type
+            | 3. Journal
             |--------------------------------------------------------------------------
             */
 
@@ -47,6 +49,13 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('journals')
                 ->nullOnDelete();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 4. Article Type
+            |--------------------------------------------------------------------------
+            */
 
             $table->foreignId('article_type_id')
                 ->nullable()
@@ -56,7 +65,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 4. Article Information - Step 1
+            | 5. Article Information
             |--------------------------------------------------------------------------
             */
 
@@ -83,7 +92,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 5. Manuscript Statistics - Step 1
+            | 6. Manuscript Statistics
             |--------------------------------------------------------------------------
             */
 
@@ -102,7 +111,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 6. Submission Status
+            | 7. Workflow Status
             |--------------------------------------------------------------------------
             */
 
@@ -111,36 +120,72 @@ return new class extends Migration
                 ->index();
 
             /*
-             | Examples:
-             | draft
-             | submitted
-             | technical_check
-             | technical_revision
-             | editor_assigned
-             | under_review
-             | revision_required
-             | accepted
-             | rejected
-             | copy_editing
-             | proofreading
-             | production
-             | published
-             */
+            |--------------------------------------------------------------------------
+            | Recommended status values
+            |--------------------------------------------------------------------------
+            |
+            | draft
+            | submitted
+            |
+            | technical_check
+            | technical_revision
+            | technical_passed
+            |
+            | payment_required
+            | payment_correction
+            | payment_verified
+            |
+            | similarity_check
+            | similarity_completed
+            |
+            | editor_assignment
+            | editor_assigned
+            | editorial_assessment
+            |
+            | reviewer_selection
+            | reviewer_invitation
+            | under_review
+            | reviews_completed
+            |
+            | editor_recommendation
+            | eic_decision
+            |
+            | minor_revision
+            | major_revision
+            | revision_submitted
+            |
+            | accepted
+            | rejected
+            |
+            | copy_editing
+            | proofreading
+            | production
+            | publication_ready
+            | published
+            |
+            */
 
-       $table->string('current_stage')
-                ->nullable()
+
+            /*
+            |--------------------------------------------------------------------------
+            | 8. Broad Current Stage
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('current_stage')
+                ->default('submission')
                 ->index();
 
             /*
-            | Current Stage examples:
+            |--------------------------------------------------------------------------
+            | current_stage values
+            |--------------------------------------------------------------------------
             |
             | submission
             | technical_review
-            | author_correction
             | payment
-            | payment_correction
-            | editorial_assessment
             | similarity_check
+            | editorial
             | peer_review
             | revision
             | decision
@@ -148,16 +193,46 @@ return new class extends Migration
             | proofreading
             | production
             | publication
+            |
             */
-
 
 
             /*
             |--------------------------------------------------------------------------
-            | 7. Submission Version
+            | 9. Current Handling Editor
+            |--------------------------------------------------------------------------
+            |
+            | This is ONLY the current editor.
+            |
+            | Assignment history is stored separately in:
+            | editor_assignments
+            |
+            */
+
+            $table->foreignId('handling_editor_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 10. Review / Revision Tracking
             |--------------------------------------------------------------------------
             */
 
+            $table->unsignedInteger('review_round')
+                ->default(0);
+
+            $table->unsignedInteger('revision_round')
+                ->default(0);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 11. Submission Version
+            |--------------------------------------------------------------------------
+            */
 
             $table->string('submission_version')
                 ->default('1.0');
@@ -165,7 +240,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 8. Draft Management
+            | 12. Draft Management
             |--------------------------------------------------------------------------
             */
 
@@ -181,7 +256,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 9. Final Submission
+            | 13. Submission Date
             |--------------------------------------------------------------------------
             */
 
@@ -191,7 +266,23 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 10. Timestamps
+            | 14. Editorial Dates
+            |--------------------------------------------------------------------------
+            */
+
+            $table->timestamp('accepted_at')
+                ->nullable();
+
+            $table->timestamp('rejected_at')
+                ->nullable();
+
+            $table->timestamp('published_at')
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 15. Timestamps
             |--------------------------------------------------------------------------
             */
 
@@ -200,19 +291,37 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | 11. Soft Delete
+            | 16. Soft Delete
             |--------------------------------------------------------------------------
             */
 
             $table->softDeletes();
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | 17. Workflow Indexes
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index([
+                'status',
+                'current_stage'
+            ]);
+
+            $table->index([
+                'handling_editor_id',
+                'status'
+            ]);
+
+            $table->index([
+                'journal_id',
+                'status'
+            ]);
         });
     }
 
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('manuscripts');

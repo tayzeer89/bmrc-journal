@@ -584,7 +584,7 @@
 
                     <div>
 
-                        {{ $journalPages->links() }}
+                        {{ $journalPages->links('pagination::bootstrap-4') }}
 
                     </div>
 

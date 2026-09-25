@@ -352,7 +352,7 @@
 
 
                     <div>
-                        {{ $reviewers->links() }}
+                        {{ $reviewers->links('pagination::bootstrap-4') }}
                     </div>
 
                 </div>

@@ -693,7 +693,7 @@
             @if($manuscripts->hasPages())
 
                 <div class="pagination-wrap">
-                    {{ $manuscripts->links() }}
+                    {{ $manuscripts->links('pagination::bootstrap-4') }}
                 </div>
 
             @endif

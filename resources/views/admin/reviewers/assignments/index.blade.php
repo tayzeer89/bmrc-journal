@@ -1004,7 +1004,7 @@
 
             <div class="card-footer">
 
-                {{ $assignments->links() }}
+                {{ $assignments->links('pagination::bootstrap-4') }}
 
             </div>
 

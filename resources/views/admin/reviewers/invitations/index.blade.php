@@ -588,7 +588,7 @@
 
                 <div class="card-footer">
 
-                    {{ $invitations->links() }}
+                    {{ $invitations->links('pagination::bootstrap-4') }}
 
                 </div>
 

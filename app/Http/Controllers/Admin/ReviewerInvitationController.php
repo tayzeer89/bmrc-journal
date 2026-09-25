@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Manuscript;
 use App\Models\Reviewer;
 use App\Models\ReviewerInvitation;
-use App\Models\Manuscript;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class ReviewerInvitationController extends Controller
 {
@@ -21,12 +21,19 @@ class ReviewerInvitationController extends Controller
 
     public function index(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Query
+        |--------------------------------------------------------------------------
+        */
+
         $query = ReviewerInvitation::query()
             ->with([
                 'reviewer.profile',
                 'manuscript',
-                'invitedBy',
+                'inviter',
             ]);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -39,6 +46,12 @@ class ReviewerInvitationController extends Controller
             $search = trim($request->search);
 
             $query->where(function ($q) use ($search) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Reviewer Search
+                |--------------------------------------------------------------------------
+                */
 
                 $q->whereHas(
                     'reviewer',
@@ -55,9 +68,18 @@ class ReviewerInvitationController extends Controller
                                 'like',
                                 "%{$search}%"
                             );
+
                     }
-                )
-                ->orWhereHas(
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Manuscript Search
+                |--------------------------------------------------------------------------
+                */
+
+                $q->orWhereHas(
                     'manuscript',
                     function ($manuscriptQuery) use ($search) {
 
@@ -69,25 +91,55 @@ class ReviewerInvitationController extends Controller
                             );
 
                         /*
-                        | Adjust manuscript_number to your actual column.
+                        |--------------------------------------------------------------------------
+                        | manuscript_id
+                        |--------------------------------------------------------------------------
                         */
 
                         if (
-                            \Schema::hasColumn(
+                            Schema::hasColumn(
+                                'manuscripts',
+                                'manuscript_id'
+                            )
+                        ) {
+
+                            $manuscriptQuery->orWhere(
+                                'manuscript_id',
+                                'like',
+                                "%{$search}%"
+                            );
+
+                        }
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Legacy manuscript_number
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if (
+                            Schema::hasColumn(
                                 'manuscripts',
                                 'manuscript_number'
                             )
                         ) {
+
                             $manuscriptQuery->orWhere(
                                 'manuscript_number',
                                 'like',
                                 "%{$search}%"
                             );
+
                         }
+
                     }
                 );
+
             });
+
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -110,11 +162,14 @@ class ReviewerInvitationController extends Controller
                 true
             )
         ) {
+
             $query->where(
                 'status',
                 $request->status
             );
+
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -128,7 +183,9 @@ class ReviewerInvitationController extends Controller
                 'manuscript_id',
                 $request->manuscript_id
             );
+
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -142,7 +199,9 @@ class ReviewerInvitationController extends Controller
                 'reviewer_id',
                 $request->reviewer_id
             );
+
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -184,12 +243,21 @@ class ReviewerInvitationController extends Controller
                     'status',
                     'cancelled'
                 )->count(),
+
         ];
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Paginate
+        |--------------------------------------------------------------------------
+        */
+
         $invitations = $query
-            ->latest()
+            ->latest('id')
             ->paginate(20)
             ->withQueryString();
+
 
         return view(
             'admin.reviewers.invitations.index',
@@ -211,17 +279,25 @@ class ReviewerInvitationController extends Controller
     {
         $manuscript = null;
 
-        if ($request->filled('manuscript_id')) {
-
-            $manuscript =
-                Manuscript::find(
-                    $request->manuscript_id
-                );
-        }
 
         /*
         |--------------------------------------------------------------------------
-        | Eligible Reviewers Only
+        | Pre-selected Manuscript
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('manuscript_id')) {
+
+            $manuscript = Manuscript::find(
+                $request->manuscript_id
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Eligible Reviewers
         |--------------------------------------------------------------------------
         */
 
@@ -252,10 +328,12 @@ class ReviewerInvitationController extends Controller
                             'receive_review_invitations',
                             true
                         );
+
                 }
             )
             ->orderBy('name')
             ->get();
+
 
         return view(
             'admin.reviewers.invitations.create',
@@ -269,40 +347,46 @@ class ReviewerInvitationController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORE / SEND INVITATION
+    | STORE / SEND SINGLE INVITATION
+    |--------------------------------------------------------------------------
+    |
+    | This method is mainly for the Admin invitation screen.
+    |
+    | Handling Editor reviewer selection uses:
+    |
+    | ReviewerSelectionController::invite()
+    |
     |--------------------------------------------------------------------------
     */
 
     public function store(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Validation
+        |--------------------------------------------------------------------------
+        */
+
         $validated = $request->validate([
 
             'manuscript_id' => [
                 'required',
+                'integer',
                 'exists:manuscripts,id',
             ],
 
             'reviewer_id' => [
                 'required',
+                'integer',
                 'exists:reviewers,id',
             ],
 
-            'review_due_date' => [
-                'required',
-                'date',
-                'after:today',
-            ],
-
-            'message' => [
-                'nullable',
-                'string',
-                'max:5000',
-            ],
         ]);
+
 
         /*
         |--------------------------------------------------------------------------
-        | Reviewer Eligibility
+        | Reviewer
         |--------------------------------------------------------------------------
         */
 
@@ -312,26 +396,71 @@ class ReviewerInvitationController extends Controller
                 $validated['reviewer_id']
             );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reviewer Eligibility
+        |--------------------------------------------------------------------------
+        */
+
         if (
-            $reviewer->status !== 'approved'
-            ||
-            !$reviewer->profile
-            ||
-            $reviewer->profile->approval_status !== 'approved'
-            ||
-            !$reviewer->profile->profile_completed
-            ||
-            !$reviewer->profile->available_for_review
-            ||
-            !$reviewer->profile->receive_review_invitations
+            method_exists(
+                $reviewer,
+                'canReceiveReviewInvitations'
+            )
         ) {
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    'The selected reviewer is not currently eligible to receive review invitations.'
-                );
+
+            if (
+                !$reviewer
+                    ->canReceiveReviewInvitations()
+            ) {
+
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'The selected reviewer is not currently eligible to receive review invitations.'
+                    );
+
+            }
+
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Fallback Eligibility Check
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $reviewer->status !== 'approved'
+                ||
+                !$reviewer->profile
+                ||
+                $reviewer->profile
+                    ->approval_status !== 'approved'
+                ||
+                !$reviewer->profile
+                    ->profile_completed
+                ||
+                !$reviewer->profile
+                    ->available_for_review
+                ||
+                !$reviewer->profile
+                    ->receive_review_invitations
+            ) {
+
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'The selected reviewer is not currently eligible to receive review invitations.'
+                    );
+
+            }
+
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -339,24 +468,24 @@ class ReviewerInvitationController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $duplicate =
-            ReviewerInvitation::query()
-                ->where(
-                    'manuscript_id',
-                    $validated['manuscript_id']
-                )
-                ->where(
-                    'reviewer_id',
-                    $validated['reviewer_id']
-                )
-                ->whereIn(
-                    'status',
-                    [
-                        'pending',
-                        'accepted',
-                    ]
-                )
-                ->exists();
+        $duplicate = ReviewerInvitation::query()
+            ->where(
+                'manuscript_id',
+                $validated['manuscript_id']
+            )
+            ->where(
+                'reviewer_id',
+                $validated['reviewer_id']
+            )
+            ->whereIn(
+                'status',
+                [
+                    'pending',
+                    'accepted',
+                ]
+            )
+            ->exists();
+
 
         if ($duplicate) {
 
@@ -366,71 +495,211 @@ class ReviewerInvitationController extends Controller
                     'error',
                     'This reviewer already has an active invitation for this manuscript.'
                 );
+
         }
+
 
         /*
         |--------------------------------------------------------------------------
-        | Optional Maximum Active Reviews Check
+        | Invitation Dates
         |--------------------------------------------------------------------------
         |
-        | This assumes ReviewerAssignment exists later.
+        | Day 0  = invitation
+        | Day 3  = invitation expiry
+        | Day 15 = review deadline
+        |
+        | ReviewerInvitation currently stores expires_at.
+        | Review due date should later be stored in ReviewerAssignment.
         |
         */
 
-        if (
-            $reviewer->profile->maximum_active_reviews !== null
-        ) {
+        $invitedAt = now();
 
-            /*
-            | Add active-assignment count here when your
-            | reviewer_assignments table is implemented.
-            */
-        }
+        $expiresAt = $invitedAt
+            ->copy()
+            ->addDays(3);
 
-        DB::transaction(
+        $reviewDueAt = $invitedAt
+            ->copy()
+            ->addDays(15);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Invitation
+        |--------------------------------------------------------------------------
+        */
+
+        $invitation = DB::transaction(
             function () use (
                 $validated,
-                $reviewer
+                $reviewer,
+                $invitedAt,
+                $expiresAt
             ) {
-
-                ReviewerInvitation::create([
-
-                    'manuscript_id' =>
-                        $validated['manuscript_id'],
-
-                    'reviewer_id' =>
-                        $reviewer->id,
-
-                    'status' =>
-                        'pending',
-
-                    'invited_by' =>
-                        auth()->id(),
-
-                    'invited_at' =>
-                        now(),
-
-                    'review_due_date' =>
-                        $validated['review_due_date'],
-
-                    'message' =>
-                        $validated['message']
-                        ?? null,
-                ]);
 
                 /*
                 |--------------------------------------------------------------------------
-                | Send invitation email here
+                | Lock Manuscript
+                |--------------------------------------------------------------------------
+                */
+
+                $manuscript = Manuscript::query()
+                    ->lockForUpdate()
+                    ->findOrFail(
+                        $validated['manuscript_id']
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Recheck Duplicate Inside Transaction
+                |--------------------------------------------------------------------------
+                */
+
+                $duplicate = ReviewerInvitation::query()
+                    ->where(
+                        'manuscript_id',
+                        $manuscript->id
+                    )
+                    ->where(
+                        'reviewer_id',
+                        $reviewer->id
+                    )
+                    ->whereIn(
+                        'status',
+                        [
+                            'pending',
+                            'accepted',
+                        ]
+                    )
+                    ->exists();
+
+
+                if ($duplicate) {
+
+                    return null;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Invitation
+                |--------------------------------------------------------------------------
+                */
+
+                $invitation =
+                    ReviewerInvitation::create([
+
+                        'manuscript_id' =>
+                            $manuscript->id,
+
+                        'reviewer_id' =>
+                            $reviewer->id,
+
+                        'invited_by' =>
+                            auth()->id(),
+
+                        'invitation_token' =>
+                            Str::random(64),
+
+                        'status' =>
+                            'pending',
+
+                        'invited_at' =>
+                            $invitedAt,
+
+                        'expires_at' =>
+                            $expiresAt,
+
+                        'responded_at' =>
+                            null,
+
+                        'response_note' =>
+                            null,
+
+                        'reminder_count' =>
+                            0,
+
+                        'last_reminder_at' =>
+                            null,
+
+                    ]);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Manuscript Workflow
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    in_array(
+                        $manuscript->status,
+                        [
+                            'reviewer_selection',
+                            'reviewer_invitation',
+                        ],
+                        true
+                    )
+                ) {
+
+                    $manuscript->update([
+
+                        'status' =>
+                            'reviewer_invitation',
+
+                        'current_stage' =>
+                            'reviewer_invitation',
+
+                    ]);
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Email Notification
                 |--------------------------------------------------------------------------
                 |
-                | Example:
+                | Add when your ReviewerInvitationMail is ready:
                 |
-                | Mail::to($reviewer->email)
-                |     ->send(new ReviewerInvitationMail(...));
+                | Mail::to($reviewer->email)->send(
+                |     new ReviewerInvitationMail($invitation)
+                | );
                 |
                 */
+
+                return $invitation;
+
             }
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Duplicate Created Concurrently
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$invitation) {
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'This reviewer already has an active invitation for this manuscript.'
+                );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Success
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route(
@@ -438,7 +707,12 @@ class ReviewerInvitationController extends Controller
             )
             ->with(
                 'success',
-                'Reviewer invitation sent successfully.'
+                'Reviewer invitation sent successfully. ' .
+                'Invitation expires on ' .
+                $expiresAt->format('d M Y') .
+                '. Review deadline is ' .
+                $reviewDueAt->format('d M Y') .
+                ' (15 days from the initial invitation).'
             );
     }
 
@@ -449,23 +723,22 @@ class ReviewerInvitationController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function show(
-        ReviewerInvitation $reviewerInvitation
-    ) {
-        $reviewerInvitation->load([
-            'reviewer.profile',
-            'manuscript',
-            'invitedBy',
-        ]);
+    public function show($reviewerInvitation)
+    {
+        $reviewerInvitation = ReviewerInvitation::query()
+            ->with([
+                'reviewer.profile',
+                'manuscript.journal',
+                'manuscript.articleType',
+                'inviter',
+            ])
+            ->findOrFail($reviewerInvitation);
 
         return view(
             'admin.reviewers.invitations.show',
-            compact(
-                'reviewerInvitation'
-            )
+            compact('reviewerInvitation')
         );
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -473,60 +746,65 @@ class ReviewerInvitationController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function remind(
-        ReviewerInvitation $reviewerInvitation
-    ) {
-        if (
-            $reviewerInvitation->status !== 'pending'
-        ) {
-            return back()->with(
-                'error',
-                'Reminder can only be sent for pending invitations.'
-            );
+        public function remind($reviewerInvitation)
+        {
+            $reviewerInvitation = ReviewerInvitation::query()
+                ->with('reviewer')
+                ->findOrFail($reviewerInvitation);
+
+            if ($reviewerInvitation->status !== 'pending') {
+                return back()->with(
+                    'error',
+                    'Reminder can only be sent for pending invitations.'
+                );
+            }
+
+            if (
+                $reviewerInvitation->expires_at &&
+                $reviewerInvitation->expires_at->isPast()
+            ) {
+                $reviewerInvitation->update([
+                    'status' => 'expired',
+                ]);
+
+                return back()->with(
+                    'error',
+                    'This reviewer invitation has already expired.'
+                );
+            }
+
+            $reviewerInvitation->update([
+                'last_reminder_at' => now(),
+
+                'reminder_count' =>
+                    ($reviewerInvitation->reminder_count ?? 0) + 1,
+            ]);
+
+            /*
+            * Later, when your mail class is ready:
+            *
+            * Mail::to(
+            *     $reviewerInvitation->reviewer->email
+            * )->send(
+            *     new ReviewerInvitationReminderMail(
+            *         $reviewerInvitation
+            *     )
+            * );
+            */
+
+            return redirect()
+                ->route(
+                    'admin.reviewers.invitations.show',
+                    [
+                        'reviewerInvitation' =>
+                            $reviewerInvitation->id
+                    ]
+                )
+                ->with(
+                    'success',
+                    'Reviewer invitation reminder recorded successfully.'
+                );
         }
-
-        $reviewerInvitation->load(
-            'reviewer'
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Update Reminder Tracking
-        |--------------------------------------------------------------------------
-        */
-
-        $reviewerInvitation->update([
-
-            'last_reminded_at' =>
-                now(),
-
-            'reminder_count' =>
-                (
-                    $reviewerInvitation->reminder_count
-                    ?? 0
-                ) + 1,
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Send Reminder Email
-        |--------------------------------------------------------------------------
-        |
-        | Mail::to(
-        |     $reviewerInvitation->reviewer->email
-        | )->send(
-        |     new ReviewerInvitationReminderMail(
-        |         $reviewerInvitation
-        |     )
-        | );
-        |
-        */
-
-        return back()->with(
-            'success',
-            'Reviewer invitation reminder sent successfully.'
-        );
-    }
 
 
     /*
@@ -536,18 +814,15 @@ class ReviewerInvitationController extends Controller
     */
 
     public function cancel(
-        Request $request,
-        ReviewerInvitation $reviewerInvitation
+    Request $request,
+    $reviewerInvitation
     ) {
-        if (
-            !in_array(
-                $reviewerInvitation->status,
-                [
-                    'pending',
-                ],
-                true
-            )
-        ) {
+        $reviewerInvitation =
+            ReviewerInvitation::findOrFail(
+                $reviewerInvitation
+            );
+
+        if ($reviewerInvitation->status !== 'pending') {
             return back()->with(
                 'error',
                 'Only pending invitations can be cancelled.'
@@ -555,7 +830,6 @@ class ReviewerInvitationController extends Controller
         }
 
         $validated = $request->validate([
-
             'cancellation_reason' => [
                 'nullable',
                 'string',
@@ -564,25 +838,25 @@ class ReviewerInvitationController extends Controller
         ]);
 
         $reviewerInvitation->update([
+            'status' => 'cancelled',
 
-            'status' =>
-                'cancelled',
-
-            'cancelled_at' =>
-                now(),
-
-            'cancelled_by' =>
-                auth()->id(),
-
-            'cancellation_reason' =>
+            'response_note' =>
                 $validated['cancellation_reason']
-                ?? null,
+                ?? 'Invitation cancelled by editorial office.',
         ]);
 
-        return back()->with(
-            'success',
-            'Reviewer invitation cancelled successfully.'
-        );
+        return redirect()
+            ->route(
+                'admin.reviewers.invitations.show',
+                [
+                    'reviewerInvitation' =>
+                        $reviewerInvitation->id
+                ]
+            )
+            ->with(
+                'success',
+                'Reviewer invitation cancelled successfully.'
+            );
     }
 
 
@@ -590,17 +864,16 @@ class ReviewerInvitationController extends Controller
     |--------------------------------------------------------------------------
     | MARK EXPIRED
     |--------------------------------------------------------------------------
-    |
-    | This can later be moved to a scheduled command.
-    |
     */
 
-    public function expire(
-        ReviewerInvitation $reviewerInvitation
-    ) {
-        if (
-            $reviewerInvitation->status !== 'pending'
-        ) {
+    public function expire($reviewerInvitation)
+    {
+        $reviewerInvitation =
+            ReviewerInvitation::findOrFail(
+                $reviewerInvitation
+            );
+
+        if ($reviewerInvitation->status !== 'pending') {
             return back()->with(
                 'error',
                 'Only pending invitations can be marked as expired.'
@@ -608,18 +881,21 @@ class ReviewerInvitationController extends Controller
         }
 
         $reviewerInvitation->update([
-
-            'status' =>
-                'expired',
-
-            'expired_at' =>
-                now(),
+            'status' => 'expired',
         ]);
 
-        return back()->with(
-            'success',
-            'Reviewer invitation marked as expired.'
-        );
+        return redirect()
+            ->route(
+                'admin.reviewers.invitations.show',
+                [
+                    'reviewerInvitation' =>
+                        $reviewerInvitation->id
+                ]
+            )
+            ->with(
+                'success',
+                'Reviewer invitation marked as expired.'
+            );
     }
 
 
@@ -708,19 +984,29 @@ class ReviewerInvitationController extends Controller
         string $status,
         string $view
     ) {
+        /*
+        |--------------------------------------------------------------------------
+        | FIX:
+        |
+        | Relationship is inviter(), NOT invitedBy()
+        |--------------------------------------------------------------------------
+        */
+
         $invitations =
             ReviewerInvitation::query()
                 ->with([
                     'reviewer.profile',
                     'manuscript',
-                    'invitedBy',
+                    'inviter',
                 ])
                 ->where(
                     'status',
                     $status
                 )
-                ->latest()
-                ->paginate(20);
+                ->latest('id')
+                ->paginate(20)
+                ->withQueryString();
+
 
         return view(
             $view,

@@ -262,7 +262,7 @@
 
             <div class="mt-3">
 
-                {{ $roles->links() }}
+                {{ $roles->links('pagination::bootstrap-4') }}
 
             </div>
 

@@ -8,14 +8,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use App\Models\ManuscriptVersion;
-
-
 
 class Manuscript extends Model
 {
     use HasFactory, SoftDeletes;
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mass Assignable Fields
+    |--------------------------------------------------------------------------
+    */
 
     protected $fillable = [
 
@@ -44,6 +47,7 @@ class Manuscript extends Model
         */
 
         'journal_id',
+
         'article_type_id',
 
 
@@ -54,11 +58,17 @@ class Manuscript extends Model
         */
 
         'title',
+
         'short_title',
+
         'abstract',
+
         'keywords',
+
         'subject_category',
+
         'subcategory',
+
         'language',
 
 
@@ -69,21 +79,46 @@ class Manuscript extends Model
         */
 
         'word_count',
+
         'number_of_tables',
+
         'number_of_figures',
+
         'number_of_references',
 
 
         /*
         |--------------------------------------------------------------------------
-        | Submission Status
+        | Submission / Workflow Status
         |--------------------------------------------------------------------------
         */
 
         'status',
+
         'current_stage',
+
         'submission_version',
+
         'submitted_at',
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Editorial Workflow
+        |--------------------------------------------------------------------------
+        */
+
+        'handling_editor_id',
+
+        'review_round',
+
+        'revision_round',
+
+        'accepted_at',
+
+        'rejected_at',
+
+        'published_at',
 
 
         /*
@@ -93,18 +128,52 @@ class Manuscript extends Model
         */
 
         'completion_percentage',
+
         'last_step',
+
         'draft_saved_at',
     ];
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Casts
+    |--------------------------------------------------------------------------
+    */
+
     protected $casts = [
 
+        /*
+        |--------------------------------------------------------------------------
+        | JSON
+        |--------------------------------------------------------------------------
+        */
+
         'keywords' => 'array',
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dates
+        |--------------------------------------------------------------------------
+        */
 
         'submitted_at' => 'datetime',
 
         'draft_saved_at' => 'datetime',
+
+        'accepted_at' => 'datetime',
+
+        'rejected_at' => 'datetime',
+
+        'published_at' => 'datetime',
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Integer Values
+        |--------------------------------------------------------------------------
+        */
 
         'completion_percentage' => 'integer',
 
@@ -118,7 +187,19 @@ class Manuscript extends Model
 
         'number_of_references' => 'integer',
 
+        'review_round' => 'integer',
+
+        'revision_round' => 'integer',
     ];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | SUBMISSION RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    */
 
 
     /*
@@ -315,20 +396,20 @@ class Manuscript extends Model
         );
     }
 
-     /*
+
+    /*
     |--------------------------------------------------------------------------
-    | Versions
+    | Manuscript Versions
     |--------------------------------------------------------------------------
     */
 
-        public function versions(): HasMany
-        {
-            return $this->hasMany(
-                ManuscriptVersion::class,
-                'manuscript_id'
-            );
-        }
-
+    public function versions(): HasMany
+    {
+        return $this->hasMany(
+            ManuscriptVersion::class,
+            'manuscript_id'
+        );
+    }
 
 
     /*
@@ -361,18 +442,11 @@ class Manuscript extends Model
     }
 
 
-
     /*
     |--------------------------------------------------------------------------
     | Technical Checks
     |--------------------------------------------------------------------------
     */
-
-    /*
-|--------------------------------------------------------------------------
-| Technical Checks
-|--------------------------------------------------------------------------
-*/
 
     public function technicalChecks(): HasMany
     {
@@ -382,6 +456,13 @@ class Manuscript extends Model
         );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Latest Technical Check
+    |--------------------------------------------------------------------------
+    */
+
     public function latestTechnicalCheck(): HasOne
     {
         return $this->hasOne(
@@ -389,7 +470,186 @@ class Manuscript extends Model
             'manuscript_id'
         )->latestOfMany('check_number');
     }
-        
+
+   /*
+    |--------------------------------------------------------------------------
+    | Similarity Check
+    |--------------------------------------------------------------------------
+    */
+
+    public function similarityChecks()
+    {
+        return $this->hasMany(SimilarityCheck::class);
+    }
+
+    public function latestSimilarityCheck()
+    {
+        return $this->hasOne(SimilarityCheck::class)->latestOfMany();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | EDITORIAL WORKFLOW RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Current Handling Editor
+    |--------------------------------------------------------------------------
+    |
+    | The current Handling Editor is also stored directly in manuscripts
+    | for fast dashboard/query access.
+    |
+    */
+
+    public function handlingEditor(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'handling_editor_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | All Editor Assignments
+    |--------------------------------------------------------------------------
+    |
+    | Complete assignment / reassignment history.
+    |
+    */
+
+    public function editorAssignments(): HasMany
+    {
+        return $this->hasMany(
+            EditorAssignment::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Current / Latest Editor Assignment
+    |--------------------------------------------------------------------------
+    */
+
+    public function currentEditorAssignment(): HasOne
+    {
+        return $this->hasOne(
+            EditorAssignment::class,
+            'manuscript_id'
+        )->latestOfMany();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Editorial Assessments
+    |--------------------------------------------------------------------------
+    */
+
+    public function editorialAssessments(): HasMany
+    {
+        return $this->hasMany(
+            EditorialAssessment::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Latest Editorial Assessment
+    |--------------------------------------------------------------------------
+    */
+
+    public function latestEditorialAssessment(): HasOne
+    {
+        return $this->hasOne(
+            EditorialAssessment::class,
+            'manuscript_id'
+        )->latestOfMany();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Handling Editor Recommendations
+    |--------------------------------------------------------------------------
+    */
+
+    public function editorRecommendations(): HasMany
+    {
+        return $this->hasMany(
+            EditorRecommendation::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Latest Handling Editor Recommendation
+    |--------------------------------------------------------------------------
+    */
+
+    public function latestRecommendation(): HasOne
+    {
+        return $this->hasOne(
+            EditorRecommendation::class,
+            'manuscript_id'
+        )->latestOfMany();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Editorial Decisions
+    |--------------------------------------------------------------------------
+    |
+    | Final decisions made by Editor-in-Chief.
+    |
+    */
+
+    public function editorialDecisions(): HasMany
+    {
+        return $this->hasMany(
+            EditorialDecision::class,
+            'manuscript_id'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Latest Editorial Decision
+    |--------------------------------------------------------------------------
+    */
+
+    public function latestEditorialDecision(): HasOne
+    {
+        return $this->hasOne(
+            EditorialDecision::class,
+            'manuscript_id'
+        )->latestOfMany();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | HELPER METHODS
+    |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    */
+
+
     /*
     |--------------------------------------------------------------------------
     | Draft Status
@@ -416,6 +676,80 @@ class Manuscript extends Model
 
     /*
     |--------------------------------------------------------------------------
+    | Accepted Status
+    |--------------------------------------------------------------------------
+    */
+
+    public function isAccepted(): bool
+    {
+        return $this->status === 'accepted';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rejected Status
+    |--------------------------------------------------------------------------
+    */
+
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Under Peer Review
+    |--------------------------------------------------------------------------
+    */
+
+    public function isUnderReview(): bool
+    {
+        return $this->status === 'under_review';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Has Handling Editor
+    |--------------------------------------------------------------------------
+    */
+
+    public function hasHandlingEditor(): bool
+    {
+        return !is_null(
+            $this->handling_editor_id
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Awaiting Editor Assignment
+    |--------------------------------------------------------------------------
+    */
+
+    public function isAwaitingEditorAssignment(): bool
+    {
+        return $this->status === 'editor_assignment';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Editorial Assessment
+    |--------------------------------------------------------------------------
+    */
+
+    public function isUnderEditorialAssessment(): bool
+    {
+        return $this->status === 'editorial_assessment';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Progress
     |--------------------------------------------------------------------------
     */
@@ -423,5 +757,14 @@ class Manuscript extends Model
     public function progress(): int
     {
         return $this->completion_percentage ?? 0;
+    }
+
+
+    public function reviewerInvitations()
+    {
+        return $this->hasMany(
+            ReviewerInvitation::class,
+            'manuscript_id'
+        );
     }
 }

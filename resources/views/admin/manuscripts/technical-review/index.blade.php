@@ -378,7 +378,7 @@
 
             <div class="card-footer bg-white">
 
-                {{ $technicalChecks->links() }}
+                {{ $technicalChecks->links('pagination::bootstrap-4') }}
 
             </div>
 

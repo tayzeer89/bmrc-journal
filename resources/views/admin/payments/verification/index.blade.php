@@ -434,7 +434,7 @@
 
                 <div class="d-flex justify-content-center">
 
-                    {{ $payments->links() }}
+                    {{ $payments->links('pagination::bootstrap-4') }}
 
                 </div>
 

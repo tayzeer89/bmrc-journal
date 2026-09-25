@@ -2704,6 +2704,29 @@
                         @endif
 
 
+                      {{-- Reviewer Directory --}}
+                        
+                        <li>
+
+                            <a
+                                class="dropdown-item"
+                                href="{{ route(
+                                    'journal.reviewers.directory'
+                                ) }}"
+                            >
+
+                                <i
+                                    class="bi
+                                           bi-box-arrow-in-right
+                                           me-2"
+                                ></i>
+
+                                Reviewer Directory
+
+                            </a>
+
+                        </li>
+
 
                         {{-- REVIEWER LOGIN --}}
 
@@ -2711,9 +2734,7 @@
 
                             <a
                                 class="dropdown-item"
-                                href="{{ route(
-                                    'reviewer.login'
-                                ) }}"
+                                href="{{ route('reviewer.login') }}"
                             >
 
                                 <i

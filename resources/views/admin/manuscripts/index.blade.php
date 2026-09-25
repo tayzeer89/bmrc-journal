@@ -1643,7 +1643,7 @@
 
         <div class="card-footer">
 
-            {{ $manuscripts->links() }}
+            {{ $manuscripts->links('pagination::bootstrap-4') }}
 
         </div>
 

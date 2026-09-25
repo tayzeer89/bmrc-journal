@@ -115,7 +115,7 @@
 
             <div class="mt-3">
 
-                {{ $reviewers->links() }}
+                {{ $reviewers->links('pagination::bootstrap-4') }}
 
             </div>
 

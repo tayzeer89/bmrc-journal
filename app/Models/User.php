@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\EditorAssignment;
 
 class User extends Authenticatable
 {
@@ -102,4 +103,14 @@ class User extends Authenticatable
         ])
         ->withTimestamps();
     }
+
+
+    public function editorAssignments()
+    {
+        return $this->hasMany(
+            EditorAssignment::class,
+            'editor_id'
+        );
+    }
+
 }

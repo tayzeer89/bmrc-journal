@@ -335,7 +335,7 @@
 
             <div class="card-footer">
 
-                {{ $requests->links() }}
+                {{ $requests->links('pagination::bootstrap-4') }}
 
             </div>
 

@@ -296,9 +296,12 @@ class ReviewerProfile extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(
-            Reviewer::class
+            Reviewer::class,
+            'reviewer_id'
         );
     }
+
+
 
     public function approvedBy(): BelongsTo
     {

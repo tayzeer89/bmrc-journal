@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 
 
 class Reviewer extends Authenticatable implements CanResetPasswordContract
@@ -78,18 +79,24 @@ class Reviewer extends Authenticatable implements CanResetPasswordContract
     ];
 
 
+
     /*
     |--------------------------------------------------------------------------
-    | Relationships
+    | Reviewer Profile
     |--------------------------------------------------------------------------
     */
-
-    public function profile(): HasOne
+      public function profile(): HasOne
     {
         return $this->hasOne(
-            ReviewerProfile::class
+            ReviewerProfile::class,
+            'reviewer_id'
         );
     }
+
+
+
+
+
 
 
     public function creator(): BelongsTo
@@ -231,5 +238,38 @@ class Reviewer extends Authenticatable implements CanResetPasswordContract
             && $this->hasCompletedProfile()
             && (bool) $this->profile?->available_for_review
             && (bool) $this->profile?->receive_review_invitations;
+    }
+
+
+
+
+    public function scopeEligibleForReview(Builder $query): Builder
+    {
+        return $query
+            ->where('status', 'approved')
+            ->whereHas('profile', function (Builder $q) {
+
+                $q->where('profile_completed', true)
+                    ->where('approval_status', 'approved')
+                    ->where('available_for_review', true)
+                    ->where('receive_review_invitations', true)
+
+                    ->where(function (Builder $availability) {
+
+                        $availability
+                            ->whereNull('unavailable_from')
+                            ->orWhereNull('unavailable_until')
+                            ->orWhereDate(
+                                'unavailable_from',
+                                '>',
+                                now()->toDateString()
+                            )
+                            ->orWhereDate(
+                                'unavailable_until',
+                                '<',
+                                now()->toDateString()
+                            );
+                    });
+            });
     }
 }

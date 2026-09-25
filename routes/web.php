@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InternalDashboardController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ReviewerDirectoryController;
 
 
 /*
@@ -31,12 +32,26 @@ use App\Http\Controllers\Admin\ReviewerController;
 use App\Http\Controllers\Admin\ReviewerRequestController;
 use App\Http\Controllers\Admin\ReviewerInvitationController;
 use App\Http\Controllers\Admin\ReviewerAssignmentController;
+use App\Http\Controllers\Admin\SimilarityCheckController;
 
 use App\Http\Controllers\ArticleTypeController;
 use App\Http\Controllers\Admin\JournalPageController;
 
 use App\Http\Controllers\Website\JournalPageController
     as PublicJournalPageController;
+
+use App\Http\Controllers\EditorInChief\EditorAssignmentController;
+use App\Http\Controllers\HandlingEditor\AssignmentController;
+use App\Http\Controllers\HandlingEditor\ReviewerSelectionController;
+use App\Http\Controllers\HandlingEditor\EditorialAssessmentController;
+
+
+
+
+
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Center Dashboard Controllers
@@ -164,6 +179,44 @@ Route::get(
 
     }
 )->name('journal.archive');
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Public Reviewer Directory
+|--------------------------------------------------------------------------
+*/
+
+
+Route::prefix('journal')
+    ->name('journal.')
+    ->group(function () {
+
+        // Reviewer Directory
+        Route::get(
+            '/reviewers',
+            [ReviewerDirectoryController::class, 'index']
+        )->name('reviewers.directory');
+
+
+        // PDF MUST be before {reviewer}
+        Route::get(
+            '/reviewers/pdf',
+            [ReviewerDirectoryController::class, 'pdf']
+        )->name('reviewers.pdf');
+
+
+        // Keep this LAST
+        Route::get(
+            '/reviewers/{reviewer}',
+            [ReviewerDirectoryController::class, 'show']
+        )
+        ->whereNumber('reviewer')
+        ->name('reviewers.show');
+
+    });
 
 
 
@@ -2127,6 +2180,35 @@ Route::middleware('auth')
             ->name(
                 'manuscripts.show'
             );
+
+        
+Route::prefix('similarity-checks')
+    ->name('similarity-checks.')
+    ->group(function () {
+
+        Route::get(
+            '/',
+            [SimilarityCheckController::class, 'index']
+        )->name('index');
+
+        Route::get(
+            '/{manuscript}',
+            [SimilarityCheckController::class, 'show']
+        )->name('show');
+
+        Route::get(
+            '/{manuscript}/create',
+            [SimilarityCheckController::class, 'create']
+        )->name('create');
+
+        Route::post(
+            '/{manuscript}',
+            [SimilarityCheckController::class, 'store']
+        )->name('store');
+    });
+
+
+
     });
 
 
@@ -2383,3 +2465,359 @@ Route::prefix('editor')
 |
 |--------------------------------------------------------------------------
 */
+
+/*
+|--------------------------------------------------------------------------
+| Editor-in-Chief
+|--------------------------------------------------------------------------
+*/
+Route::middleware([
+    'auth',
+    'role:editor_in_chief|system_administrator'
+])
+->prefix('editor-in-chief')
+->name('eic.')
+->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Editor Assignment Queue
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/editor-assignment',
+        [EditorAssignmentController::class, 'index']
+    )->name('editor-assignment.index');
+
+    Route::get(
+        '/editor-assignment/{manuscript}',
+        [EditorAssignmentController::class, 'show']
+    )
+    ->whereNumber('manuscript')
+    ->name('editor-assignment.show');
+
+    Route::post(
+        '/editor-assignment/{manuscript}',
+        [EditorAssignmentController::class, 'store']
+    )
+    ->whereNumber('manuscript')
+    ->name('editor-assignment.store');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Assignment Tracking
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/assignment-tracking',
+        [EditorAssignmentController::class, 'tracking']
+    )->name('editor-assignment.tracking');
+
+    Route::get(
+        '/assignment-tracking/{assignment}',
+        [EditorAssignmentController::class, 'trackingShow']
+    )
+    ->whereNumber('assignment')
+    ->name('editor-assignment.tracking.show');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Handling Editor
+|--------------------------------------------------------------------------
+|
+| Accessible by:
+| 1. Handling Editor
+| 2. System Administrator
+|
+*/
+Route::middleware([
+    'auth',
+    'role:handling_editor|system_administrator'
+])
+->prefix('handling-editor')
+->name('handling-editor.')
+->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | 1. Handling Editor Assignments
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/assignments',
+        [AssignmentController::class, 'index']
+    )->name('assignments.index');
+
+
+    Route::get(
+        '/assignments/{assignment}',
+        [AssignmentController::class, 'show']
+    )
+    ->whereNumber('assignment')
+    ->name('assignments.show');
+
+
+    Route::post(
+        '/assignments/{assignment}/accept',
+        [AssignmentController::class, 'accept']
+    )
+    ->whereNumber('assignment')
+    ->name('assignments.accept');
+
+
+    Route::post(
+        '/assignments/{assignment}/decline',
+        [AssignmentController::class, 'decline']
+    )
+    ->whereNumber('assignment')
+    ->name('assignments.decline');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 2. Editorial Assessment
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/assessment',
+        [EditorialAssessmentController::class, 'index']
+    )->name('assessment.index');
+
+
+    Route::get(
+        '/assessment/{manuscript}',
+        [EditorialAssessmentController::class, 'show']
+    )
+    ->whereNumber('manuscript')
+    ->name('assessment.show');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Later we will add:
+    |
+    | POST /assessment/{manuscript}
+    | for saving/completing the assessment.
+    |--------------------------------------------------------------------------
+    */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 3. Reviewer Selection
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/reviewer-selection',
+        [ReviewerSelectionController::class, 'index']
+    )->name('reviewer-selection.index');
+
+
+    Route::get(
+        '/reviewer-selection/{manuscript}',
+        [ReviewerSelectionController::class, 'show']
+    )
+    ->whereNumber('manuscript')
+    ->name('reviewer-selection.show');
+
+
+    Route::post(
+        '/reviewer-selection/{manuscript}/invite',
+        [ReviewerSelectionController::class, 'invite']
+    )
+    ->whereNumber('manuscript')
+    ->name('reviewer-selection.invite');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 4. Reviewer Invitations
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/reviewer-invitations',
+        [ReviewerInvitationController::class, 'index']
+    )->name('reviewer-invitations.index');
+
+
+    Route::get(
+        '/reviewer-invitations/{manuscript}',
+        [ReviewerInvitationController::class, 'show']
+    )
+    ->whereNumber('manuscript')
+    ->name('reviewer-invitations.show');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 5. Assigned Reviewers
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/assigned-reviewers',
+        [ReviewerAssignmentController::class, 'index']
+    )->name('assigned-reviewers.index');
+
+
+    Route::get(
+        '/assigned-reviewers/{manuscript}',
+        [ReviewerAssignmentController::class, 'show']
+    )
+    ->whereNumber('manuscript')
+    ->name('assigned-reviewers.show');
+
+    Route::post(
+    '/assessment/{manuscript}',
+    [EditorialAssessmentController::class, 'store']
+    )
+    ->whereNumber('manuscript')
+    ->name('assessment.store');
+
+});
+
+
+Route::middleware([
+    'auth',
+    'role:system_administrator|editorial_officer|editor_in_chief'
+])
+->prefix('admin/reviewers/invitations')
+->name('admin.reviewers.invitations.')
+->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | All Invitations
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/',
+        [ReviewerInvitationController::class, 'index']
+    )->name('index');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create Invitation
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/create',
+        [ReviewerInvitationController::class, 'create']
+    )->name('create');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store Invitation
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/',
+        [ReviewerInvitationController::class, 'store']
+    )->name('store');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Status Lists
+    |--------------------------------------------------------------------------
+    |
+    | These MUST be before /{reviewerInvitation}
+    |
+    */
+
+    Route::get(
+        '/pending',
+        [ReviewerInvitationController::class, 'pending']
+    )->name('pending');
+
+    Route::get(
+        '/accepted',
+        [ReviewerInvitationController::class, 'accepted']
+    )->name('accepted');
+
+    Route::get(
+        '/declined',
+        [ReviewerInvitationController::class, 'declined']
+    )->name('declined');
+
+    Route::get(
+        '/expired',
+        [ReviewerInvitationController::class, 'expired']
+    )->name('expired');
+
+    Route::get(
+        '/cancelled',
+        [ReviewerInvitationController::class, 'cancelled']
+    )->name('cancelled');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Show Invitation
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/{reviewerInvitation}',
+        [ReviewerInvitationController::class, 'show']
+    )
+    ->whereNumber('reviewerInvitation')
+    ->name('show');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Send Reminder
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/{reviewerInvitation}/remind',
+        [ReviewerInvitationController::class, 'remind']
+    )
+    ->whereNumber('reviewerInvitation')
+    ->name('remind');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cancel Invitation
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/{reviewerInvitation}/cancel',
+        [ReviewerInvitationController::class, 'cancel']
+    )
+    ->whereNumber('reviewerInvitation')
+    ->name('cancel');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mark Expired
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/{reviewerInvitation}/expire',
+        [ReviewerInvitationController::class, 'expire']
+    )
+    ->whereNumber('reviewerInvitation')
+    ->name('expire');
+
+});

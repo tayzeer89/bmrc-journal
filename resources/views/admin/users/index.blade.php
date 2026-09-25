@@ -290,7 +290,7 @@
 
             <div class="card-footer bg-white">
 
-                {{ $users->links() }}
+                {{ $users->links('pagination::bootstrap-4') }}
 
             </div>
 
