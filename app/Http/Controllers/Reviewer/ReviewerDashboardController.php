@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reviewer;
 
 use App\Http\Controllers\Controller;
+use App\Models\ReviewerInvitation;
 use Illuminate\Support\Facades\Auth;
 
 class ReviewerDashboardController extends Controller
@@ -36,14 +37,6 @@ class ReviewerDashboardController extends Controller
         |--------------------------------------------------------------------------
         | Load Reviewer Profile
         |--------------------------------------------------------------------------
-        |
-        | Reviewer model already contains:
-        |
-        | public function profile()
-        | {
-        |     return $this->hasOne(ReviewerProfile::class);
-        | }
-        |
         */
 
         $reviewer->load('profile');
@@ -54,10 +47,6 @@ class ReviewerDashboardController extends Controller
         /*
         |--------------------------------------------------------------------------
         | Profile Missing
-        |--------------------------------------------------------------------------
-        |
-        | Normally registration creates the profile automatically.
-        | This is only a safety/fallback condition.
         |--------------------------------------------------------------------------
         */
 
@@ -75,9 +64,6 @@ class ReviewerDashboardController extends Controller
         /*
         |--------------------------------------------------------------------------
         | Suspended Reviewer
-        |--------------------------------------------------------------------------
-        |
-        | Suspended reviewers should not access the reviewer portal.
         |--------------------------------------------------------------------------
         */
 
@@ -108,10 +94,6 @@ class ReviewerDashboardController extends Controller
         |--------------------------------------------------------------------------
         | Forced Password Change
         |--------------------------------------------------------------------------
-        |
-        | This applies primarily to reviewers created by
-        | Editorial Office using a temporary password.
-        |--------------------------------------------------------------------------
         */
 
         if ($reviewer->mustChangePassword()) {
@@ -125,24 +107,73 @@ class ReviewerDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | IMPORTANT
+        | Automatically Expire Old Review Invitations
         |--------------------------------------------------------------------------
         |
-        | DO NOT redirect incomplete / pending / rejected reviewers away
-        | from this dashboard.
+        | This keeps the dashboard synchronized with the invitation module.
         |
-        | All authenticated non-suspended reviewers may see their dashboard.
+        */
+
+        ReviewerInvitation::query()
+            ->where(
+                'reviewer_id',
+                $reviewer->id
+            )
+            ->where(
+                'status',
+                'pending'
+            )
+            ->whereNotNull(
+                'expires_at'
+            )
+            ->where(
+                'expires_at',
+                '<',
+                now()
+            )
+            ->update([
+                'status' => 'expired',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pending Review Invitations
+        |--------------------------------------------------------------------------
         |
-        | The dashboard UI decides which actions are available according to:
+        | These invitations will be displayed as notifications
+        | on the reviewer dashboard.
         |
-        | draft
-        | pending_approval
-        | update_requested
-        | approved
-        | rejected
-        |
+        */
+
+        $pendingInvitations = ReviewerInvitation::query()
+            ->with([
+                'manuscript.journal',
+                'manuscript.articleType',
+                'inviter',
+            ])
+            ->where(
+                'reviewer_id',
+                $reviewer->id
+            )
+            ->where(
+                'status',
+                'pending'
+            )
+            ->orderByDesc(
+                'invited_at'
+            )
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pending Invitation Count
         |--------------------------------------------------------------------------
         */
+
+        $pendingInvitationCount =
+            $pendingInvitations->count();
 
 
         /*
@@ -155,7 +186,9 @@ class ReviewerDashboardController extends Controller
             'reviewer.dashboard',
             compact(
                 'reviewer',
-                'profile'
+                'profile',
+                'pendingInvitations',
+                'pendingInvitationCount'
             )
         );
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reviewer;
 
 use App\Http\Controllers\Controller;
+use App\Models\PeerReview;
 use Illuminate\Support\Facades\Auth;
 
 class ReviewerReviewController extends Controller
@@ -11,13 +12,23 @@ class ReviewerReviewController extends Controller
     |--------------------------------------------------------------------------
     | Active Reviews
     |--------------------------------------------------------------------------
+    |
+    | Shows reviews that the logged-in reviewer has started but has not yet
+    | finally submitted.
+    |
     */
 
     public function active()
     {
-        $reviewer =
-            Auth::guard('reviewer')
-                ->user();
+        /*
+        |--------------------------------------------------------------------------
+        | Authenticated Reviewer
+        |--------------------------------------------------------------------------
+        */
+
+        $reviewer = Auth::guard('reviewer')
+            ->user();
+
 
         if (!$reviewer) {
 
@@ -27,13 +38,49 @@ class ReviewerReviewController extends Controller
                 );
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Connect assignment model here later.
+        | Active Peer Reviews
         |--------------------------------------------------------------------------
+        |
+        | draft
+        | in_progress
+        |
         */
 
-        $reviews = collect();
+        $reviews = PeerReview::query()
+
+            ->with([
+                'invitation.manuscript.articleType',
+                'invitation.manuscript.journal',
+            ])
+
+            ->where(
+                'reviewer_id',
+                $reviewer->id
+            )
+
+            ->whereIn(
+                'status',
+                [
+                    'draft',
+                    'in_progress',
+                ]
+            )
+
+            ->orderByDesc(
+                'updated_at'
+            )
+
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return Active Reviews
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'reviewer.reviews.active',
@@ -49,13 +96,22 @@ class ReviewerReviewController extends Controller
     |--------------------------------------------------------------------------
     | Completed Reviews
     |--------------------------------------------------------------------------
+    |
+    | Shows peer reviews that have been finally submitted.
+    |
     */
 
     public function completed()
     {
-        $reviewer =
-            Auth::guard('reviewer')
-                ->user();
+        /*
+        |--------------------------------------------------------------------------
+        | Authenticated Reviewer
+        |--------------------------------------------------------------------------
+        */
+
+        $reviewer = Auth::guard('reviewer')
+            ->user();
+
 
         if (!$reviewer) {
 
@@ -65,8 +121,42 @@ class ReviewerReviewController extends Controller
                 );
         }
 
-        $reviews =
-            collect();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submitted Peer Reviews
+        |--------------------------------------------------------------------------
+        */
+
+        $reviews = PeerReview::query()
+
+            ->with([
+                'invitation.manuscript.articleType',
+                'invitation.manuscript.journal',
+            ])
+
+            ->where(
+                'reviewer_id',
+                $reviewer->id
+            )
+
+            ->where(
+                'status',
+                'submitted'
+            )
+
+            ->orderByDesc(
+                'submitted_at'
+            )
+
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return Completed Reviews
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'reviewer.reviews.completed',
@@ -82,13 +172,26 @@ class ReviewerReviewController extends Controller
     |--------------------------------------------------------------------------
     | Review History
     |--------------------------------------------------------------------------
+    |
+    | Shows the complete review history of the logged-in reviewer:
+    |
+    | - Draft
+    | - In Progress
+    | - Submitted
+    |
     */
 
     public function history()
     {
-        $reviewer =
-            Auth::guard('reviewer')
-                ->user();
+        /*
+        |--------------------------------------------------------------------------
+        | Authenticated Reviewer
+        |--------------------------------------------------------------------------
+        */
+
+        $reviewer = Auth::guard('reviewer')
+            ->user();
+
 
         if (!$reviewer) {
 
@@ -98,8 +201,37 @@ class ReviewerReviewController extends Controller
                 );
         }
 
-        $reviews =
-            collect();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Complete Peer Review History
+        |--------------------------------------------------------------------------
+        */
+
+        $reviews = PeerReview::query()
+
+            ->with([
+                'invitation.manuscript.articleType',
+                'invitation.manuscript.journal',
+            ])
+
+            ->where(
+                'reviewer_id',
+                $reviewer->id
+            )
+
+            ->orderByDesc(
+                'updated_at'
+            )
+
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return Review History
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'reviewer.reviews.history',

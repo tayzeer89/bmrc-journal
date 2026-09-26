@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'libreoffice' => [
+    'path' => env(
+        'LIBREOFFICE_PATH',
+        'C:/Program Files/LibreOffice/program/soffice.exe'
+         ),
+    ],
+
+
 ];

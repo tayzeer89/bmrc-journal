@@ -62,6 +62,121 @@
 
             </div>
 
+  @endif
+
+
+        {{-- =====================================================
+            REVIEW INVITATION NOTIFICATION
+        ====================================================== --}}
+
+        @if(isset($pendingInvitations) && $pendingInvitations->count() > 0)
+
+            <div class="card dashboard-card mb-4 border-warning">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex
+                                align-items-center
+                                justify-content-between
+                                flex-wrap
+                                gap-3">
+
+                        {{-- Notification Icon + Message --}}
+                        <div class="d-flex align-items-center">
+
+                            <div
+                                class="d-flex
+                                       align-items-center
+                                       justify-content-center
+                                       rounded-circle
+                                       bg-warning
+                                       bg-opacity-25
+                                       me-3"
+                                style="width:58px; height:58px;"
+                            >
+
+                                <i
+                                    class="bi bi-envelope-exclamation
+                                           text-warning"
+                                    style="font-size:27px;"
+                                ></i>
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="d-flex
+                                            align-items-center
+                                            gap-2
+                                            mb-1">
+
+                                    <h5 class="mb-0">
+
+                                        New Review
+                                        {{ $pendingInvitations->count() > 1
+                                            ? 'Invitations'
+                                            : 'Invitation' }}
+
+                                    </h5>
+
+
+                                    <span class="badge bg-danger">
+
+                                        {{ $pendingInvitations->count() }}
+
+                                    </span>
+
+                                </div>
+
+
+                                <div class="text-muted">
+
+                                    You have
+
+                                    <strong class="text-dark">
+                                        {{ $pendingInvitations->count() }}
+                                    </strong>
+
+                                    pending manuscript review
+                                    {{ $pendingInvitations->count() > 1
+                                        ? 'invitations'
+                                        : 'invitation' }}.
+
+                                    Please review and respond.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- View Button --}}
+                        <div>
+
+                            <a
+                                href="{{ route('reviewer.invitations.index') }}"
+                                class="btn btn-warning"
+                            >
+
+                                <i class="bi bi-envelope-open me-1"></i>
+
+                                View
+                                {{ $pendingInvitations->count() > 1
+                                    ? 'Invitations'
+                                    : 'Invitation' }}
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         @endif
 
 

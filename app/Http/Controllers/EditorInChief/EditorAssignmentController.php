@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\EditorAssignment;
 use App\Models\Manuscript;
 use App\Models\User;
+use App\Notifications\HandlingEditorInvitationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EditorAssignmentController extends Controller
 {
@@ -15,17 +17,6 @@ class EditorAssignmentController extends Controller
     |--------------------------------------------------------------------------
     | Editor Assignment Queue
     |--------------------------------------------------------------------------
-    |
-    | Shows manuscripts that have completed:
-    |
-    | Technical Check
-    |      ↓
-    | Payment Verification
-    |      ↓
-    | Similarity Check
-    |      ↓
-    | Editor Assignment Queue
-    |
     */
 
     public function index()
@@ -57,16 +48,6 @@ class EditorAssignmentController extends Controller
     |--------------------------------------------------------------------------
     | Show Manuscript for Editor Assignment
     |--------------------------------------------------------------------------
-    |
-    | Editor-in-Chief / System Administrator can review:
-    |
-    | - Manuscript information
-    | - Technical check
-    | - Payment verification
-    | - Similarity check
-    | - Previous editor assignments
-    | - Available Handling Editors
-    |
     */
 
     public function show(Manuscript $manuscript)
@@ -85,7 +66,7 @@ class EditorAssignmentController extends Controller
                 )
                 ->withErrors([
                     'manuscript' =>
-                        'This manuscript is not currently awaiting Handling Editor assignment.'
+                        'This manuscript is not currently awaiting Handling Editor assignment.',
                 ]);
         }
 
@@ -98,12 +79,6 @@ class EditorAssignmentController extends Controller
 
         $manuscript->load([
 
-            /*
-            |--------------------------------------------------------------------------
-            | Basic Manuscript Information
-            |--------------------------------------------------------------------------
-            */
-
             'submitter',
 
             'journal',
@@ -114,34 +89,13 @@ class EditorAssignmentController extends Controller
 
             'files',
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Previous Workflow Information
-            |--------------------------------------------------------------------------
-            */
-
             'latestTechnicalCheck',
 
             'latestPayment',
 
             'latestSimilarityCheck',
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Current Handling Editor
-            |--------------------------------------------------------------------------
-            */
-
             'handlingEditor',
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Assignment History
-            |--------------------------------------------------------------------------
-            */
 
             'editorAssignments' => function ($query) {
 
@@ -160,9 +114,6 @@ class EditorAssignmentController extends Controller
         |--------------------------------------------------------------------------
         | Available Handling Editors
         |--------------------------------------------------------------------------
-        |
-        | Only users having handling_editor role are shown.
-        |
         */
 
         $editors = User::role(
@@ -176,20 +127,14 @@ class EditorAssignmentController extends Controller
         |--------------------------------------------------------------------------
         | Calculate Handling Editor Workload
         |--------------------------------------------------------------------------
-        |
-        | We calculate the number of active assignments for every Handling
-        | Editor.
-        |
-        | Active:
-        | pending
-        | accepted
-        |
         */
 
         $editorWorkloads = EditorAssignment::query()
             ->select(
                 'editor_id',
-                DB::raw('COUNT(*) as active_assignments')
+                DB::raw(
+                    'COUNT(*) as active_assignments'
+                )
             )
             ->whereIn(
                 'status',
@@ -207,7 +152,7 @@ class EditorAssignmentController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Attach Workload to Editor Objects
+        | Attach Workload
         |--------------------------------------------------------------------------
         */
 
@@ -279,7 +224,7 @@ class EditorAssignmentController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Find Selected Editor
+        | Find Selected Handling Editor
         |--------------------------------------------------------------------------
         */
 
@@ -294,19 +239,13 @@ class EditorAssignmentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            !$editor->hasRole(
-                'handling_editor'
-            )
-        ) {
+        if (!$editor->hasRole('handling_editor')) {
 
             return back()
                 ->withInput()
                 ->withErrors([
-
                     'editor_id' =>
-                        'Selected user is not a Handling Editor.'
-
+                        'Selected user is not a Handling Editor.',
                 ]);
         }
 
@@ -315,12 +254,9 @@ class EditorAssignmentController extends Controller
         |--------------------------------------------------------------------------
         | Database Transaction
         |--------------------------------------------------------------------------
-        |
-        | Everything below will succeed together or fail together.
-        |
         */
 
-        DB::transaction(
+        $assignment = DB::transaction(
             function () use (
                 $validated,
                 $manuscript
@@ -330,10 +266,6 @@ class EditorAssignmentController extends Controller
                 |--------------------------------------------------------------------------
                 | Lock Manuscript
                 |--------------------------------------------------------------------------
-                |
-                | Prevent two EIC/Admin users assigning two editors to the
-                | same manuscript simultaneously.
-                |
                 */
 
                 $lockedManuscript =
@@ -368,21 +300,16 @@ class EditorAssignmentController extends Controller
                 |--------------------------------------------------------------------------
                 | Check Existing Active Assignment
                 |--------------------------------------------------------------------------
-                |
-                | There must not already be:
-                |
-                | pending assignment
-                | OR
-                | accepted assignment
-                |
                 */
 
                 $activeAssignment =
                     EditorAssignment::query()
+
                         ->where(
                             'manuscript_id',
                             $lockedManuscript->id
                         )
+
                         ->whereIn(
                             'status',
                             [
@@ -390,13 +317,15 @@ class EditorAssignmentController extends Controller
                                 'accepted',
                             ]
                         )
+
                         ->lockForUpdate()
+
                         ->first();
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Stop Duplicate Assignment
+                | Prevent Duplicate Assignment
                 |--------------------------------------------------------------------------
                 */
 
@@ -413,19 +342,16 @@ class EditorAssignmentController extends Controller
                 |--------------------------------------------------------------------------
                 | Determine Assignment Round
                 |--------------------------------------------------------------------------
-                |
-                | First assignment  = 1
-                | Reassignment      = 2
-                | Next reassignment = 3
-                |
                 */
 
                 $lastRound =
                     EditorAssignment::query()
+
                         ->where(
                             'manuscript_id',
                             $lockedManuscript->id
                         )
+
                         ->max(
                             'assignment_round'
                         );
@@ -441,51 +367,52 @@ class EditorAssignmentController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                EditorAssignment::create([
+                $assignment =
+                    EditorAssignment::create([
 
-                    'manuscript_id' =>
-                        $lockedManuscript->id,
+                        'manuscript_id' =>
+                            $lockedManuscript->id,
 
-                    'editor_id' =>
-                        $validated['editor_id'],
+                        'editor_id' =>
+                            $validated['editor_id'],
 
-                    'assigned_by' =>
-                        auth()->id(),
+                        'assigned_by' =>
+                            auth()->id(),
 
-                    'assignment_round' =>
-                        $assignmentRound,
+                        'assignment_round' =>
+                            $assignmentRound,
 
-                    'status' =>
-                        'pending',
+                        'status' =>
+                            'pending',
 
-                    'assignment_note' =>
-                        $validated[
-                            'assignment_note'
-                        ] ?? null,
+                        'assignment_note' =>
+                            $validated[
+                                'assignment_note'
+                            ] ?? null,
 
-                    'due_date' =>
-                        $validated[
-                            'due_date'
-                        ] ?? null,
+                        'due_date' =>
+                            $validated[
+                                'due_date'
+                            ] ?? null,
 
-                    'assigned_at' =>
-                        now(),
+                        'assigned_at' =>
+                            now(),
 
-                    'accepted_at' =>
-                        null,
+                        'accepted_at' =>
+                            null,
 
-                    'declined_at' =>
-                        null,
+                        'declined_at' =>
+                            null,
 
-                    'completed_at' =>
-                        null,
+                        'completed_at' =>
+                            null,
 
-                    'cancelled_at' =>
-                        null,
+                        'cancelled_at' =>
+                            null,
 
-                    'decline_reason' =>
-                        null,
-                ]);
+                        'decline_reason' =>
+                            null,
+                    ]);
 
 
                 /*
@@ -493,16 +420,8 @@ class EditorAssignmentController extends Controller
                 | Update Manuscript Workflow
                 |--------------------------------------------------------------------------
                 |
-                | IMPORTANT:
-                |
-                | The editor has been assigned, but the editor has NOT yet
-                | accepted the assignment.
-                |
-                | Therefore we DO NOT change the manuscript directly to:
-                |
-                | editorial_assessment
-                |
-                | It first waits for Handling Editor acceptance.
+                | The Handling Editor is assigned but has
+                | not accepted the invitation yet.
                 |
                 */
 
@@ -517,13 +436,99 @@ class EditorAssignmentController extends Controller
                     'current_stage' =>
                         'handling_editor_assignment',
                 ]);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Return Created Assignment
+                |--------------------------------------------------------------------------
+                */
+
+                return $assignment;
             }
         );
 
 
         /*
         |--------------------------------------------------------------------------
-        | Success Response
+        | Send Handling Editor Invitation Email
+        |--------------------------------------------------------------------------
+        |
+        | IMPORTANT:
+        | Email is sent AFTER the database transaction.
+        |
+        | Therefore SMTP failure will NOT delete or rollback
+        | the Handling Editor assignment.
+        |
+        */
+
+        $emailSent = true;
+
+        try {
+
+            $editor->notify(
+                new HandlingEditorInvitationNotification(
+                    $assignment
+                )
+            );
+
+        } catch (\Throwable $e) {
+
+            $emailSent = false;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Log Email Failure
+            |--------------------------------------------------------------------------
+            */
+
+            Log::error(
+                'Handling Editor invitation email failed.',
+                [
+                    'assignment_id' =>
+                        $assignment->id,
+
+                    'manuscript_id' =>
+                        $manuscript->id,
+
+                    'editor_id' =>
+                        $editor->id,
+
+                    'editor_email' =>
+                        $editor->email,
+
+                    'error' =>
+                        $e->getMessage(),
+                ]
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Success - Assignment + Email
+        |--------------------------------------------------------------------------
+        */
+
+        if ($emailSent) {
+
+            return redirect()
+                ->route(
+                    'eic.editor-assignment.index'
+                )
+                ->with(
+                    'success',
+                    'Handling Editor assigned successfully. Invitation email sent to ' .
+                    $editor->email .
+                    '. The assignment is awaiting the Handling Editor\'s response.'
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Assignment Successful but Email Failed
         |--------------------------------------------------------------------------
         */
 
@@ -532,139 +537,170 @@ class EditorAssignmentController extends Controller
                 'eic.editor-assignment.index'
             )
             ->with(
-                'success',
-                'Handling Editor assigned successfully. The assignment is now awaiting the Handling Editor\'s response.'
+                'warning',
+                'Handling Editor assigned successfully, but the invitation email could not be sent. Please check the mail configuration and Laravel log.'
             );
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Assignment Tracking
+    |--------------------------------------------------------------------------
+    */
 
-        public function tracking(Request $request)
-        {
-            $query = EditorAssignment::query()
-                ->with([
-                    'manuscript.journal',
-                    'manuscript.articleType',
-                    'editor',
-                    'assignedBy',
-                ])
-                ->latest('assigned_at');
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Search
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->filled('search')) {
-
-                $search = $request->search;
-
-                $query->whereHas('manuscript', function ($q) use ($search) {
-
-                    $q->where('manuscript_id', 'like', "%{$search}%")
-                        ->orWhere('title', 'like', "%{$search}%");
-
-                });
-
-            }
+    public function tracking(Request $request)
+    {
+        $query = EditorAssignment::query()
+            ->with([
+                'manuscript.journal',
+                'manuscript.articleType',
+                'editor',
+                'assignedBy',
+            ])
+            ->latest('assigned_at');
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Handling Editor Filter
-            |--------------------------------------------------------------------------
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
 
-            if ($request->filled('editor_id')) {
+        if ($request->filled('search')) {
 
-                $query->where(
-                    'editor_id',
-                    $request->editor_id
-                );
+            $search = $request->search;
 
-            }
+            $query->whereHas(
+                'manuscript',
+                function ($q) use ($search) {
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Assignment Status Filter
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->filled('status')) {
-
-                $query->where(
-                    'status',
-                    $request->status
-                );
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Get Assignments
-            |--------------------------------------------------------------------------
-            */
-
-            $assignments = $query
-                ->paginate(20)
-                ->withQueryString();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Handling Editors
-            |--------------------------------------------------------------------------
-            */
-
-            $editors = User::role('handling_editor')
-                ->orderBy('name')
-                ->get();
-
-
-            return view(
-                'editor-in-chief.editor-assignment.tracking',
-                compact(
-                    'assignments',
-                    'editors'
-                )
+                    $q->where(
+                        'manuscript_id',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhere(
+                        'title',
+                        'like',
+                        "%{$search}%"
+                    );
+                }
             );
         }
 
-        public function trackingShow(EditorAssignment $assignment)
-            {
-                $assignment->load([
-                    'manuscript.journal',
-                    'manuscript.articleType',
-                    'manuscript.authors',
-                    'manuscript.files',
 
-                    'editor',
-                    'assignedBy',
+        /*
+        |--------------------------------------------------------------------------
+        | Handling Editor Filter
+        |--------------------------------------------------------------------------
+        */
 
-                    'manuscript.latestTechnicalCheck',
-                    'manuscript.latestPayment',
-                    'manuscript.latestSimilarityCheck',
+        if ($request->filled('editor_id')) {
 
-                    'manuscript.editorAssignments.editor',
-                    'manuscript.editorAssignments.assignedBy',
-
-                    'manuscript.latestEditorialAssessment',
-                    'manuscript.latestRecommendation',
-                    'manuscript.latestEditorialDecision',
-                ]);
-
-                return view(
-                    'editor-in-chief.editor-assignment.tracking-show',
-                    compact('assignment')
-                );
-            }
+            $query->where(
+                'editor_id',
+                $request->editor_id
+            );
+        }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Assignment Status Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('status')) {
+
+            $query->where(
+                'status',
+                $request->status
+            );
+        }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Get Assignments
+        |--------------------------------------------------------------------------
+        */
 
+        $assignments = $query
+            ->paginate(20)
+            ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Handling Editors
+        |--------------------------------------------------------------------------
+        */
+
+        $editors = User::role(
+                'handling_editor'
+            )
+            ->orderBy('name')
+            ->get();
+
+
+        return view(
+            'editor-in-chief.editor-assignment.tracking',
+            compact(
+                'assignments',
+                'editors'
+            )
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Assignment Tracking Details
+    |--------------------------------------------------------------------------
+    */
+
+    public function trackingShow(
+        EditorAssignment $assignment
+    ) {
+
+        $assignment->load([
+
+            'manuscript.journal',
+
+            'manuscript.articleType',
+
+            'manuscript.authors',
+
+            'manuscript.files',
+
+            'editor',
+
+            'assignedBy',
+
+            'manuscript.latestTechnicalCheck',
+
+            'manuscript.latestPayment',
+
+            'manuscript.latestSimilarityCheck',
+
+            'manuscript.editorAssignments.editor',
+
+            'manuscript.editorAssignments.assignedBy',
+
+            'manuscript.latestEditorialAssessment',
+
+            'manuscript.latestRecommendation',
+
+            'manuscript.latestEditorialDecision',
+        ]);
+
+
+        return view(
+            'editor-in-chief.editor-assignment.tracking-show',
+            compact(
+                'assignment'
+            )
+        );
+    }
 }

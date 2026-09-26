@@ -51,7 +51,6 @@ use App\Http\Controllers\HandlingEditor\EditorialAssessmentController;
 
 
 
-
 /*
 |--------------------------------------------------------------------------
 | Center Dashboard Controllers
@@ -105,6 +104,9 @@ use App\Http\Controllers\Reviewer\ReviewerReviewController
 
 use App\Http\Controllers\Reviewer\ReviewerPaymentController
     as ReviewerPortalPaymentController;
+
+use App\Http\Controllers\Reviewer\PeerReviewController;
+use App\Http\Controllers\Reviewer\ReviewerManuscriptFileController;
 /*
 |--------------------------------------------------------------------------
 | PUBLIC WEBSITE
@@ -833,6 +835,31 @@ Route::prefix('reviewer')
     ->name('reviewer.')
     ->group(function () {
 
+
+         /*
+        |--------------------------------------------------------------------------
+        | REVIEWER INVITATION EMAIL GATEWAY
+        |--------------------------------------------------------------------------
+        |
+        | This route must remain outside guest:reviewer and auth:reviewer.
+        |
+        | It receives the unique invitation token from the email.
+        | The controller will decide whether to:
+        |
+        | 1. Redirect the reviewer to login, or
+        | 2. Redirect an authenticated reviewer to the invitation.
+        |
+        */
+
+        Route::get(
+            '/invitation/{token}',
+            [
+                ReviewerPortalInvitationController::class,
+                'open'
+            ]
+        )->name('invitation.open');
+
+
         /*
         |--------------------------------------------------------------------------
         | GUEST REVIEWER ROUTES
@@ -1043,9 +1070,15 @@ Route::prefix('reviewer')
                 Route::middleware('reviewer.approved')
                     ->group(function () {
 
-                        /*
+                       /*
                         |--------------------------------------------------------------------------
                         | REVIEW INVITATIONS
+                        |--------------------------------------------------------------------------
+                        */
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Invitation List
                         |--------------------------------------------------------------------------
                         */
 
@@ -1057,6 +1090,185 @@ Route::prefix('reviewer')
                             ]
                         )->name('invitations.index');
 
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Invitation Details
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/invitations/{invitation}',
+                            [
+                                ReviewerPortalInvitationController::class,
+                                'show'
+                            ]
+                        )->name('invitations.show');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Accept Invitation
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::post(
+                            '/invitations/{invitation}/accept',
+                            [
+                                ReviewerPortalInvitationController::class,
+                                'accept'
+                            ]
+                        )->name('invitations.accept');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Decline Invitation
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::post(
+                            '/invitations/{invitation}/decline',
+                            [
+                                ReviewerPortalInvitationController::class,
+                                'decline'
+                            ]
+                        )->name('invitations.decline');
+
+                        
+                        /*
+                        |--------------------------------------------------------------------------
+                        | PEER REVIEW
+                        |--------------------------------------------------------------------------
+                        |
+                        | These routes are available only to:
+                        |
+                        | 1. Authenticated reviewers
+                        | 2. Approved reviewers
+                        |
+                        | The PeerReviewController must additionally verify that:
+                        |
+                        | - the invitation belongs to the logged-in reviewer
+                        | - the invitation has been accepted
+                        | - the peer review belongs to the logged-in reviewer
+                        |
+                        */
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Start / Continue Peer Review
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/peer-reviews/invitation/{invitation}',
+                            [
+                                PeerReviewController::class,
+                                'create'
+                            ]
+                        )->name('peer-reviews.create');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Save Peer Review Draft
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::put(
+                            '/peer-reviews/{peerReview}/draft',
+                            [
+                                PeerReviewController::class,
+                                'saveDraft'
+                            ]
+                        )->name('peer-reviews.draft');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Preview Peer Review
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/peer-reviews/{peerReview}/preview',
+                            [
+                                PeerReviewController::class,
+                                'preview'
+                            ]
+                        )->name('peer-reviews.preview');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Submit Final Peer Review
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::post(
+                            '/peer-reviews/{peerReview}/submit',
+                            [
+                                PeerReviewController::class,
+                                'submit'
+                            ]
+                        )->name('peer-reviews.submit');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | View Submitted Peer Review
+                        |--------------------------------------------------------------------------
+                        */
+
+                        Route::get(
+                            '/peer-reviews/{peerReview}',
+                            [
+                                PeerReviewController::class,
+                                'show'
+                            ]
+                        )->name('peer-reviews.show');
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Download Reviewer-Safe Blinded Manuscript File
+                        |--------------------------------------------------------------------------
+                        |
+                        | IMPORTANT:
+                        |
+                        | This controller must only return:
+                        |
+                        | - files belonging to this manuscript
+                        | - files approved for reviewer access
+                        | - blinded files
+                        |
+                        */
+                        Route::get(
+                            '/peer-reviews/invitation/{invitation}/files/{file}/view',
+                            [
+                                ReviewerManuscriptFileController::class, 
+                                'view'
+                            ]
+                          )->name('peer-reviews.files.view');
+
+                        
+                        Route::get(
+                            '/peer-reviews/invitation/{invitation}/files/{file}/preview-content',
+                            [
+                                ReviewerManuscriptFileController::class,
+                                'previewContent'
+                            ]
+                        )->name('peer-reviews.files.preview-content');
+
+
+                        Route::get(
+                            '/peer-reviews/invitation/{invitation}/files/{file}',
+                            [
+                                ReviewerManuscriptFileController::class,
+                                'download'
+                            ]
+                        )->name('peer-reviews.files.download');
 
                         /*
                         |--------------------------------------------------------------------------
@@ -1116,6 +1328,11 @@ Route::prefix('reviewer')
                                 'index'
                             ]
                         )->name('payments.index');
+
+
+
+
+                        
 
                     }); // reviewer.approved
 

@@ -7,8 +7,10 @@ use App\Models\Manuscript;
 use App\Models\Reviewer;
 use App\Models\ReviewerInvitation;
 use App\Models\ReviewerProfile;
+use App\Notifications\ReviewerInvitationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -73,15 +75,15 @@ class ReviewerSelectionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $request->filled('search')
-        ) {
+        if ($request->filled('search')) {
+
             $search = trim(
                 $request->search
             );
 
             $query->where(
                 function ($q) use ($search) {
+
                     $q->where(
                         'manuscript_id',
                         'like',
@@ -102,9 +104,8 @@ class ReviewerSelectionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $request->filled('status')
-        ) {
+        if ($request->filled('status')) {
+
             $query->where(
                 'status',
                 $request->status
@@ -146,8 +147,7 @@ class ReviewerSelectionController extends Controller
                 'system_administrator'
             )
             &&
-            (int) $manuscript
-                ->handling_editor_id
+            (int) $manuscript->handling_editor_id
             !==
             (int) $user->id
         ) {
@@ -194,6 +194,7 @@ class ReviewerSelectionController extends Controller
 
             'reviewerInvitations' =>
                 function ($query) {
+
                     $query
                         ->with(
                             'reviewer.profile'
@@ -206,14 +207,6 @@ class ReviewerSelectionController extends Controller
         |--------------------------------------------------------------------------
         | Active Reviewer Count
         |--------------------------------------------------------------------------
-        |
-        | pending  = occupies slot
-        | accepted = occupies slot
-        |
-        | declined  = free slot
-        | expired   = free slot
-        | cancelled = free slot
-        |
         */
 
         $activeReviewerCount =
@@ -249,11 +242,8 @@ class ReviewerSelectionController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | All Previously Invited Reviewers
+        | Previously Invited Reviewers
         |--------------------------------------------------------------------------
-        |
-        | Do not offer the same reviewer again.
-        |
         */
 
         $alreadyInvitedReviewerIds =
@@ -299,15 +289,15 @@ class ReviewerSelectionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $request->filled('search')
-        ) {
+        if ($request->filled('search')) {
+
             $search = trim(
                 $request->search
             );
 
             $reviewerQuery->where(
                 function ($query) use ($search) {
+
                     $query
                         ->where(
                             'name',
@@ -323,6 +313,7 @@ class ReviewerSelectionController extends Controller
                             'profile',
                             function ($profile)
                             use ($search) {
+
                                 $profile
                                     ->where(
                                         'display_name',
@@ -400,6 +391,7 @@ class ReviewerSelectionController extends Controller
                     'profile',
                     function ($query)
                     use ($speciality) {
+
                         $query->where(
                             'speciality',
                             $speciality
@@ -428,6 +420,7 @@ class ReviewerSelectionController extends Controller
                     'profile',
                     function ($query)
                     use ($country) {
+
                         $query->where(
                             'country',
                             $country
@@ -456,6 +449,7 @@ class ReviewerSelectionController extends Controller
                     'profile',
                     function ($query)
                     use ($designation) {
+
                         $query->where(
                             'designation',
                             $designation
@@ -545,12 +539,12 @@ class ReviewerSelectionController extends Controller
         $invitationDate = now();
 
         $invitationExpiryDate =
-            now()
+            $invitationDate
                 ->copy()
                 ->addDays(3);
 
         $reviewDueDate =
-            now()
+            $invitationDate
                 ->copy()
                 ->addDays(15);
 
@@ -603,8 +597,7 @@ class ReviewerSelectionController extends Controller
                 'system_administrator'
             )
             &&
-            (int) $manuscript
-                ->handling_editor_id
+            (int) $manuscript->handling_editor_id
             !==
             (int) $user->id
         ) {
@@ -641,10 +634,6 @@ class ReviewerSelectionController extends Controller
         |--------------------------------------------------------------------------
         | 3. Validation
         |--------------------------------------------------------------------------
-        |
-        | A single request may contain 1-3 reviewers.
-        | Remaining-slot validation happens inside transaction.
-        |
         */
 
         $validated =
@@ -742,6 +731,17 @@ class ReviewerSelectionController extends Controller
         |--------------------------------------------------------------------------
         | 7. Invitation Dates
         |--------------------------------------------------------------------------
+        |
+        | invited_at:
+        |     Date/time invitation is created.
+        |
+        | expires_at:
+        |     Reviewer has 3 days to Accept / Decline.
+        |
+        | review_deadline:
+        |     Reviewer has 15 days from initial invitation
+        |     to complete the manuscript review.
+        |
         */
 
         $invitedAt = now();
@@ -758,7 +758,15 @@ class ReviewerSelectionController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 8. Transaction
+        | Collection for Created Invitations
+        |--------------------------------------------------------------------------
+        */
+
+        $createdInvitations = collect();
+
+        /*
+        |--------------------------------------------------------------------------
+        | 8. Database Transaction
         |--------------------------------------------------------------------------
         */
 
@@ -768,8 +776,15 @@ class ReviewerSelectionController extends Controller
                 $reviewers,
                 $user,
                 $invitedAt,
-                $expiresAt
+                $expiresAt,
+
+                // IMPORTANT:
+                // Pass review deadline into transaction.
+                $reviewDueAt,
+
+                &$createdInvitations
             ) {
+
                 /*
                 |--------------------------------------------------------------------------
                 | Lock Manuscript
@@ -791,8 +806,7 @@ class ReviewerSelectionController extends Controller
 
                 if (
                     !in_array(
-                        $lockedManuscript
-                            ->status,
+                        $lockedManuscript->status,
                         [
                             'reviewer_selection',
                             'reviewer_invitation',
@@ -810,17 +824,13 @@ class ReviewerSelectionController extends Controller
                 |--------------------------------------------------------------------------
                 | Count Active Reviewers
                 |--------------------------------------------------------------------------
-                |
-                | Only pending + accepted occupy active slots.
-                |
                 */
 
                 $activeReviewerCount =
                     ReviewerInvitation::query()
                         ->where(
                             'manuscript_id',
-                            $lockedManuscript
-                                ->id
+                            $lockedManuscript->id
                         )
                         ->whereIn(
                             'status',
@@ -830,12 +840,6 @@ class ReviewerSelectionController extends Controller
                             ]
                         )
                         ->count();
-
-                /*
-                |--------------------------------------------------------------------------
-                | Calculate Available Slots
-                |--------------------------------------------------------------------------
-                */
 
                 $maximumReviewers = 3;
 
@@ -853,9 +857,8 @@ class ReviewerSelectionController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                if (
-                    $availableSlots <= 0
-                ) {
+                if ($availableSlots <= 0) {
+
                     throw ValidationException::withMessages([
                         'reviewer_ids' =>
                             'Maximum reviewer limit reached. ' .
@@ -896,9 +899,9 @@ class ReviewerSelectionController extends Controller
                 */
 
                 foreach (
-                    $reviewers
-                    as $reviewer
+                    $reviewers as $reviewer
                 ) {
+
                     /*
                     |--------------------------------------------------------------------------
                     | Prevent Duplicate Active Invitation
@@ -909,8 +912,7 @@ class ReviewerSelectionController extends Controller
                         ReviewerInvitation::query()
                             ->where(
                                 'manuscript_id',
-                                $lockedManuscript
-                                    ->id
+                                $lockedManuscript->id
                             )
                             ->where(
                                 'reviewer_id',
@@ -925,9 +927,8 @@ class ReviewerSelectionController extends Controller
                             )
                             ->exists();
 
-                    if (
-                        $existingActiveInvitation
-                    ) {
+                    if ($existingActiveInvitation) {
+
                         throw ValidationException::withMessages([
                             'reviewer_ids' =>
                                 $reviewer->name .
@@ -945,8 +946,7 @@ class ReviewerSelectionController extends Controller
                         ReviewerInvitation::query()
                             ->where(
                                 'manuscript_id',
-                                $lockedManuscript
-                                    ->id
+                                $lockedManuscript->id
                             )
                             ->where(
                                 'reviewer_id',
@@ -954,9 +954,8 @@ class ReviewerSelectionController extends Controller
                             )
                             ->exists();
 
-                    if (
-                        $previousInvitation
-                    ) {
+                    if ($previousInvitation) {
+
                         throw ValidationException::withMessages([
                             'reviewer_ids' =>
                                 $reviewer->name .
@@ -971,41 +970,127 @@ class ReviewerSelectionController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    ReviewerInvitation::create([
-                        'manuscript_id' =>
-                            $lockedManuscript
-                                ->id,
+                    $invitation =
+                        ReviewerInvitation::create([
 
-                        'reviewer_id' =>
-                            $reviewer->id,
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Manuscript
+                            |--------------------------------------------------------------------------
+                            */
 
-                        'invited_by' =>
-                            $user->id,
+                            'manuscript_id' =>
+                                $lockedManuscript->id,
 
-                        'invitation_token' =>
-                            Str::random(64),
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Reviewer
+                            |--------------------------------------------------------------------------
+                            */
 
-                        'status' =>
-                            'pending',
+                            'reviewer_id' =>
+                                $reviewer->id,
 
-                        'invited_at' =>
-                            $invitedAt,
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Invited By
+                            |--------------------------------------------------------------------------
+                            */
 
-                        'expires_at' =>
-                            $expiresAt,
+                            'invited_by' =>
+                                $user->id,
 
-                        'reminder_count' =>
-                            0,
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Secure Email Invitation Token
+                            |--------------------------------------------------------------------------
+                            */
 
-                        'last_reminder_at' =>
-                            null,
+                            'invitation_token' =>
+                                Str::random(64),
 
-                        'responded_at' =>
-                            null,
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Invitation Status
+                            |--------------------------------------------------------------------------
+                            */
 
-                        'response_note' =>
-                            null,
-                    ]);
+                            'status' =>
+                                'pending',
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Invitation Date
+                            |--------------------------------------------------------------------------
+                            */
+
+                            'invited_at' =>
+                                $invitedAt,
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Invitation Response Deadline
+                            |--------------------------------------------------------------------------
+                            |
+                            | Accept / Decline within 3 days.
+                            |
+                            */
+
+                            'expires_at' =>
+                                $expiresAt,
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Review Submission Deadline
+                            |--------------------------------------------------------------------------
+                            |
+                            | IMPORTANT:
+                            |
+                            | This value is now actually stored
+                            | in reviewer_invitations.review_deadline.
+                            |
+                            | 15 days from initial invitation.
+                            |
+                            */
+
+                            'review_deadline' =>
+                                $reviewDueAt,
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Reminder Information
+                            |--------------------------------------------------------------------------
+                            */
+
+                            'reminder_count' =>
+                                0,
+
+                            'last_reminder_at' =>
+                                null,
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Reviewer Response
+                            |--------------------------------------------------------------------------
+                            */
+
+                            'responded_at' =>
+                                null,
+
+                            'response_note' =>
+                                null,
+                        ]);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Store Created Invitation
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $createdInvitations
+                        ->push(
+                            $invitation
+                        );
                 }
 
                 /*
@@ -1015,6 +1100,7 @@ class ReviewerSelectionController extends Controller
                 */
 
                 $lockedManuscript->update([
+
                     'status' =>
                         'reviewer_invitation',
 
@@ -1026,25 +1112,171 @@ class ReviewerSelectionController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 9. Success
+        | 9. Send Reviewer Invitation Emails
+        |--------------------------------------------------------------------------
+        |
+        | Email is sent only after database transaction succeeds.
+        |
+        */
+
+        $emailSentCount = 0;
+        $emailFailedCount = 0;
+
+        foreach (
+            $createdInvitations as $invitation
+        ) {
+            try {
+
+                $invitation->loadMissing([
+                    'reviewer',
+                    'manuscript',
+                    'inviter',
+                ]);
+
+                $reviewer =
+                    $invitation->reviewer;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Reviewer / Email Validation
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    !$reviewer
+                    ||
+                    blank(
+                        $reviewer->email
+                    )
+                ) {
+                    $emailFailedCount++;
+
+                    Log::warning(
+                        'Reviewer invitation email skipped because reviewer email is missing.',
+                        [
+                            'invitation_id' =>
+                                $invitation->id,
+
+                            'reviewer_id' =>
+                                $invitation->reviewer_id,
+
+                            'manuscript_id' =>
+                                $invitation->manuscript_id,
+                        ]
+                    );
+
+                    continue;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Send Invitation Email
+                |--------------------------------------------------------------------------
+                */
+
+                $reviewer->notify(
+                    new ReviewerInvitationNotification(
+                        $invitation
+                    )
+                );
+
+                $emailSentCount++;
+
+                Log::info(
+                    'Reviewer invitation email sent successfully.',
+                    [
+                        'invitation_id' =>
+                            $invitation->id,
+
+                        'reviewer_id' =>
+                            $reviewer->id,
+
+                        'reviewer_email' =>
+                            $reviewer->email,
+
+                        'manuscript_id' =>
+                            $invitation->manuscript_id,
+
+                        'review_deadline' =>
+                            $invitation
+                                ->review_deadline
+                                ?->format(
+                                    'Y-m-d H:i:s'
+                                ),
+                    ]
+                );
+
+            } catch (\Throwable $e) {
+
+                $emailFailedCount++;
+
+                Log::error(
+                    'Reviewer invitation email failed.',
+                    [
+                        'invitation_id' =>
+                            $invitation->id,
+
+                        'reviewer_id' =>
+                            $invitation->reviewer_id,
+
+                        'manuscript_id' =>
+                            $invitation->manuscript_id,
+
+                        'reviewer_email' =>
+                            $invitation
+                                ->reviewer
+                                ?->email,
+
+                        'error' =>
+                            $e->getMessage(),
+                    ]
+                );
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 10. Result Message
+        |--------------------------------------------------------------------------
+        */
+
+        $message =
+            $createdInvitations->count() .
+            ' reviewer invitation(s) created successfully. ' .
+            $emailSentCount .
+            ' invitation email(s) sent. ' .
+            'The invitation will expire after 3 days. ' .
+            'The review deadline is 15 days from the initial invitation date (' .
+            $reviewDueAt->format(
+                'd M Y'
+            ) .
+            ').';
+
+        if ($emailFailedCount > 0) {
+
+            $message .=
+                ' ' .
+                $emailFailedCount .
+                ' invitation email(s) could not be sent. ' .
+                'Please check the Laravel log for details.';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 11. Redirect
         |--------------------------------------------------------------------------
         */
 
         return redirect()
             ->route(
-                'handling-editor.reviewer-invitations.show',
+                'handling-editor.reviewer-selection.show',
                 $manuscript->id
             )
             ->with(
-                'success',
-                $reviewers->count() .
-                ' reviewer invitation(s) created successfully. ' .
-                'The invitation will expire after 3 days. ' .
-                'The review deadline is 15 days from the initial invitation date (' .
-                $reviewDueAt->format(
-                    'd M Y'
-                ) .
-                ').'
+                $emailFailedCount > 0
+                    ? 'warning'
+                    : 'success',
+                $message
             );
     }
 }
